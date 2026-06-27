@@ -216,8 +216,10 @@
                   <th>البريد الإلكتروني</th>
                   <th>الهاتف/الواتساب</th>
                   <th>الجامعة والتخصص</th>
+                  <th>الخصومات والعروض</th>
                   <th>إجمالي الطلبات</th>
                   <th>إجمالي المدفوعات</th>
+                  <th style="text-align: left;">الإجراءات</th>
                 </tr>
               </thead>
               <tbody id="admin-students-table-body">
@@ -369,6 +371,30 @@
           </div>
 
           <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">حفظ التعديلات وتحديث المشروع <i class="fa-solid fa-save"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- د) مودال تعديل امتيازات وخصومات الطالب -->
+  <div class="modal-overlay" id="admin-student-privileges-modal">
+    <div class="modal-container" style="max-width: 450px;">
+      <div class="modal-header">
+        <h3 class="modal-title">تعديل امتيازات وخصومات الطالب</h3>
+        <button class="modal-close" id="admin-student-privileges-modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h4 id="privileges-modal-student-name" style="font-weight: 700; margin-bottom: 1.5rem; text-align: center; color: var(--primary-cyan);">اسم الطالب المختار</h4>
+        <form id="student-privileges-form">
+          <div class="form-group">
+            <label for="student-discount-input">نسبة الخصم المباشر للطلبات (%)</label>
+            <input type="number" id="student-discount-input" class="form-control" placeholder="مثال: 15" required min="0" max="100">
+          </div>
+          <div class="form-group">
+            <label for="student-offer-input">عرض خاص / رسالة مخصصة تظهر للطالب</label>
+            <input type="text" id="student-offer-input" class="form-control" placeholder="مثال: خصم خاص 20% على مشاريع التخرج هذا الأسبوع!">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 1rem;">حفظ وتطبيق الامتيازات <i class="fa-solid fa-gift"></i></button>
         </form>
       </div>
     </div>

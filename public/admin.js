@@ -646,21 +646,101 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderStudentsTable(students) {
     adminStudentsTableBody.innerHTML = '';
     if (students.length === 0) {
-      adminStudentsTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 1.5rem;">لا يوجد طلاب مسجلين بالمنصة حالياً.</td></tr>`;
+      adminStudentsTableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-secondary); padding: 1.5rem;">لا يوجد طلاب مسجلين بالمنصة حالياً.</td></tr>`;
       return;
     }
 
     students.forEach(s => {
       const tr = document.createElement('tr');
+      
+      const discountLabel = s.discountPercent > 0 ? `<span style="color: #ff5555; font-weight:700; background: rgba(255, 85, 85, 0.1); border: 1px solid rgba(255, 85, 85, 0.25); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.8rem;">%${s.discountPercent} خصم</span>` : '<span style="color: var(--text-muted); font-size: 0.85rem;">لا يوجد خصم</span>';
+      const offerLabel = s.specialOffer ? `<div style="font-size:0.75rem; color: var(--accent-gold); max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 0.2rem;" title="${s.specialOffer}"><i class="fa-solid fa-gift"></i> ${s.specialOffer}</div>` : '';
+
       tr.innerHTML = `
         <td style="font-weight: 700;">${s.name}</td>
         <td style="font-family: 'Orbitron', sans-serif;">${s.email}</td>
         <td style="font-family: 'Orbitron', sans-serif; direction: ltr; text-align: right;">${s.phone}</td>
         <td>${s.university} - ${s.major}</td>
+        <td>
+          <div style="display: flex; flex-direction: column;">
+            ${discountLabel}
+            ${offerLabel}
+          </div>
+        </td>
         <td style="font-family: 'Orbitron', sans-serif; text-align: center; font-weight:700;">${s.ordersCount}</td>
         <td style="font-family: 'Orbitron', sans-serif; color: var(--primary-cyan); font-weight: 700;">${s.totalSpent} EGP</td>
+        <td>
+          <button class="btn btn-outline btn-xs btn-admin-student-privileges" data-id="${s.id}" style="color: var(--accent-gold); border-color: rgba(255, 215, 0, 0.25); float: left;">
+            <i class="fa-solid fa-gift"></i> الامتيازات
+          </button>
+        </td>
       `;
       adminStudentsTableBody.appendChild(tr);
+    });
+
+    // ربط مستمعات تعديل الامتيازات
+    document.querySelectorAll('.btn-admin-student-privileges').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        openStudentPrivilegesModal(id);
+      });
+    });
+  }
+
+  // إدارة امتيازات وخصومات الطلاب
+  let activeStudentIdPrivilege = null;
+  const adminStudentPrivilegesModal = document.getElementById('admin-student-privileges-modal');
+  const adminStudentPrivilegesModalClose = document.getElementById('admin-student-privileges-modal-close');
+  const studentPrivilegesForm = document.getElementById('student-privileges-form');
+  const privilegesModalStudentName = document.getElementById('privileges-modal-student-name');
+  const studentDiscountInput = document.getElementById('student-discount-input');
+  const studentOfferInput = document.getElementById('student-offer-input');
+
+  function openStudentPrivilegesModal(studentId) {
+    activeStudentIdPrivilege = studentId;
+    const student = allStudents.find(s => s.id === studentId);
+    if (!student) return;
+
+    privilegesModalStudentName.innerText = `امتيازات الطالب: ${student.name}`;
+    studentDiscountInput.value = student.discountPercent || 0;
+    studentOfferInput.value = student.specialOffer || '';
+
+    adminStudentPrivilegesModal.classList.add('active');
+  }
+
+  if (adminStudentPrivilegesModalClose) {
+    adminStudentPrivilegesModalClose.addEventListener('click', () => {
+      adminStudentPrivilegesModal.classList.remove('active');
+    });
+  }
+
+  if (studentPrivilegesForm) {
+    studentPrivilegesForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const discountPercent = Number(studentDiscountInput.value) || 0;
+      const specialOffer = studentOfferInput.value.trim();
+
+      try {
+        const response = await fetch(`/api/students/${activeStudentIdPrivilege}/privileges`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ discountPercent, specialOffer })
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          alert(data.error || 'حدث خطأ أثناء تعديل الامتيازات');
+          return;
+        }
+
+        alert('تم تعديل وحفظ امتيازات الطالب بنجاح! ستظهر له في حسابه فوراً.');
+        adminStudentPrivilegesModal.classList.remove('active');
+        loadStudentsData(); // إعادة تحميل الجدول
+      } catch (err) {
+        console.error(err);
+        alert('خطأ في الاتصال بالخادم');
+      }
     });
   }
 

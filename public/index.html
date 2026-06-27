@@ -119,6 +119,13 @@
             <div class="user-name-text" id="portal-user-name">اسم الطالب</div>
             <div class="user-major-text" id="portal-user-major">الكلية والتخصص</div>
           </div>
+          
+          <!-- كارت الامتيازات والعروض الخاصة بالطالب -->
+          <div id="portal-user-privileges" class="hidden" style="margin: 1.2rem; padding: 1.2rem; background: radial-gradient(circle at top right, rgba(255, 0, 127, 0.1), rgba(0, 240, 255, 0.05)); border: 1px solid rgba(255, 215, 0, 0.25); border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.05);">
+            <div style="color: var(--accent-gold); font-size: 1rem; margin-bottom: 0.5rem; font-weight: 800;"><i class="fa-solid fa-gift"></i> عروض مخصصة لك</div>
+            <div id="portal-discount-badge" class="hidden" style="background: rgba(255, 51, 51, 0.15); border: 1px solid rgba(255, 51, 51, 0.3); color: #ff5555; padding: 0.3rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: inline-block; margin-bottom: 0.6rem;">خصم خاص بك: 15%</div>
+            <p id="portal-offer-text" style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; margin: 0;"></p>
+          </div>
           <ul class="portal-menu">
             <li class="portal-menu-item active" id="menu-my-requests" data-target="portal-requests-panel">
               <i class="fa-solid fa-list-check"></i> طلباتي الجارية
@@ -156,6 +163,11 @@
           <div id="portal-new-request-panel" class="portal-panel hidden">
             <h3 style="margin-bottom: 1.5rem; font-weight: 700;">تقديم استمارة طلب مشروع جديد</h3>
             <form id="new-request-form" enctype="multipart/form-data">
+              <!-- تنبيه الخصم الخاص بالطالب -->
+              <div id="new-request-discount-notice" class="hidden" style="background: rgba(255, 51, 51, 0.08); border: 1px solid rgba(255, 51, 51, 0.2); border-radius: 8px; padding: 0.8rem; margin-bottom: 1.5rem; color: #ff5555; font-size: 0.85rem; font-weight: 700;">
+                <i class="fa-solid fa-tags"></i> سيتم تطبيق خصم حسابك الخاص بنسبة <span id="request-discount-val">0</span>% تلقائياً عند قيام المطور بتسعير طلبك!
+              </div>
+
               <div class="form-group">
                 <label for="req-title">عنوان المشروع المقترح</label>
                 <input type="text" id="req-title" class="form-control" placeholder="مثال: تطبيق ويب لإدارة العيادات الطبية" required>

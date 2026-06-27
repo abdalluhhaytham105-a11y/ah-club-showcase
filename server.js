@@ -426,12 +426,45 @@ app.get('/api/students', (req, res) => {
       phone: s.phone,
       university: s.university,
       major: s.major,
+      discountPercent: s.discountPercent || 0,
+      specialOffer: s.specialOffer || "",
       ordersCount: studentOrders.length,
       totalSpent
     };
   });
 
   res.json(studentListWithStats);
+});
+
+// جلب بيانات مستخدم محدد (بما فيها الامتيازات المحدثة)
+app.get('/api/users/:id', (req, res) => {
+  const { id } = req.params;
+  const data = db.readDb();
+  const user = data.users.find(u => u.id === id);
+  if (!user) {
+    return res.status(404).json({ error: 'المستخدم غير موجود' });
+  }
+  const { password, ...safeUser } = user;
+  res.json(safeUser);
+});
+
+// تعديل امتيازات وخصومات طالب محدد
+app.put('/api/students/:id/privileges', (req, res) => {
+  const { id } = req.params;
+  const { discountPercent, specialOffer } = req.body;
+
+  const data = db.readDb();
+  const userIndex = data.users.findIndex(u => u.id === id);
+
+  if (userIndex === -1) {
+    return res.status(404).json({ error: 'المستخدم غير موجود' });
+  }
+
+  data.users[userIndex].discountPercent = Number(discountPercent) || 0;
+  data.users[userIndex].specialOffer = specialOffer || '';
+
+  db.writeDb(data);
+  res.json(data.users[userIndex]);
 });
 
 if (require.main === module) {

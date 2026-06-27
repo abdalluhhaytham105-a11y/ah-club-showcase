@@ -430,6 +430,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // بوابة الطالب - المنطق والـ APIs
   // ----------------------------------------------------
   function showPortalPanel(panel) {
+    const discountNotice = document.getElementById('new-request-discount-notice');
+    const discountVal = document.getElementById('request-discount-val');
+
     if (panel === 'requests') {
       menuMyRequests.classList.add('active');
       menuNewRequest.classList.remove('active');
@@ -440,19 +443,72 @@ document.addEventListener('DOMContentLoaded', () => {
       menuNewRequest.classList.add('active');
       portalRequestsPanel.classList.add('hidden');
       portalNewRequestPanel.classList.remove('hidden');
+
+      // إظهار وإعداد إشعار الخصم الخاص
+      if (discountNotice && discountVal) {
+        if (currentUser.discountPercent && currentUser.discountPercent > 0) {
+          discountVal.innerText = currentUser.discountPercent;
+          discountNotice.classList.remove('hidden');
+        } else {
+          discountNotice.classList.add('hidden');
+        }
+      }
     }
   }
 
   menuMyRequests.addEventListener('click', () => showPortalPanel('requests'));
   menuNewRequest.addEventListener('click', () => showPortalPanel('new-request'));
 
-  function loadPortalData() {
+  async function loadPortalData() {
     if (!currentUser) return;
     
+    try {
+      // جلب بيانات الطالب المحدثة للتأكد من المزامنة اللحظية للخصومات
+      const resUser = await fetch(`/api/users/${currentUser.id}`);
+      if (resUser.ok) {
+        const freshUser = await resUser.json();
+        currentUser = freshUser;
+        localStorage.setItem('currentUser', JSON.stringify(freshUser));
+      }
+    } catch (err) {
+      console.error('Error fetching fresh user privileges:', err);
+    }
+
     // تعبئة بيانات البروفايل الجانبي
-    document.getElementById('portal-user-avatar').innerText = currentUser.name.charAt(0);
+    document.getElementById('portal-user-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
     document.getElementById('portal-user-name').innerText = currentUser.name;
     document.getElementById('portal-user-major').innerText = `${currentUser.university} - ${currentUser.major}`;
+
+    // إدارة وتصيير كارت الامتيازات والعروض
+    const privilegesCard = document.getElementById('portal-user-privileges');
+    const discountBadge = document.getElementById('portal-discount-badge');
+    const offerText = document.getElementById('portal-offer-text');
+
+    if (privilegesCard && discountBadge && offerText) {
+      let hasPrivileges = false;
+
+      if (currentUser.discountPercent && currentUser.discountPercent > 0) {
+        discountBadge.innerText = `🔥 خصم حسابك الخاص: ${currentUser.discountPercent}%`;
+        discountBadge.classList.remove('hidden');
+        hasPrivileges = true;
+      } else {
+        discountBadge.classList.add('hidden');
+      }
+
+      if (currentUser.specialOffer && currentUser.specialOffer.trim() !== '') {
+        offerText.innerText = currentUser.specialOffer;
+        offerText.classList.remove('hidden');
+        hasPrivileges = true;
+      } else {
+        offerText.classList.add('hidden');
+      }
+
+      if (hasPrivileges) {
+        privilegesCard.classList.remove('hidden');
+      } else {
+        privilegesCard.classList.add('hidden');
+      }
+    }
 
     fetchStudentRequests();
   }
