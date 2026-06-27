@@ -64,13 +64,17 @@ const categorySchema = new mongoose.Schema({
 
 const Category = mongoose.models.Category || mongoose.model('Category', categorySchema);
 
-let isConnected = false;
-
 async function connectToMongo() {
-  if (isConnected) return true;
+  if (mongoose.connection.readyState === 1) return true;
   try {
-    await mongoose.connect(MONGODB_URI);
-    isConnected = true;
+    if (mongoose.connection.readyState === 2) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      if (mongoose.connection.readyState === 1) return true;
+    }
+    
+    await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000 // ينهي المحاولة بعد 5 ثوانٍ بدلاً من التعليق اللانهائي
+    });
     console.log('Connected to MongoDB Atlas successfully!');
     await seedDefaultData();
     return true;
