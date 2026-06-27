@@ -585,6 +585,44 @@ app.put('/api/students/:id/privileges', verifyAdmin, (req, res) => {
   }
 });
 
+app.put('/api/students/:id/profile', verifyStudent, upload.single('avatar'), (req, res) => {
+  const { id } = req.params;
+  const { name, phone, university, major, password } = req.body;
+
+  try {
+    const data = db.readDb();
+    const userIndex = data.users.findIndex(u => u.id === id);
+
+    if (userIndex === -1) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    // تصفية أمان: الطالب لا يمكنه تعديل حساب طالب آخر
+    if (req.user.role === 'student' && id !== req.user.id) {
+      return res.status(403).json({ error: 'غير مصرح لك بتعديل بيانات هذا الحساب' });
+    }
+
+    const user = data.users[userIndex];
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+    if (university) user.university = university;
+    if (major) user.major = major;
+    if (password && password.trim() !== '') user.password = password.trim();
+
+    if (req.file) {
+      user.profileImage = '/uploads/' + req.file.filename;
+    }
+
+    db.writeDb(data);
+
+    const { password: _, ...userWithoutPassword } = user;
+    res.json(userWithoutPassword);
+  } catch (err) {
+    console.error('Update profile error:', err);
+    res.status(500).json({ error: 'فشل تحديث بيانات الملف الشخصي' });
+  }
+});
+
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

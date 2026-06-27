@@ -12,7 +12,7 @@
 
   <!-- هيدر الصفحة الرئيسي -->
   <header>
-    <div class="logo-container">
+    <div class="logo-container" style="cursor: pointer;" id="logo-container-trigger">
       <img src="logo.png" alt="AH CLUB Logo" class="logo-img" id="header-logo">
       <span class="brand-name">AH CLUB</span>
     </div>
@@ -127,7 +127,10 @@
             <p id="portal-offer-text" style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; margin: 0;"></p>
           </div>
           <ul class="portal-menu">
-            <li class="portal-menu-item active" id="menu-my-requests" data-target="portal-requests-panel">
+            <li class="portal-menu-item active" id="menu-my-dashboard" data-target="portal-dashboard-panel">
+              <i class="fa-solid fa-chart-line"></i> حسابي وإحصائياتي
+            </li>
+            <li class="portal-menu-item" id="menu-my-requests" data-target="portal-requests-panel">
               <i class="fa-solid fa-list-check"></i> طلباتي الجارية
             </li>
             <li class="portal-menu-item" id="menu-new-request" data-target="portal-new-request-panel">
@@ -138,8 +141,79 @@
 
         <!-- المحتوى الرئيسي للبوابة -->
         <div class="portal-content">
+          <!-- ==================================================== -->
+          <!-- 1.5 لوحة التحكم الشخصية للطالب (Dashboard & Profile Panel) -->
+          <!-- ==================================================== -->
+          <div id="portal-dashboard-panel" class="portal-panel">
+            <h3 style="margin-bottom: 1.5rem; font-weight: 700;">مرحباً بك في لوحتك الشخصية 🚀</h3>
+            
+            <!-- شبكة الإحصائيات الخاصة بالطالب -->
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; margin-top: 1rem;">
+              <div class="stat-card" style="padding: 1.2rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); text-align: center; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                <div class="stat-number" id="student-stat-total-requests" style="font-size: 1.8rem; font-weight: 800; color: var(--primary-cyan); font-family: 'Orbitron', sans-serif;">0</div>
+                <div class="stat-label" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.3rem;">إجمالي الطلبات</div>
+              </div>
+              <div class="stat-card" style="padding: 1.2rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); text-align: center; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                <div class="stat-number" id="student-stat-completed" style="font-size: 1.8rem; font-weight: 800; color: #00ff00; font-family: 'Orbitron', sans-serif;">0</div>
+                <div class="stat-label" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.3rem;">مشاريع مكتملة</div>
+              </div>
+              <div class="stat-card" style="padding: 1.2rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); text-align: center; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                <div class="stat-number" id="student-stat-total-spent" style="font-size: 1.8rem; font-weight: 800; color: var(--accent-gold); font-family: 'Orbitron', sans-serif;">0 EGP</div>
+                <div class="stat-label" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.3rem;">إجمالي المدفوعات</div>
+              </div>
+            </div>
+
+            <!-- قسم تعديل الملف الشخصي -->
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-light); padding: 2rem; border-radius: 12px; max-width: 600px; margin-bottom: 2rem;">
+              <h4 style="font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary);">
+                <i class="fa-solid fa-user-gear" style="color: var(--primary-cyan);"></i> تعديل بيانات الملف الشخصي
+              </h4>
+              
+              <form id="student-update-profile-form">
+                <!-- اختيار صورة الملف الشخصي -->
+                <div class="form-group" style="display: flex; flex-direction: column; align-items: center; gap: 0.8rem; margin-bottom: 1.8rem;">
+                  <div class="user-avatar-circle" id="profile-edit-avatar-preview" style="width: 80px; height: 80px; font-size: 2rem; margin-bottom: 0; box-shadow: 0 0 15px rgba(0,240,255,0.2); border: 2px solid var(--primary-cyan); background-size: cover; background-position: center; display: flex; justify-content: center; align-items: center;">?</div>
+                  <label for="profile-avatar-input" class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.75rem; cursor: pointer; font-family: 'Cairo', sans-serif;">
+                    <i class="fa-solid fa-camera"></i> اختر صورة شخصية
+                  </label>
+                  <input type="file" id="profile-avatar-input" accept="image/*" style="display: none;">
+                </div>
+
+                <div class="form-group">
+                  <label for="profile-name">اسم الطالب بالكامل</label>
+                  <input type="text" id="profile-name" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="profile-phone">رقم الهاتف / الواتساب</label>
+                  <input type="text" id="profile-phone" class="form-control" required style="font-family: 'Orbitron', sans-serif;">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                  <div class="form-group">
+                    <label for="profile-university">الجامعة</label>
+                    <input type="text" id="profile-university" class="form-control" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="profile-major">التخصص / الكلية</label>
+                    <input type="text" id="profile-major" class="form-control" required>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="profile-password">كلمة المرور الجديدة (اتركها فارغة إذا لم ترغب في التغيير)</label>
+                  <input type="password" id="profile-password" class="form-control" placeholder="أدخل كلمة مرور جديدة...">
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                  حفظ تعديلات الحساب <i class="fa-solid fa-floppy-disk"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+
           <!-- لوحة الطلبات الجارية -->
-          <div id="portal-requests-panel" class="portal-panel">
+          <div id="portal-requests-panel" class="portal-panel hidden">
             <h3 style="margin-bottom: 1.5rem; font-weight: 700;">طلباتك ومشاريعك الجارية</h3>
             <div class="table-responsive">
               <table class="custom-table">

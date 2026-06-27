@@ -56,8 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const projDetailTags = document.getElementById('proj-detail-tags');
 
   // تابات البوابة للطلاب
+  const menuMyDashboard = document.getElementById('menu-my-dashboard');
   const menuMyRequests = document.getElementById('menu-my-requests');
   const menuNewRequest = document.getElementById('menu-new-request');
+  const portalDashboardPanel = document.getElementById('portal-dashboard-panel');
   const portalRequestsPanel = document.getElementById('portal-requests-panel');
   const portalNewRequestPanel = document.getElementById('portal-new-request-panel');
   const studentRequestsTableBody = document.getElementById('student-requests-table-body');
@@ -452,15 +454,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const discountNotice = document.getElementById('new-request-discount-notice');
     const discountVal = document.getElementById('request-discount-val');
 
-    if (panel === 'requests') {
+    // إزالة التنشيط عن التبويبات
+    menuMyDashboard.classList.remove('active');
+    menuMyRequests.classList.remove('active');
+    menuNewRequest.classList.remove('active');
+
+    // إخفاء جميع اللوحات
+    portalDashboardPanel.classList.add('hidden');
+    portalRequestsPanel.classList.add('hidden');
+    portalNewRequestPanel.classList.add('hidden');
+
+    if (panel === 'dashboard') {
+      menuMyDashboard.classList.add('active');
+      portalDashboardPanel.classList.remove('hidden');
+      updateDashboardStats();
+    } else if (panel === 'requests') {
       menuMyRequests.classList.add('active');
-      menuNewRequest.classList.remove('active');
       portalRequestsPanel.classList.remove('hidden');
-      portalNewRequestPanel.classList.add('hidden');
     } else {
-      menuMyRequests.classList.remove('active');
       menuNewRequest.classList.add('active');
-      portalRequestsPanel.classList.add('hidden');
       portalNewRequestPanel.classList.remove('hidden');
 
       // إظهار وإعداد إشعار الخصم الخاص
@@ -475,6 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  menuMyDashboard.addEventListener('click', () => showPortalPanel('dashboard'));
   menuMyRequests.addEventListener('click', () => showPortalPanel('requests'));
   menuNewRequest.addEventListener('click', () => showPortalPanel('new-request'));
 
@@ -500,10 +513,28 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.remove('gold-theme');
     }
 
-    // تعبئة بيانات البروفايل الجانبي
-    document.getElementById('portal-user-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
+    // تعبئة بيانات البروفايل الجانبي والداشبورد
     document.getElementById('portal-user-name').innerText = currentUser.name;
     document.getElementById('portal-user-major').innerText = `${currentUser.university} - ${currentUser.major}`;
+
+    // تحديث الصور الشخصية (الأفاتار)
+    updateAvatarPreviews();
+
+    // تعبئة حقول تعديل الملف الشخصي بالبيانات الحالية
+    const profName = document.getElementById('profile-name');
+    const profPhone = document.getElementById('profile-phone');
+    const profUni = document.getElementById('profile-university');
+    const profMajor = document.getElementById('profile-major');
+    const profPassword = document.getElementById('profile-password');
+    
+    if (profName) profName.value = currentUser.name;
+    if (profPhone) profPhone.value = currentUser.phone || '';
+    if (profUni) profUni.value = currentUser.university || '';
+    if (profMajor) profMajor.value = currentUser.major || '';
+    if (profPassword) profPassword.value = '';
+
+    // تحديث إحصائيات الداشبورد
+    updateDashboardStats();
 
     // تفريغ أعضاء المشروع الإضافيين وإبقاء الأول فقط مع ملء اسمه تلقائياً
     const wrapper = document.getElementById('members-list-wrapper');
@@ -1067,6 +1098,133 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ----------------------------------------------------
   // بدء تشغيل الصفحة والتهيئة الأساسية
+  // ربط النقر على اللوجو للانتقال لمعرض المشاريع مباشرة
+  const logoContainerTrigger = document.getElementById('logo-container-trigger');
+  if (logoContainerTrigger) {
+    logoContainerTrigger.addEventListener('click', () => {
+      showSection('landing');
+      const showcaseSec = document.getElementById('showcase-section');
+      if (showcaseSec) {
+        showcaseSec.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  }
+
+  function updateAvatarPreviews() {
+    const sidebarAvatar = document.getElementById('portal-user-avatar');
+    const editAvatarPreview = document.getElementById('profile-edit-avatar-preview');
+    
+    if (currentUser.profileImage) {
+      if (sidebarAvatar) {
+        sidebarAvatar.style.backgroundImage = `url(${currentUser.profileImage})`;
+        sidebarAvatar.innerText = '';
+      }
+      if (editAvatarPreview) {
+        editAvatarPreview.style.backgroundImage = `url(${currentUser.profileImage})`;
+        editAvatarPreview.innerText = '';
+      }
+    } else {
+      const letter = currentUser.name.charAt(0).toUpperCase();
+      if (sidebarAvatar) {
+        sidebarAvatar.style.backgroundImage = 'none';
+        sidebarAvatar.innerText = letter;
+      }
+      if (editAvatarPreview) {
+        editAvatarPreview.style.backgroundImage = 'none';
+        editAvatarPreview.innerText = letter;
+      }
+    }
+  }
+
+  async function updateDashboardStats() {
+    if (!currentUser) return;
+    try {
+      const response = await fetch(`/api/requests?studentId=${currentUser.id}`);
+      if (!response.ok) return;
+      const requests = await response.json();
+
+      const totalRequests = requests.length;
+      const completedRequests = requests.filter(r => r.status === 'completed').length;
+      const totalSpent = requests
+        .filter(r => r.status === 'completed' || r.status === 'paid')
+        .reduce((sum, r) => sum + r.price, 0);
+
+      document.getElementById('student-stat-total-requests').innerText = totalRequests;
+      document.getElementById('student-stat-completed').innerText = completedRequests;
+      document.getElementById('student-stat-total-spent').innerText = totalSpent + ' EGP';
+    } catch (err) {
+      console.error('Error loading dashboard stats:', err);
+    }
+  }
+
+  const profileAvatarInput = document.getElementById('profile-avatar-input');
+  if (profileAvatarInput) {
+    profileAvatarInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const editAvatarPreview = document.getElementById('profile-edit-avatar-preview');
+          if (editAvatarPreview) {
+            editAvatarPreview.style.backgroundImage = `url(${event.target.result})`;
+            editAvatarPreview.innerText = '';
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  const studentUpdateProfileForm = document.getElementById('student-update-profile-form');
+  if (studentUpdateProfileForm) {
+    studentUpdateProfileForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('profile-name').value;
+      const phone = document.getElementById('profile-phone').value;
+      const university = document.getElementById('profile-university').value;
+      const major = document.getElementById('profile-major').value;
+      const password = document.getElementById('profile-password').value;
+      const avatarFile = profileAvatarInput ? profileAvatarInput.files[0] : null;
+
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('phone', phone);
+      formData.append('university', university);
+      formData.append('major', major);
+      if (password && password.trim() !== '') {
+        formData.append('password', password);
+      }
+      if (avatarFile) {
+        formData.append('avatar', avatarFile);
+      }
+
+      try {
+        const response = await fetch(`/api/students/${currentUser.id}/profile`, {
+          method: 'PUT',
+          body: formData
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          alert(data.error || 'حدث خطأ أثناء تعديل بيانات الحساب');
+          return;
+        }
+
+        currentUser = data;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        
+        updateAuthUI();
+        loadPortalData();
+        
+        alert('تم حفظ تعديلات حسابك بنجاح! 🚀');
+      } catch (err) {
+        console.error('Error updating profile:', err);
+        alert('خطأ في الاتصال بالخادم أثناء حفظ التعديلات');
+      }
+    });
+  }
+
   // ----------------------------------------------------
   updateAuthUI();
   fetchCategories().then(() => {
