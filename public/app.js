@@ -82,12 +82,20 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         navAdmin.classList.add('hidden');
       }
+
+      // تفعيل الثيم الذهبي العام في حال كان الخصم 100%
+      if (currentUser.discountPercent === 100) {
+        document.body.classList.add('gold-theme');
+      } else {
+        document.body.classList.remove('gold-theme');
+      }
     } else {
       authButtonsContainer.classList.remove('hidden');
       userProfileContainer.classList.add('hidden');
       navPortal.classList.add('hidden');
       navAdmin.classList.add('hidden');
       showSection('landing');
+      document.body.classList.remove('gold-theme');
     }
   }
 
@@ -474,14 +482,11 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Error fetching fresh user privileges:', err);
     }
 
-    // تفعيل الثيم الذهبي الفخم في حال كان الخصم 100%
-    const portalView = document.getElementById('student-portal-view');
-    if (portalView) {
-      if (currentUser.discountPercent === 100) {
-        portalView.classList.add('gold-theme');
-      } else {
-        portalView.classList.remove('gold-theme');
-      }
+    // تفعيل الثيم الذهبي الفخم في حال كان الخصم 100% (على كامل الصفحة)
+    if (currentUser.discountPercent === 100) {
+      document.body.classList.add('gold-theme');
+    } else {
+      document.body.classList.remove('gold-theme');
     }
 
     // تعبئة بيانات البروفايل الجانبي

@@ -1010,17 +1010,17 @@ textarea.form-control {
   --neon-shadow-magenta: 0 0 10px var(--secondary-magenta), 0 0 20px rgba(212, 175, 55, 0.15) !important;
 }
 
-#student-portal-view.gold-theme {
+#student-portal-view.gold-theme, body.gold-theme {
   background: radial-gradient(circle at top left, rgba(212, 175, 55, 0.08), transparent 60%), var(--bg-deep) !important;
 }
 
-#student-portal-view.gold-theme .portal-sidebar {
+body.gold-theme .portal-sidebar {
   border-left: 1px solid rgba(212, 175, 55, 0.25) !important;
   background: linear-gradient(180deg, rgba(212, 175, 55, 0.04) 0%, rgba(0, 0, 0, 0.25) 100%) !important;
   box-shadow: inset -5px 0 25px rgba(212, 175, 55, 0.02) !important;
 }
 
-#student-portal-view.gold-theme .user-avatar-circle {
+body.gold-theme .user-avatar-circle {
   background: linear-gradient(135deg, #ffe57f 0%, #d4af37 50%, #aa7c11 100%) !important;
   color: #000 !important;
   font-weight: 900 !important;
@@ -1028,13 +1028,13 @@ textarea.form-control {
   text-shadow: 0 1px 1px rgba(255,255,255,0.3) !important;
 }
 
-#student-portal-view.gold-theme .portal-menu-item.active {
+body.gold-theme .portal-menu-item.active {
   background: rgba(212, 175, 55, 0.12) !important;
   color: var(--primary-cyan) !important; /* Gold */
   box-shadow: inset -3px 0 0 var(--primary-cyan) !important;
 }
 
-#student-portal-view.gold-theme .btn-primary {
+body.gold-theme .btn-primary {
   background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important;
   color: #000 !important;
   font-weight: 700 !important;
@@ -1042,7 +1042,7 @@ textarea.form-control {
   box-shadow: 0 0 15px rgba(212, 175, 55, 0.3) !important;
 }
 
-#student-portal-view.gold-theme .btn-primary:hover {
+body.gold-theme .btn-primary:hover {
   transform: translateY(-2px) scale(1.02) !important;
   box-shadow: 0 0 20px rgba(212, 175, 55, 0.5) !important;
 }
