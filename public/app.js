@@ -1225,6 +1225,71 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  async function loadAnnouncements() {
+    try {
+      const response = await fetch('/api/announcements');
+      if (!response.ok) return;
+      const announcements = await response.json();
+
+      const hubContainer = document.getElementById('announcements-hub-container');
+      const listWrapper = document.getElementById('announcements-list-wrapper');
+
+      if (!hubContainer || !listWrapper) return;
+
+      if (announcements.length === 0) {
+        hubContainer.classList.add('hidden');
+        return;
+      }
+
+      hubContainer.classList.remove('hidden');
+      listWrapper.innerHTML = '';
+
+      announcements.forEach(ann => {
+        const item = document.createElement('div');
+        item.style.background = 'rgba(255, 255, 255, 0.015)';
+        item.style.border = '1px solid rgba(255, 255, 255, 0.05)';
+        item.style.padding = '1.2rem';
+        item.style.borderRadius = '12px';
+        item.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)';
+
+        const formattedDate = new Date(ann.createdAt).toLocaleDateString('ar-EG');
+
+        item.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
+            <h4 style="font-weight: 700; color: var(--primary-cyan); font-size: 1rem; margin: 0;">${ann.title}</h4>
+            <span style="font-size: 0.75rem; color: var(--text-secondary);"><i class="fa-regular fa-clock"></i> ${formattedDate}</span>
+          </div>
+          <p style="color: var(--text-secondary); line-height: 1.6; font-size: 0.85rem; margin: 0; white-space: pre-line;">${ann.content}</p>
+        `;
+        listWrapper.appendChild(item);
+      });
+
+      // عرض البوب اب لأول إعلان نشط لم يتم مشاهدته في هذه الجلسة
+      const firstAnn = announcements[0];
+      const seen = JSON.parse(sessionStorage.getItem('seenAnnouncements') || '[]');
+      if (firstAnn && !seen.includes(firstAnn.id)) {
+        const popupModal = document.getElementById('announcement-popup-modal');
+        const popupTitle = document.getElementById('popup-announcement-title');
+        const popupContent = document.getElementById('popup-announcement-content');
+        const btnClosePopup = document.getElementById('btn-close-announcement-popup');
+
+        if (popupModal && popupTitle && popupContent && btnClosePopup) {
+          popupTitle.innerText = firstAnn.title;
+          popupContent.innerText = firstAnn.content;
+          popupModal.classList.add('active');
+
+          btnClosePopup.onclick = () => {
+            popupModal.classList.remove('active');
+            seen.push(firstAnn.id);
+            sessionStorage.setItem('seenAnnouncements', JSON.stringify(seen));
+          };
+        }
+      }
+    } catch (err) {
+      console.error('Error loading announcements:', err);
+    }
+  }
+
   // ----------------------------------------------------
   updateAuthUI();
   fetchCategories().then(() => {
@@ -1235,4 +1300,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadDynamicStats().then(() => {
     setTimeout(animateCounters, 300);
   });
+
+  // جلب الإعلانات وتفعيل البوب اب
+  loadAnnouncements();
 });

@@ -45,6 +45,9 @@
           <li class="portal-menu-item" id="admin-menu-categories" data-target="admin-categories-panel">
             <i class="fa-solid fa-tags"></i> إدارة الأقسام
           </li>
+          <li class="portal-menu-item" id="admin-menu-announcements" data-target="admin-announcements-panel">
+            <i class="fa-solid fa-bullhorn"></i> إدارة الإعلانات 📢
+          </li>
         </ul>
       </aside>
 
@@ -265,6 +268,62 @@
                 </tr>
               </thead>
               <tbody id="admin-categories-list-table">
+                <!-- ديناميكي -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ==================================================== -->
+        <!-- 6. لوحة إدارة الإعلانات والتنبيهات (Announcements Panel) -->
+        <!-- ==================================================== -->
+        <div id="admin-announcements-panel" class="portal-panel hidden">
+          <h3 style="margin-bottom: 1.5rem; font-weight: 700;">إدارة إعلانات وتنبيهات المنصة 📢</h3>
+          
+          <form id="admin-add-announcement-form" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-light); padding: 1.5rem; border-radius: 12px; margin-bottom: 3rem; max-width: 600px;">
+            <input type="hidden" id="announcement-id-edit" value="">
+            <div class="form-group">
+              <label for="announcement-title-input">عنوان الإعلان</label>
+              <input type="text" id="announcement-title-input" class="form-control" placeholder="مثال: خصم هائل 50% على مشاريع الأبحاث" required>
+            </div>
+            <div class="form-group">
+              <label for="announcement-content-input">محتوى ونص الإعلان (يدعم السطور المتعددة)</label>
+              <textarea id="announcement-content-input" class="form-control" placeholder="اكتب تفاصيل الإعلان هنا..." required style="min-height: 100px; resize: vertical; font-family: 'Cairo', sans-serif; padding: 0.8rem;"></textarea>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label for="announcement-duration-input">مدة العرض / الإعلان (بالأيام)</label>
+                <input type="number" id="announcement-duration-input" class="form-control" placeholder="مثال: 7" required min="1">
+              </div>
+              <div class="form-group">
+                <label for="announcement-order-input">ترتيب الإعلان (الترتيب الأصغر يظهر أولاً)</label>
+                <input type="number" id="announcement-order-input" class="form-control" placeholder="مثال: 1" required min="0" value="0">
+              </div>
+            </div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+              <input type="checkbox" id="announcement-active-input" checked style="width: auto; cursor: pointer;">
+              <label for="announcement-active-input" style="margin-bottom: 0; cursor: pointer; font-weight: 700;">تنشيط وعرض الإعلان فوراً</label>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+              <button type="submit" class="btn btn-primary" id="btn-submit-announcement" style="flex: 1; justify-content: center; font-family: 'Cairo', sans-serif;">إضافة إعلان جديد <i class="fa-solid fa-plus"></i></button>
+              <button type="button" class="btn btn-outline hidden" id="btn-cancel-announcement-edit" style="justify-content: center; font-family: 'Cairo', sans-serif;">إلغاء التعديل</button>
+            </div>
+          </form>
+
+          <h4 style="font-weight: 700; margin-bottom: 1rem;">كل الإعلانات المضافة</h4>
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>العنوان</th>
+                  <th>مدة الإعلان</th>
+                  <th>الترتيب</th>
+                  <th>الحالة</th>
+                  <th>تاريخ الإنشاء</th>
+                  <th style="text-align: left;">الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="admin-announcements-list-table">
                 <!-- ديناميكي -->
               </tbody>
             </table>

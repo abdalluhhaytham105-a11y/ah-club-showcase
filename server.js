@@ -623,6 +623,121 @@ app.put('/api/students/:id/profile', verifyStudent, upload.single('avatar'), (re
   }
 });
 
+// ----------------------------------------------------
+// 5. إدارة الإعلانات والتنبيهات (Announcements API)
+// ----------------------------------------------------
+
+app.get('/api/announcements', (req, res) => {
+  try {
+    const data = db.readDb();
+    const now = new Date();
+    const activeAnnouncements = (data.announcements || []).filter(ann => {
+      if (!ann.active) return false;
+      const created = new Date(ann.createdAt);
+      const expiry = new Date(created.getTime() + Number(ann.durationDays) * 24 * 60 * 60 * 1000);
+      return now <= expiry;
+    });
+
+    activeAnnouncements.sort((a, b) => {
+      const orderDiff = (a.order || 0) - (b.order || 0);
+      if (orderDiff !== 0) return orderDiff;
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    res.json(activeAnnouncements);
+  } catch (err) {
+    res.status(500).json({ error: 'فشل جلب الإعلانات' });
+  }
+});
+
+app.get('/api/admin/announcements', verifyAdmin, (req, res) => {
+  try {
+    const data = db.readDb();
+    const announcements = data.announcements || [];
+
+    announcements.sort((a, b) => {
+      const orderDiff = (a.order || 0) - (b.order || 0);
+      if (orderDiff !== 0) return orderDiff;
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    res.json(announcements);
+  } catch (err) {
+    res.status(500).json({ error: 'فشل جلب قائمة الإعلانات للإدارة' });
+  }
+});
+
+app.post('/api/admin/announcements', verifyAdmin, (req, res) => {
+  const { title, content, durationDays, order, active } = req.body;
+  if (!title || !content || !durationDays) {
+    return res.status(400).json({ error: 'جميع الحقول الأساسية مطلوبة' });
+  }
+
+  try {
+    const data = db.readDb();
+    if (!data.announcements) data.announcements = [];
+
+    const newAnn = {
+      id: 'ann-' + Date.now(),
+      title,
+      content,
+      durationDays: Number(durationDays),
+      order: Number(order) || 0,
+      active: active !== undefined ? active : true,
+      createdAt: new Date().toISOString()
+    };
+
+    data.announcements.push(newAnn);
+    db.writeDb(data);
+    res.status(201).json(newAnn);
+  } catch (err) {
+    res.status(500).json({ error: 'فشل إضافة الإعلان الجديد' });
+  }
+});
+
+app.put('/api/admin/announcements/:id', verifyAdmin, (req, res) => {
+  const { id } = req.params;
+  const { title, content, durationDays, order, active } = req.body;
+
+  try {
+    const data = db.readDb();
+    const index = (data.announcements || []).findIndex(a => a.id === id);
+    if (index === -1) {
+      return res.status(404).json({ error: 'الإعلان غير موجود' });
+    }
+
+    const ann = data.announcements[index];
+    if (title !== undefined) ann.title = title;
+    if (content !== undefined) ann.content = content;
+    if (durationDays !== undefined) ann.durationDays = Number(durationDays);
+    if (order !== undefined) ann.order = Number(order);
+    if (active !== undefined) ann.active = active;
+
+    db.writeDb(data);
+    res.json(ann);
+  } catch (err) {
+    res.status(500).json({ error: 'فشل تعديل الإعلان' });
+  }
+});
+
+app.delete('/api/admin/announcements/:id', verifyAdmin, (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const data = db.readDb();
+    const index = (data.announcements || []).findIndex(a => a.id === id);
+    if (index === -1) {
+      return res.status(404).json({ error: 'الإعلان غير موجود' });
+    }
+
+    data.announcements.splice(index, 1);
+    db.writeDb(data);
+    res.json({ message: 'تم حذف الإعلان بنجاح' });
+  } catch (err) {
+    res.status(500).json({ error: 'فشل حذف الإعلان' });
+  }
+});
+
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

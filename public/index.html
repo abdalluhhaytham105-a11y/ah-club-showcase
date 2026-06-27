@@ -75,6 +75,16 @@
         </div>
       </div>
 
+      <!-- لوحة إعلانات المنصة العامة (Announcements Hub) -->
+      <div id="announcements-hub-container" class="hidden" style="margin-bottom: 3rem; background: radial-gradient(circle at top right, rgba(0, 240, 255, 0.05), rgba(0, 0, 0, 0.4)); border: 1px solid rgba(0, 240, 255, 0.2); padding: 1.8rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);">
+        <h3 style="font-weight: 800; font-size: 1.2rem; color: #fff; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.6rem; justify-content: flex-start; direction: rtl;">
+          <i class="fa-solid fa-bullhorn" style="color: var(--primary-cyan);"></i> إعلانات وتنبيهات المنصة 📢
+        </h3>
+        <div id="announcements-list-wrapper" style="display: flex; flex-direction: column; gap: 1rem; direction: rtl; text-align: right;">
+          <!-- سيتم تعبئتها ديناميكياً بالإعلانات النشطة -->
+        </div>
+      </div>
+
       <!-- أرشيف المشاريع (Showcase Section) -->
       <div id="showcase-section" style="scroll-margin-top: 100px;">
         <div class="showcase-header">
@@ -559,6 +569,16 @@
       <i class="fa-brands fa-whatsapp" style="font-size: 1.2rem;"></i> تواصل معنا عبر الواتساب: 01014054673
     </a>
   </footer>
+
+  <!-- مودال الإعلانات العائم (Announcement Popup) -->
+  <div id="announcement-popup-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="max-width: 500px; padding: 2rem; border: 2px solid var(--primary-cyan); box-shadow: 0 0 30px rgba(0, 240, 255, 0.25); text-align: center;">
+      <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--primary-cyan);"><i class="fa-solid fa-bullhorn fa-bounce"></i></div>
+      <h3 id="popup-announcement-title" style="font-weight: 800; font-size: 1.3rem; margin-bottom: 1rem; color: #fff;">عنوان الإعلان</h3>
+      <p id="popup-announcement-content" style="color: var(--text-secondary); line-height: 1.6; font-size: 0.95rem; margin-bottom: 1.8rem; text-align: right; direction: rtl; white-space: pre-line;"></p>
+      <button id="btn-close-announcement-popup" class="btn btn-primary" style="width: 100%; font-family: 'Cairo', sans-serif;">حسناً، فهمت <i class="fa-solid fa-check"></i></button>
+    </div>
+  </div>
 
   <script src="app.js?v=2.0"></script>
 </body>

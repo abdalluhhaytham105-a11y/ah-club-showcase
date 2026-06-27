@@ -117,6 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadStudentsData();
       } else if (targetPanelId === 'admin-categories-panel') {
         loadCategoriesPanel();
+      } else if (targetPanelId === 'admin-announcements-panel') {
+        fetchAnnouncements();
       }
     });
   });
@@ -905,6 +907,208 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('خطأ في الاتصال بالخادم');
       }
     });
+  }
+
+  // ----------------------------------------------------
+  // 6. إدارة الإعلانات والتنبيهات (Admin Announcements)
+  // ----------------------------------------------------
+  let allAnnouncements = [];
+  const adminAddAnnouncementForm = document.getElementById('admin-add-announcement-form');
+  const adminAnnouncementsListTable = document.getElementById('admin-announcements-list-table');
+  const btnSubmitAnnouncement = document.getElementById('btn-submit-announcement');
+  const btnCancelAnnouncementEdit = document.getElementById('btn-cancel-announcement-edit');
+
+  async function fetchAnnouncements() {
+    try {
+      const response = await fetch('/api/admin/announcements');
+      if (!response.ok) return;
+      allAnnouncements = await response.json();
+      renderAnnouncementsTable();
+    } catch (err) {
+      console.error('Error fetching announcements:', err);
+    }
+  }
+
+  function renderAnnouncementsTable() {
+    if (!adminAnnouncementsListTable) return;
+    adminAnnouncementsListTable.innerHTML = '';
+
+    if (allAnnouncements.length === 0) {
+      adminAnnouncementsListTable.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 2rem;">لا توجد إعلانات مضافة حالياً.</td></tr>`;
+      return;
+    }
+
+    allAnnouncements.forEach((ann, index) => {
+      const tr = document.createElement('tr');
+      const createdDate = new Date(ann.createdAt).toLocaleDateString('ar-EG');
+      const statusBadge = ann.active 
+        ? `<span class="badge badge-success">نشط</span>` 
+        : `<span class="badge badge-pending">غير نشط</span>`;
+
+      tr.innerHTML = `
+        <td style="font-weight: 600; text-align: right;">${ann.title}</td>
+        <td>${ann.durationDays} يوم</td>
+        <td style="font-family: 'Orbitron', sans-serif;">${ann.order}</td>
+        <td>${statusBadge}</td>
+        <td>${createdDate}</td>
+        <td>
+          <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+            <button class="btn btn-outline btn-xs btn-edit-ann" data-id="${ann.id}" title="تعديل"><i class="fa-solid fa-edit"></i></button>
+            <button class="btn btn-outline btn-xs btn-delete-ann" data-id="${ann.id}" style="color: #ff5555; border-color: rgba(255, 85, 85, 0.25);" title="حذف"><i class="fa-solid fa-trash"></i></button>
+            <button class="btn btn-outline btn-xs btn-move-up" data-id="${ann.id}" data-index="${index}" title="رفع الترتيب للأعلى"><i class="fa-solid fa-chevron-up"></i></button>
+            <button class="btn btn-outline btn-xs btn-move-down" data-id="${ann.id}" data-index="${index}" title="خفض الترتيب للأسفل"><i class="fa-solid fa-chevron-down"></i></button>
+          </div>
+        </td>
+      `;
+      adminAnnouncementsListTable.appendChild(tr);
+    });
+
+    // ربط مستمعات الأحداث
+    document.querySelectorAll('.btn-edit-ann').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        loadAnnouncementToEdit(id);
+      });
+    });
+
+    document.querySelectorAll('.btn-delete-ann').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        if (confirm('هل أنت متأكد من حذف هذا الإعلان نهائياً؟')) {
+          await deleteAnnouncement(id);
+        }
+      });
+    });
+
+    document.querySelectorAll('.btn-move-up').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const index = parseInt(e.currentTarget.getAttribute('data-index'));
+        if (index > 0) {
+          await swapAnnouncementsOrder(index, index - 1);
+        }
+      });
+    });
+
+    document.querySelectorAll('.btn-move-down').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const index = parseInt(e.currentTarget.getAttribute('data-index'));
+        if (index < allAnnouncements.length - 1) {
+          await swapAnnouncementsOrder(index, index + 1);
+        }
+      });
+    });
+  }
+
+  function loadAnnouncementToEdit(id) {
+    const ann = allAnnouncements.find(a => a.id === id);
+    if (!ann) return;
+
+    document.getElementById('announcement-id-edit').value = ann.id;
+    document.getElementById('announcement-title-input').value = ann.title;
+    document.getElementById('announcement-content-input').value = ann.content;
+    document.getElementById('announcement-duration-input').value = ann.durationDays;
+    document.getElementById('announcement-order-input').value = ann.order;
+    document.getElementById('announcement-active-input').checked = ann.active;
+
+    btnSubmitAnnouncement.innerHTML = `حفظ التعديلات <i class="fa-solid fa-save"></i>`;
+    btnCancelAnnouncementEdit.classList.remove('hidden');
+    
+    // التمرير لأعلى النموذج
+    adminAddAnnouncementForm.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function resetAnnouncementForm() {
+    document.getElementById('announcement-id-edit').value = '';
+    document.getElementById('announcement-title-input').value = '';
+    document.getElementById('announcement-content-input').value = '';
+    document.getElementById('announcement-duration-input').value = '';
+    document.getElementById('announcement-order-input').value = '0';
+    document.getElementById('announcement-active-input').checked = true;
+
+    btnSubmitAnnouncement.innerHTML = `إضافة إعلان جديد <i class="fa-solid fa-plus"></i>`;
+    btnCancelAnnouncementEdit.classList.add('hidden');
+  }
+
+  if (btnCancelAnnouncementEdit) {
+    btnCancelAnnouncementEdit.addEventListener('click', resetAnnouncementForm);
+  }
+
+  if (adminAddAnnouncementForm) {
+    adminAddAnnouncementForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const id = document.getElementById('announcement-id-edit').value;
+      const title = document.getElementById('announcement-title-input').value;
+      const content = document.getElementById('announcement-content-input').value;
+      const durationDays = document.getElementById('announcement-duration-input').value;
+      const order = document.getElementById('announcement-order-input').value;
+      const active = document.getElementById('announcement-active-input').checked;
+
+      const payload = { title, content, durationDays, order, active };
+      const url = id ? `/api/admin/announcements/${id}` : '/api/admin/announcements';
+      const method = id ? 'PUT' : 'POST';
+
+      try {
+        const response = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+          alert(id ? 'تم تعديل الإعلان بنجاح!' : 'تم إضافة الإعلان بنجاح!');
+          resetAnnouncementForm();
+          await fetchAnnouncements();
+        } else {
+          alert(data.error || 'فشل حفظ الإعلان');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('خطأ في الاتصال بالخادم');
+      }
+    });
+  }
+
+  async function deleteAnnouncement(id) {
+    try {
+      const response = await fetch(`/api/admin/announcements/${id}`, { method: 'DELETE' });
+      if (response.ok) {
+        await fetchAnnouncements();
+      } else {
+        const data = await response.json();
+        alert(data.error || 'فشل حذف الإعلان');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function swapAnnouncementsOrder(indexA, indexB) {
+    const annA = allAnnouncements[indexA];
+    const annB = allAnnouncements[indexB];
+
+    // تبديل قيم الترتيب (order)
+    const tempOrder = annA.order;
+    
+    try {
+      // إرسال تعديل للأول
+      await fetch(`/api/admin/announcements/${annA.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order: annB.order })
+      });
+      // إرسال تعديل للثاني
+      await fetch(`/api/admin/announcements/${annB.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order: tempOrder })
+      });
+      
+      await fetchAnnouncements();
+    } catch (err) {
+      console.error('Error swapping announcement order:', err);
+    }
   }
 
   // تشغيل الإحصائيات لأول مرة عند تحميل الملف

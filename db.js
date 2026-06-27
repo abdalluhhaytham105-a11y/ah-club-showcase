@@ -65,7 +65,8 @@ const initialDb = {
       rating: 5,
       ratingComment: ""
     }
-  ]
+  ],
+  announcements: []
 };
 
 function readDb() {
@@ -87,6 +88,12 @@ function readDb() {
         writeDb(parsed);
       }
     }
+    
+    if (!parsed.announcements) {
+      parsed.announcements = [];
+      writeDb(parsed);
+    }
+    
     return parsed;
   } catch (error) {
     console.error('Error reading database:', error);
