@@ -1,6 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
   // التحقق من صلاحيات الأدمن أولاً
   let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+
+  // تفعيل التوقيع التلقائي لجميع الطلبات بمعرف الأدمن للتحقق من الصلاحيات بالخادم
+  const originalFetch = window.fetch;
+  window.fetch = function (url, options = {}) {
+    options.headers = options.headers || {};
+    if (currentUser && currentUser.id) {
+      options.headers['x-user-id'] = currentUser.id;
+    }
+    return originalFetch(url, options);
+  };
+
   if (!currentUser || currentUser.role !== 'admin') {
     alert('غير مصرح لك بدخول لوحة المطور والمسؤول');
     window.location.href = 'index.html';

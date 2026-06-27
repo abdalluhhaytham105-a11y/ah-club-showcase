@@ -1,6 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
   // حالة المستخدم الحالية
   let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+
+  // تفعيل التوقيع التلقائي لجميع الطلبات بمعرف المستخدم الحالي للتحقق من الصلاحيات بالخادم
+  const originalFetch = window.fetch;
+  window.fetch = function (url, options = {}) {
+    options.headers = options.headers || {};
+    if (currentUser && currentUser.id) {
+      options.headers['x-user-id'] = currentUser.id;
+    }
+    return originalFetch(url, options);
+  };
+
   let allProjects = [];
   let categories = [];
 
