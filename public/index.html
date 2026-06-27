@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AH CLUB | منصة المشاريع والخدمات الطلابية 🚀</title>
+  <!-- أيقونات FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- هيدر الصفحة الرئيسي -->
+  <header>
+    <div class="logo-container">
+      <img src="logo.png" alt="AH CLUB Logo" class="logo-img" id="header-logo">
+      <span class="brand-name">AH CLUB</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#" id="nav-home" class="active">المعرض العام</a></li>
+      <li><a href="#" id="nav-portal" class="hidden">بوابة الطالب</a></li>
+      <li><a href="admin.html" id="nav-admin" class="hidden">لوحة المطور</a></li>
+    </ul>
+    <div class="auth-buttons" id="auth-buttons-container">
+      <button class="btn btn-outline" id="btn-login-trigger">تسجيل الدخول</button>
+      <button class="btn btn-primary" id="btn-register-trigger">إنشاء حساب</button>
+    </div>
+    <div class="auth-buttons hidden" id="user-profile-container">
+      <span id="user-welcome-msg" style="font-weight: 600; color: var(--primary-cyan);"></span>
+      <button class="btn btn-outline" id="btn-logout">خروج <i class="fa-solid fa-right-from-bracket"></i></button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ==================================================== -->
+    <!-- 1. واجهة الزوار والمعرض العام (Landing & Showcase) -->
+    <!-- ==================================================== -->
+    <section id="landing-view" class="page-section">
+      <!-- البطل (Hero Section) -->
+      <div class="hero">
+        <div class="hero-content">
+          <span class="hero-tagline">مرحباً بك في مدار الإبداع 🚀</span>
+          <h1 class="hero-title">نصنع أفكاركم <span>مشاريعاً ملموسة</span> بالجامعة</h1>
+          <p class="hero-description">
+            نحن في <strong>AH CLUB</strong> نقدم أفضل الخدمات والمشاريع الأكاديمية والتطبيقية بأعلى جودة. تصفح أكثر من 300 مشروع نفذناها على مدار سنتين، أو اطلب مشروعك الخاص ليقوم نخبة من المطورين والمهندسين بتنفيذه وتسليمه لك.
+          </p>
+          <div class="hero-actions">
+            <button class="btn btn-primary btn-large" id="hero-order-btn">اطلب مشروعك الآن <i class="fa-solid fa-paper-plane"></i></button>
+            <a href="#showcase-section" class="btn btn-outline btn-large">تصفح الأرشيف <i class="fa-solid fa-magnifying-glass"></i></a>
+          </div>
+        </div>
+        <div class="hero-image-container">
+          <div class="hero-glow"></div>
+          <img src="logo.png" alt="AH CLUB 3D Emblem" class="hero-logo-large">
+        </div>
+      </div>
+
+      <!-- الإحصائيات -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" data-target="300">0</div>
+          <div class="stat-label">مشروع منجز</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" data-target="2">0</div>
+          <div class="stat-label">سنتين من العطاء</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" data-target="1500">0</div>
+          <div class="stat-label">طالب مستفيد</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" data-target="98">0</div>
+          <div class="stat-label">نسبة الرضا %</div>
+        </div>
+      </div>
+
+      <!-- أرشيف المشاريع (Showcase Section) -->
+      <div id="showcase-section" style="scroll-margin-top: 100px;">
+        <div class="showcase-header">
+          <div>
+            <h2 class="section-title">أرشيف أعمالنا المميزة</h2>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 0.95rem;">تصفح واكتشف عينة من مشاريعنا الطلابية في كافة الكليات</p>
+          </div>
+          <div class="search-bar-container">
+            <input type="text" placeholder="ابحث بالاسم، الكلية أو التقنية..." class="search-input" id="project-search">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          </div>
+        </div>
+
+        <div class="showcase-header">
+          <div class="filters-wrapper" id="filters-container">
+            <!-- سيتم توليد أزرار الأقسام ديناميكياً هنا عبر JS -->
+          </div>
+        </div>
+
+        <div class="projects-grid" id="projects-list-container">
+          <!-- سيتم توليد المشاريع ديناميكياً هنا عبر JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================== -->
+    <!-- 2. بوابة الطالب (Student Portal View) -->
+    <!-- ==================================================== -->
+    <section id="student-portal-view" class="page-section hidden">
+      <div class="showcase-header">
+        <div>
+          <h2 class="section-title">بوابة الطالب الخاصة بك</h2>
+          <p style="color: var(--text-secondary); margin-top: 0.5rem;">تواصل مع المطورين، اطلب مشاريعك، وتابع التسليم والتحميل</p>
+        </div>
+      </div>
+
+      <div class="portal-layout">
+        <!-- القائمة الجانبية -->
+        <aside class="portal-sidebar">
+          <div class="user-profile-summary">
+            <div class="user-avatar-circle" id="portal-user-avatar">?</div>
+            <div class="user-name-text" id="portal-user-name">اسم الطالب</div>
+            <div class="user-major-text" id="portal-user-major">الكلية والتخصص</div>
+          </div>
+          <ul class="portal-menu">
+            <li class="portal-menu-item active" id="menu-my-requests" data-target="portal-requests-panel">
+              <i class="fa-solid fa-list-check"></i> طلباتي الجارية
+            </li>
+            <li class="portal-menu-item" id="menu-new-request" data-target="portal-new-request-panel">
+              <i class="fa-solid fa-circle-plus"></i> طلب مشروع جديد
+            </li>
+          </ul>
+        </aside>
+
+        <!-- المحتوى الرئيسي للبوابة -->
+        <div class="portal-content">
+          <!-- لوحة الطلبات الجارية -->
+          <div id="portal-requests-panel" class="portal-panel">
+            <h3 style="margin-bottom: 1.5rem; font-weight: 700;">طلباتك ومشاريعك الجارية</h3>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>عنوان الطلب</th>
+                    <th>التاريخ</th>
+                    <th>التكلفة</th>
+                    <th>حالة الطلب</th>
+                    <th>الإجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="student-requests-table-body">
+                  <!-- سيتم تعبئتها ديناميكياً -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- لوحة طلب مشروع جديد -->
+          <div id="portal-new-request-panel" class="portal-panel hidden">
+            <h3 style="margin-bottom: 1.5rem; font-weight: 700;">تقديم استمارة طلب مشروع جديد</h3>
+            <form id="new-request-form" enctype="multipart/form-data">
+              <div class="form-group">
+                <label for="req-title">عنوان المشروع المقترح</label>
+                <input type="text" id="req-title" class="form-control" placeholder="مثال: تطبيق ويب لإدارة العيادات الطبية" required>
+              </div>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                  <label for="req-category">التصنيف الأساسي</label>
+                  <select id="req-category" class="form-control" required>
+                    <!-- سيتم تعبئة الأقسام ديناميكياً عبر JS -->
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="req-college">الكلية والجامعة</label>
+                  <input type="text" id="req-college" class="form-control" placeholder="مثال: هندسة عين شمس" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="req-description">وصف تفصيلي لمتطلبات المشروع</label>
+                <textarea id="req-description" class="form-control" rows="5" placeholder="اشرح بالتفصيل فكرة المشروع، وما هي الميزات المطلوبة بالضبط ليسهل على المطور فهمها وتسعيرها بدقة..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="req-tech">التقنيات المطلوب استخدامها (إن وجدت)</label>
+                <input type="text" id="req-tech" class="form-control" placeholder="مثال: React, Python, Flutter, Matlab (اختياري)">
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                  <label for="req-deadline">تاريخ التسليم المطلوب النهائي</label>
+                  <input type="date" id="req-deadline" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label for="req-file">ملف الإرشادات أو الـ Guideline (PDF, Zip)</label>
+                  <input type="file" id="req-file" class="form-control" accept=".pdf,.zip,.rar,.doc,.docx">
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="margin-top: 1rem; width: 100%; justify-content: center;">
+                إرسال استمارة الطلب للمطور <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================================================== -->
+  <!-- 3. المودالز والنوافذ المنبثقة (Modals) -->
+  <!-- ==================================================== -->
+
+  <!-- أ) مودال التحقق وتسجيل الدخول / إنشاء الحساب -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal-container" style="max-width: 450px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="auth-modal-title">تسجيل الدخول للمنصة</h3>
+        <button class="modal-close" id="auth-modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- تبديل التابات -->
+        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-light); padding-bottom: 10px;">
+          <button id="tab-login" class="filter-tab active" style="flex: 1;">تسجيل دخول</button>
+          <button id="tab-register" class="filter-tab" style="flex: 1;">إنشاء حساب</button>
+        </div>
+
+        <!-- فورمة تسجيل الدخول -->
+        <form id="login-form">
+          <div class="form-group">
+            <label for="login-email">البريد الإلكتروني أو اسم المستخدم</label>
+            <input type="text" id="login-email" class="form-control" required placeholder="البريد أو اسم المستخدم">
+          </div>
+          <div class="form-group">
+            <label for="login-password">كلمة المرور</label>
+            <input type="password" id="login-password" class="form-control" required placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">دخول آمن</button>
+        </form>
+
+        <!-- فورمة التسجيل الجديد -->
+        <form id="register-form" class="hidden">
+          <div class="form-group">
+            <label for="reg-name">الاسم بالكامل</label>
+            <input type="text" id="reg-name" class="form-control" required placeholder="مثال: أحمد محمد علي">
+          </div>
+          <div class="form-group">
+            <label for="reg-email">البريد الإلكتروني</label>
+            <input type="email" id="reg-email" class="form-control" required placeholder="name@example.com">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+            <div class="form-group">
+              <label for="reg-phone">رقم الهاتف (الواتساب)</label>
+              <input type="tel" id="reg-phone" class="form-control" required placeholder="01xxxxxxxxx">
+            </div>
+            <div class="form-group">
+              <label for="reg-university">الجامعة</label>
+              <input type="text" id="reg-university" class="form-control" required placeholder="جامعة القاهرة">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="reg-major">الكلية والتخصص الدراسي</label>
+            <input type="text" id="reg-major" class="form-control" required placeholder="هندسة - قسم حاسبات">
+          </div>
+          <div class="form-group">
+            <label for="reg-password">كلمة المرور</label>
+            <input type="password" id="reg-password" class="form-control" required placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn btn-secondary" style="width: 100%; justify-content: center;">إنشاء الحساب</button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ب) مودال استعراض تفاصيل مشروع من الأرشيف -->
+  <div class="modal-overlay" id="project-detail-modal">
+    <div class="modal-container" style="max-width: 550px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="proj-detail-title">عنوان المشروع بالكامل</h3>
+        <button class="modal-close" id="proj-detail-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- صورة غلاف المشروع مع خيارات التحكم بالتحجيم والمعاينة -->
+        <div id="proj-detail-image-wrapper" style="position: relative; width: 100%; height: 260px; background: rgba(0, 0, 0, 0.4); border-radius: 12px; margin-bottom: 1.5rem; display: none; overflow: hidden; border: 1px solid var(--border-light);">
+          <img id="proj-detail-image" src="" alt="غلاف المشروع" style="width: 100%; height: 100%; object-fit: contain; transition: var(--transition-smooth);">
+          
+          <!-- أزرار التحكم بالصورة -->
+          <div style="position: absolute; bottom: 10px; left: 10px; display: flex; gap: 0.5rem; z-index: 10;">
+            <button type="button" id="btn-toggle-fit" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; background: rgba(3, 7, 18, 0.85); border-color: var(--primary-cyan); color: var(--primary-cyan);" title="تبديل وضع الملء / الاحتواء">
+              <i class="fa-solid fa-expand"></i> تمديد الصورة
+            </button>
+            <button type="button" id="btn-view-full" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; background: rgba(3, 7, 18, 0.85); border-color: var(--accent-gold); color: var(--accent-gold);" title="عرض الصورة بالحجم الكامل">
+              <i class="fa-solid fa-magnifying-glass-plus"></i> تكبير
+            </button>
+          </div>
+        </div>
+
+        <div class="alert-box" id="proj-detail-college" style="font-weight: 700;"></div>
+        <p id="proj-detail-description" style="line-height: 1.8; color: var(--text-secondary); margin-bottom: 2rem;"></p>
+        <h4 style="margin-bottom: 0.8rem;">التقنيات والمستشعرات المستخدمة:</h4>
+        <div class="project-tags" id="proj-detail-tags" style="margin-bottom: 2rem;"></div>
+        
+        <!-- زر تحميل الكود والملف للمشروع -->
+        <div id="proj-detail-download-container" style="display: none; margin-bottom: 2rem; border-top: 1px solid var(--border-light); padding-top: 1.5rem;">
+          <a href="" id="proj-detail-download-btn" class="btn btn-primary" download style="width: 100%; justify-content: center;">تحميل ملف وكود المشروع <i class="fa-solid fa-download"></i></a>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-light); padding-top: 1.5rem; display: flex; justify-content: flex-end;">
+          <button class="btn btn-outline" id="proj-detail-btn-close">إغلاق</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ج) مودال تتبع الطلب والدفع والاستلام للطلاب -->
+  <div class="modal-overlay" id="order-status-modal">
+    <div class="modal-container" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 class="modal-title">تتبع حالة طلبك بالتفصيل</h3>
+        <button class="modal-close" id="order-status-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <h4 id="order-title-modal" style="font-weight: 700; margin-bottom: 1.5rem; text-align: center;">عنوان الطلب المختار</h4>
+        
+        <!-- التايم لاين -->
+        <div class="timeline-stepper">
+          <div class="timeline-step" id="step-1">
+            <div class="step-node"><i class="fa-solid fa-receipt"></i></div>
+            <div class="step-label">طلب استلم</div>
+          </div>
+          <div class="timeline-step" id="step-2">
+            <div class="step-node"><i class="fa-solid fa-tag"></i></div>
+            <div class="step-label">تم التسعير</div>
+          </div>
+          <div class="timeline-step" id="step-3">
+            <div class="step-node"><i class="fa-solid fa-code"></i></div>
+            <div class="step-label">قيد التنفيذ</div>
+          </div>
+          <div class="timeline-step" id="step-4">
+            <div class="step-node"><i class="fa-solid fa-wallet"></i></div>
+            <div class="step-label">الدفع</div>
+          </div>
+          <div class="timeline-step" id="step-5">
+            <div class="step-node"><i class="fa-solid fa-circle-down"></i></div>
+            <div class="step-label">التسليم</div>
+          </div>
+        </div>
+
+        <!-- معلومات وحالة السعر والدفع والتحميل -->
+        <div style="background: var(--bg-panel); border: 1px solid var(--border-light); border-radius: 12px; padding: 1.5rem; margin-top: 2rem;">
+          
+          <div id="payment-pricing-info" class="hidden">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid var(--border-light); padding-bottom: 10px;">
+              <span style="font-weight: 700;">سعر تنفيذ المشروع:</span>
+              <span id="order-price-display" style="color: var(--primary-cyan); font-family: 'Orbitron', sans-serif; font-size: 1.2rem; font-weight: 800;">0 EGP</span>
+            </div>
+            <div id="payment-instructions" class="hidden">
+              <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+                الرجاء إرسال المبلغ المطلوب على أحد الحسابات التالية لجروب <strong>AH CLUB</strong> وتعبئة رقم المعاملة بالأسفل:
+              </p>
+              
+              <!-- كروت حسابات الدفع -->
+              <div class="payment-methods-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                <!-- كارت فودافون كاش -->
+                <div class="payment-method-card" style="background: rgba(255, 255, 255, 0.015); border: 1px solid rgba(255, 0, 0, 0.15); border-radius: 12px; padding: 1.2rem; cursor: pointer; transition: var(--transition-smooth);" onclick="copyPaymentNumber('01014054673', this)">
+                  <div>
+                    <h5 style="font-weight: 700; color: #ff3333; font-size: 0.85rem; margin-bottom: 0.2rem;"><i class="fa-solid fa-mobile-screen-button"></i> فودافون كاش</h5>
+                    <p style="font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.5px; color: #fff; margin-bottom: 0.3rem;">01014054673</p>
+                    <span style="font-size: 0.65rem; color: var(--text-muted);"><i class="fa-solid fa-copy"></i> اضغط للنسخ</span>
+                  </div>
+                </div>
+                <!-- كارت انستا باي -->
+                <div class="payment-method-card" style="background: rgba(255, 255, 255, 0.015); border: 1px solid rgba(0, 240, 255, 0.15); border-radius: 12px; padding: 1.2rem; cursor: pointer; transition: var(--transition-smooth);" onclick="copyPaymentNumber('01202217795', this)">
+                  <div>
+                    <h5 style="font-weight: 700; color: var(--primary-cyan); font-size: 0.85rem; margin-bottom: 0.2rem;"><i class="fa-solid fa-money-bill-transfer"></i> إنستا باي (Instapay)</h5>
+                    <p style="font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.5px; color: #fff; margin-bottom: 0.3rem;">01202217795</p>
+                    <span style="font-size: 0.65rem; color: var(--text-muted);"><i class="fa-solid fa-copy"></i> اضغط للنسخ</span>
+                  </div>
+                </div>
+              </div>
+              <form id="payment-submission-form">
+                <div class="form-group">
+                  <label for="pay-method">وسيلة التحويل المستخدمة</label>
+                  <select id="pay-method" class="form-control" required>
+                    <option value="Vodafone Cash">فودافون كاش</option>
+                    <option value="Instapay">إنستا باي</option>
+                    <option value="Bank Transfer">تحويل بنكي</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="pay-transaction-id">رقم المعاملة / العملية (Transaction ID)</label>
+                  <input type="text" id="pay-transaction-id" class="form-control" placeholder="ادخل الرقم المرجعي للتحويل" required>
+                </div>
+                <button type="submit" class="btn btn-secondary" style="width: 100%; justify-content: center;">إرسال بيانات الدفع للأدمن</button>
+              </form>
+            </div>
+            <div id="payment-verify-pending" class="hidden" style="text-align: center; color: var(--accent-gold);">
+              <i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 1.8rem; margin-bottom: 0.8rem;"></i>
+              <p style="font-weight: 700;">تم إرسال بيانات الدفع! في انتظار تأكيد الأدمن من قاعدة البيانات لتفعيل التحميل.</p>
+            </div>
+          </div>
+
+          <div id="delivery-download-info" class="hidden" style="text-align: center;">
+            <i class="fa-solid fa-circle-check" style="font-size: 2.5rem; color: #10b981; margin-bottom: 1rem;"></i>
+            <h4 style="font-weight: 700; margin-bottom: 0.5rem;">تم إنجاز وتوصيل مشروعك بنجاح!</h4>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">اضغط على الزر بالأسفل لتحميل الكود والمستندات الخاصة بالمشروع.</p>
+            <a href="#" id="btn-download-project-files" class="btn btn-primary" download style="justify-content: center; width: 100%; margin-bottom: 1.5rem;">تحميل ملفات المشروع (Zip) <i class="fa-solid fa-circle-down"></i></a>
+            
+            <!-- قسم تقييم الخدمة (اختياري) -->
+            <div id="rating-section" style="margin-top: 1.5rem; border-top: 1px dashed var(--border-light); padding-top: 1.2rem; text-align: right;">
+              <h5 style="font-weight: 700; margin-bottom: 0.8rem; font-size: 0.9rem; color: var(--text-primary); text-align: center;">ما هو تقييمك لجودة تنفيذ هذا المشروع؟ (اختياري)</h5>
+              
+              <div class="rating-stars-container" style="display: flex; justify-content: center; gap: 0.6rem; margin-bottom: 1rem; direction: ltr;">
+                <i class="fa-regular fa-star star-btn" data-value="1" style="font-size: 1.6rem; cursor: pointer; color: var(--accent-gold); transition: var(--transition-smooth);"></i>
+                <i class="fa-regular fa-star star-btn" data-value="2" style="font-size: 1.6rem; cursor: pointer; color: var(--accent-gold); transition: var(--transition-smooth);"></i>
+                <i class="fa-regular fa-star star-btn" data-value="3" style="font-size: 1.6rem; cursor: pointer; color: var(--accent-gold); transition: var(--transition-smooth);"></i>
+                <i class="fa-regular fa-star star-btn" data-value="4" style="font-size: 1.6rem; cursor: pointer; color: var(--accent-gold); transition: var(--transition-smooth);"></i>
+                <i class="fa-regular fa-star star-btn" data-value="5" style="font-size: 1.6rem; cursor: pointer; color: var(--accent-gold); transition: var(--transition-smooth);"></i>
+              </div>
+              
+              <div class="form-group" style="margin-bottom: 0.8rem;">
+                <input type="text" id="rating-comment" class="form-control" placeholder="اكتب تعليقاً أو رأياً إضافياً إذا رغبت..." style="font-size: 0.8rem;">
+              </div>
+              
+              <button type="button" id="btn-submit-rating" class="btn btn-outline" style="width: 100%; justify-content: center; font-size: 0.8rem; padding: 0.5rem 1rem;">إرسال التقييم</button>
+            </div>
+            
+            <div id="rating-success-message" class="hidden" style="margin-top: 1.2rem; border-top: 1px dashed var(--border-light); padding-top: 1rem; color: #10b981; font-size: 0.85rem;">
+              <!-- سيتم ملؤه برمجياً -->
+            </div>
+          </div>
+
+          <div id="order-pending-review-info" class="hidden" style="text-align: center; color: var(--text-secondary);">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size: 1.8rem; margin-bottom: 0.8rem;"></i>
+            <p style="font-weight: 700;">الطلب قيد المراجعة الفنية حالياً بواسطة مطوري AH CLUB. سيتم تحديد السعر وتأكيد الطلب قريباً.</p>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <footer style="margin-top: 4rem; padding: 2rem; border-top: 1px solid var(--border-light); text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
+    <p>&copy; 2026 AH CLUB. جميع الحقوق محفوظة. صُمم بكل فخر للمشاريع الجامعية.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AH CLUB | لوحة تحكم المطور والمسؤول 🛠️</title>
+  <!-- أيقونات FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- هيدر صفحة الأدمن -->
+  <header>
+    <div class="logo-container">
+      <img src="logo.png" alt="AH CLUB Logo" class="logo-img">
+      <span class="brand-name">AH CLUB CONTROL</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html"><i class="fa-solid fa-arrow-right-to-bracket"></i> العودة للموقع الرئيسي</a></li>
+    </ul>
+    <div class="auth-buttons">
+      <span style="font-weight: 700; color: var(--secondary-magenta);"><i class="fa-solid fa-user-gear"></i> لوحة المطور</span>
+      <button class="btn btn-outline" id="admin-logout">خروج <i class="fa-solid fa-right-from-bracket"></i></button>
+    </div>
+  </header>
+
+  <main class="page-section">
+    <div class="portal-layout">
+      <!-- سايدبار الأدمن -->
+      <aside class="portal-sidebar">
+        <ul class="portal-menu">
+          <li class="portal-menu-item active" id="admin-menu-overview" data-target="admin-overview-panel">
+            <i class="fa-solid fa-chart-line"></i> نظرة عامة
+          </li>
+          <li class="portal-menu-item" id="admin-menu-requests" data-target="admin-requests-panel">
+            <i class="fa-solid fa-folder-open"></i> إدارة طلبات الطلاب
+          </li>
+          <li class="portal-menu-item" id="admin-menu-archive" data-target="admin-archive-panel">
+            <i class="fa-solid fa-database"></i> إدارة الأرشيف العام
+          </li>
+          <li class="portal-menu-item" id="admin-menu-students" data-target="admin-students-panel">
+            <i class="fa-solid fa-users"></i> قاعدة بيانات الطلاب
+          </li>
+          <li class="portal-menu-item" id="admin-menu-categories" data-target="admin-categories-panel">
+            <i class="fa-solid fa-tags"></i> إدارة الأقسام
+          </li>
+        </ul>
+      </aside>
+
+      <!-- محتوى لوحة التحكم -->
+      <div class="portal-content" style="background: var(--bg-panel); border-color: rgba(255, 0, 127, 0.15);">
+        
+        <!-- ==================================================== -->
+        <!-- 1. لوحة الإحصائيات العامة (Overview Panel) -->
+        <!-- ==================================================== -->
+        <div id="admin-overview-panel" class="portal-panel">
+          <h3 style="margin-bottom: 1.5rem; font-weight: 700;">لوحة تحكم النشاط العام</h3>
+          
+          <div class="admin-grid">
+            <div class="admin-card">
+              <div class="admin-card-icon icon-blue"><i class="fa-solid fa-users"></i></div>
+              <div class="admin-card-info">
+                <h3>إجمالي الطلاب</h3>
+                <p id="stat-total-students">0</p>
+              </div>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-icon icon-pink"><i class="fa-solid fa-clock-rotate-left"></i></div>
+              <div class="admin-card-info">
+                <h3>طلبات بانتظار المراجعة</h3>
+                <p id="stat-pending-orders">0</p>
+              </div>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-icon icon-gold"><i class="fa-solid fa-wallet"></i></div>
+              <div class="admin-card-info">
+                <h3>تأكيد دفع معلق</h3>
+                <p id="stat-verify-payments">0</p>
+              </div>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-icon icon-blue"><i class="fa-solid fa-circle-check"></i></div>
+              <div class="admin-card-info">
+                <h3>المشاريع المنجزة</h3>
+                <p id="stat-completed-projects">0</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 3rem;">
+            <h4 style="font-weight: 700; margin-bottom: 1rem; color: var(--primary-cyan);">أحدث الطلبات المستلمة</h4>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>اسم الطالب</th>
+                    <th>عنوان المشروع</th>
+                    <th>تاريخ التسليم المطلوب</th>
+                    <th>الحالة</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-latest-orders-table">
+                  <!-- ديناميكي -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================================================== -->
+        <!-- 2. لوحة إدارة طلبات الطلاب (Requests Panel) -->
+        <!-- ==================================================== -->
+        <div id="admin-requests-panel" class="portal-panel hidden">
+          <h3 style="margin-bottom: 1.5rem; font-weight: 700;">إدارة وتحديث طلبات المشاريع للطلاب</h3>
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>الطالب</th>
+                  <th>عنوان الطلب</th>
+                  <th>التسليم المطلوب</th>
+                  <th>السعر</th>
+                  <th>الحالة</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="admin-requests-table-body">
+                <!-- ديناميكي -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ==================================================== -->
+        <!-- 3. لوحة إدارة الأرشيف العام (Archive Panel) -->
+        <!-- ==================================================== -->
+        <div id="admin-archive-panel" class="portal-panel hidden">
+          <h3 style="margin-bottom: 1.5rem; font-weight: 700;">إضافة مشروع جديد للأرشيف العام المعروض للطلاب</h3>
+          
+          <form id="admin-add-project-form" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-light); padding: 1.5rem; border-radius: 12px; margin-bottom: 3rem;">
+            <div class="form-group">
+              <label for="new-proj-title">عنوان المشروع</label>
+              <input type="text" id="new-proj-title" class="form-control" placeholder="مثال: نظام التحكم بالمنزل الذكي" required>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label for="new-proj-category">القسم</label>
+                <select id="new-proj-category" class="form-control" required>
+                  <!-- سيتم تعبئة الأقسام ديناميكياً عبر JS -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="new-proj-college">الكلية والجامعة</label>
+                <input type="text" id="new-proj-college" class="form-control" placeholder="كلية الحاسبات - جامعة القاهرة" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="new-proj-desc">وصف المشروع بالتفصيل</label>
+              <textarea id="new-proj-desc" class="form-control" rows="4" placeholder="اكتب ملخصاً إبداعياً للمشروع وكيف يعمل..." required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="new-proj-tech">التقنيات المستخدمة (مفصولة بفواصل)</label>
+              <input type="text" id="new-proj-tech" class="form-control" placeholder="React, Node.js, Express, SQLite" required>
+            </div>
+
+            <!-- حقول اختيار الملفات الإضافية -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+              <div class="form-group">
+                <label for="new-proj-image">صورة غلاف المشروع (اختياري)</label>
+                <input type="file" id="new-proj-image" class="form-control" accept="image/*">
+              </div>
+              <div class="form-group">
+                <label for="new-proj-file">ملف المشروع النهائي/الكود (اختياري)</label>
+                <input type="file" id="new-proj-file" class="form-control" accept=".zip,.rar,.pdf,.doc,.docx,.ppt,.pptx">
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+              رفع وإضافة المشروع للأرشيف العام للطلاب <i class="fa-solid fa-cloud-arrow-up"></i>
+            </button>
+          </form>
+
+          <h4 style="font-weight: 700; margin-bottom: 1rem;">قائمة المشاريع المرفوعة حالياً</h4>
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>عنوان المشروع</th>
+                  <th>القسم</th>
+                  <th>الكلية</th>
+                  <th>التقنيات</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="admin-archive-list-table">
+                <!-- ديناميكي -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ==================================================== -->
+        <!-- 4. لوحة قاعدة بيانات الطلاب (Students Panel) -->
+        <!-- ==================================================== -->
+        <div id="admin-students-panel" class="portal-panel hidden">
+          <h3 style="margin-bottom: 1.5rem; font-weight: 700;">قاعدة بيانات الطلاب المسجلين بالمنصة</h3>
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>اسم الطالب</th>
+                  <th>البريد الإلكتروني</th>
+                  <th>الهاتف/الواتساب</th>
+                  <th>الجامعة والتخصص</th>
+                  <th>إجمالي الطلبات</th>
+                  <th>إجمالي المدفوعات</th>
+                </tr>
+              </thead>
+              <tbody id="admin-students-table-body">
+                <!-- ديناميكي -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ==================================================== -->
+        <!-- 5. لوحة إدارة الأقسام والتصنيفات (Categories Panel) -->
+        <!-- ==================================================== -->
+        <div id="admin-categories-panel" class="portal-panel hidden">
+          <h3 style="margin-bottom: 1.5rem; font-weight: 700;">إدارة الأقسام والتصنيفات (Categories)</h3>
+          
+          <form id="admin-add-category-form" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-light); padding: 1.5rem; border-radius: 12px; margin-bottom: 3rem; max-width: 500px;">
+            <div class="form-group">
+              <label for="new-cat-label">اسم القسم الجديد</label>
+              <input type="text" id="new-cat-label" class="form-control" placeholder="مثال: ذكاء اصطناعي وتعلم آلة" required>
+            </div>
+            <button type="submit" class="btn btn-primary">إضافة قسم جديد <i class="fa-solid fa-plus"></i></button>
+          </form>
+
+          <h4 style="font-weight: 700; margin-bottom: 1rem;">الأقسام الحالية بالمنصة</h4>
+          <div class="table-responsive" style="max-width: 500px;">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>اسم القسم</th>
+                  <th style="text-align: left;">الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="admin-categories-list-table">
+                <!-- ديناميكي -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================================================== -->
+  <!-- 5. مودالز لوحة الأدمن -->
+  <!-- ==================================================== -->
+
+  <!-- أ) مودال تسعير وقبول الطلب -->
+  <div class="modal-overlay" id="admin-price-modal">
+    <div class="modal-container" style="max-width: 450px;">
+      <div class="modal-header">
+        <h3 class="modal-title">تسعير وقبول طلب المشروع</h3>
+        <button class="modal-close" id="admin-price-modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h4 id="price-modal-order-title" style="font-weight: 700; margin-bottom: 1rem;">عنوان الطلب</h4>
+        <form id="price-order-form">
+          <div class="form-group">
+            <label for="order-price-input">تحديد التكلفة بالجنيه المصري (EGP)</label>
+            <input type="number" id="order-price-input" class="form-control" placeholder="مثال: 1200" required min="1">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">قبول الطلب وإرسال التسعيرة للطلاب</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ب) مودال رفع وتسليم الملفات للمشروع المنجز -->
+  <div class="modal-overlay" id="admin-deliver-modal">
+    <div class="modal-container" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 class="modal-title">توصيل وتسليم المشروع النهائي</h3>
+        <button class="modal-close" id="admin-deliver-modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h4 id="deliver-modal-order-title" style="font-weight: 700; margin-bottom: 1.2rem; text-align: center;">عنوان الطلب</h4>
+        
+        <!-- تبديل نوع التسليم -->
+        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-light); padding-bottom: 10px;">
+          <button type="button" id="deliver-tab-file" class="filter-tab active" style="flex: 1; padding: 0.4rem;">رفع ملفات</button>
+          <button type="button" id="deliver-tab-link" class="filter-tab" style="flex: 1; padding: 0.4rem;">إرفاق رابط</button>
+        </div>
+
+        <form id="deliver-order-form" enctype="multipart/form-data">
+          <!-- قسم رفع الملفات -->
+          <div class="form-group" id="deliver-file-group">
+            <label for="deliver-file-input">اختر ملف التسليم (Zip, PDF, Word, PPTX)</label>
+            <input type="file" id="deliver-file-input" class="form-control" accept=".zip,.rar,.pdf,.doc,.docx,.ppt,.pptx">
+          </div>
+
+          <!-- قسم إرفاق الرابط -->
+          <div class="form-group hidden" id="deliver-link-group">
+            <label for="deliver-link-input">أدخل رابط التسليم (Google Drive, GitHub...)</label>
+            <input type="url" id="deliver-link-input" class="form-control" placeholder="https://drive.google.com/...">
+          </div>
+
+          <button type="submit" class="btn btn-secondary" style="width: 100%; justify-content: center; margin-top: 1rem;">توصيل وتسليم المشروع</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ج) مودال تعديل مشروع في الأرشيف -->
+  <div class="modal-overlay" id="admin-edit-project-modal">
+    <div class="modal-container" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 class="modal-title">تعديل بيانات مشروع الأرشيف</h3>
+        <button class="modal-close" id="admin-edit-project-modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="admin-edit-project-form" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="edit-proj-title">عنوان المشروع</label>
+            <input type="text" id="edit-proj-title" class="form-control" required>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label for="edit-proj-category">القسم</label>
+              <select id="edit-proj-category" class="form-control" required>
+                <!-- سيتم تعبئته ديناميكياً -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit-proj-college">الكلية والجامعة</label>
+              <input type="text" id="edit-proj-college" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-proj-desc">وصف المشروع بالتفصيل</label>
+            <textarea id="edit-proj-desc" class="form-control" rows="4" required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-proj-tech">التقنيات المستخدمة (مفصولة بفواصل)</label>
+            <input type="text" id="edit-proj-tech" class="form-control" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="form-group">
+              <label for="edit-proj-image">تغيير صورة الغلاف (اختياري)</label>
+              <input type="file" id="edit-proj-image" class="form-control" accept="image/*">
+            </div>
+            <div class="form-group">
+              <label for="edit-proj-file">تغيير ملف المشروع/الكود (اختياري)</label>
+              <input type="file" id="edit-proj-file" class="form-control" accept=".zip,.rar,.pdf,.doc,.docx,.ppt,.pptx">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">حفظ التعديلات وتحديث المشروع <i class="fa-solid fa-save"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
