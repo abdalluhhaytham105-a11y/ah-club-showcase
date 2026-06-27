@@ -1,7 +1,9 @@
 const fs = require('fs');
 const path = require('path');
+const mongoose = require('mongoose');
 
 const DB_PATH = path.join(__dirname, 'database.json');
+const MONGODB_URI = process.env.MONGODB_URI;
 
 const initialDb = {
   categories: [
@@ -41,97 +43,103 @@ const initialDb = {
       techUsed: 'Node.js, Express, SQLite, RFID RC522, HTML/CSS',
       image: '/logo.png',
       link: '#'
-    },
-    {
-      id: 'proj-3',
-      title: 'دراسة جدوى تسويقية ومالية لمشروع طاقة متجددة',
-      category: 'business',
-      college: 'كلية التجارة وإدارة الأعمال',
-      description: 'دراسة جدوى شاملة تغطي التحليل المالي، حساب الـ ROI، تقييم المخاطر، وخطة تسويقية متكاملة لإطلاق شركة ناشئة متخصصة في تركيب الألواح الشمسية.',
-      techUsed: 'MS Excel, Financial Modeling, Market Research',
-      image: '/logo.png',
-      link: '#'
-    },
-    {
-      id: 'proj-4',
-      title: 'نظام فحص وفلترة السير الذاتية بالذكاء الاصطناعي',
-      category: 'cs',
-      college: 'كلية الحاسبات والمعلومات',
-      description: 'تطبيق ويب يقوم بقراءة ملفات الـ PDF للسير الذاتية وتصنيفها ومطابقتها مع الوصف الوظيفي بناءً على الكلمات المفتاحية والـ NLP وترتيب المتقدمين.',
-      techUsed: 'Python, Flask, NLTK, Spacy, React',
-      image: '/logo.png',
-      link: '#'
-    },
-    {
-      id: 'proj-5',
-      title: 'تصميم وتحليل إنشائي لبرج سكني 15 طابق',
-      category: 'engineering',
-      college: 'كلية الهندسة - قسم مدني',
-      description: 'تصميم هندسي إنشائي كامل لبرج سكني يحتوي على حسابات الأحمال الزلزالية والرياح، وتصميم القواعد والأعمدة والأسقف باستخدام البرامج الهندسية المعتمدة.',
-      techUsed: 'AUTOCAD, ETABS, SAFE, Excel Sheets',
-      image: '/logo.png',
-      link: '#'
-    },
-    {
-      id: 'proj-6',
-      title: 'تطبيق محادثة فوري مشفر (Encrypted Chat App)',
-      category: 'cs',
-      college: 'كلية الحاسبات والمعلومات',
-      description: 'برنامج محادثة فوري يتيح للمستخدمين إنشاء غرف دردشة آمنة ومشفرة بالكامل بنظام End-to-End Encryption لحماية خصوصية البيانات.',
-      techUsed: 'Java, Socket Programming, AES Encryption',
-      image: '/logo.png',
-      link: '#'
     }
   ],
   requests: []
 };
 
-function readDb() {
+// تعريف موديل Mongoose لتخزين الملف بالكامل في مستند سحابي واحد
+const dbSchema = new mongoose.Schema({
+  key: { type: String, default: 'ah-club-db-store', unique: true },
+  data: { type: mongoose.Schema.Types.Mixed, default: initialDb }
+});
+
+const DbModel = mongoose.models.DbStore || mongoose.model('DbStore', dbSchema);
+
+let isConnected = false;
+
+async function connectToMongo() {
+  if (isConnected) return true;
+  if (!MONGODB_URI) {
+    return false;
+  }
+  try {
+    await mongoose.connect(MONGODB_URI);
+    isConnected = true;
+    console.log('Connected to MongoDB Atlas successfully!');
+    return true;
+  } catch (err) {
+    console.error('Failed to connect to MongoDB Atlas:', err);
+    return false;
+  }
+}
+
+async function readDb() {
+  const hasMongo = await connectToMongo();
+  if (hasMongo) {
+    try {
+      let doc = await DbModel.findOne({ key: 'ah-club-db-store' });
+      if (!doc) {
+        // إذا كان فارغاً، نحاول قراءة الملف المحلي لترحيله للسحابة حتى لا تضيع البيانات الحالية
+        let localData = initialDb;
+        if (fs.existsSync(DB_PATH)) {
+          try {
+            localData = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+          } catch (e) {}
+        }
+        doc = await DbModel.create({ key: 'ah-club-db-store', data: localData });
+      }
+      return doc.data;
+    } catch (err) {
+      console.error('Error reading from MongoDB Atlas, falling back to local file:', err);
+    }
+  }
+
+  // المحاذاة والرجوع للملف المحلي في حالة عدم وجود MONGODB_URI (بيئة التطوير المحلية مثلاً)
   try {
     if (!fs.existsSync(DB_PATH)) {
-      writeDb(initialDb);
+      fs.writeFileSync(DB_PATH, JSON.stringify(initialDb, null, 2), 'utf8');
       return initialDb;
     }
     const data = fs.readFileSync(DB_PATH, 'utf8');
     let parsed = JSON.parse(data);
-    if (!parsed.categories) {
-      parsed.categories = [
-        { id: 'cs', label: 'حاسبات وبرمجيات' },
-        { id: 'engineering', label: 'هندسة وميكاترونكس' },
-        { id: 'business', label: 'إدارة وأبحاث' }
-      ];
-      writeDb(parsed);
-    }
     
-    // هجرة بيانات الأدمن للتعديل الجديد
+    // هجرة بيانات الأدمن في حال تغيرت في الكود
     let admin = parsed.users.find(u => u.role === 'admin' || u.id === 'admin-id-123');
     if (admin) {
       if (admin.name !== 'Abdalluh haytham' || admin.email !== 'Abdalluh haytham' || admin.password !== 'Admin') {
         admin.name = 'Abdalluh haytham';
         admin.email = 'Abdalluh haytham';
         admin.password = 'Admin';
-        writeDb(parsed);
+        fs.writeFileSync(DB_PATH, JSON.stringify(parsed, null, 2), 'utf8');
       }
     }
     return parsed;
   } catch (error) {
-    console.error('Error reading database:', error);
+    console.error('Error reading database file:', error);
     return initialDb;
   }
 }
 
-function writeDb(data) {
+async function writeDb(data) {
+  const hasMongo = await connectToMongo();
+  if (hasMongo) {
+    try {
+      await DbModel.updateOne({ key: 'ah-club-db-store' }, { data }, { upsert: true });
+      return true;
+    } catch (err) {
+      console.error('Error writing to MongoDB Atlas, falling back to local file:', err);
+    }
+  }
+
   try {
     fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
     return true;
   } catch (error) {
-    console.error('Error writing database:', error);
+    console.error('Error writing database file:', error);
     return false;
   }
 }
-
-// تهيئة قاعدة البيانات عند بدء التشغيل
-readDb();
 
 module.exports = {
   readDb,
