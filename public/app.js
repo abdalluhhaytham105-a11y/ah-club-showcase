@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // تفعيل الثيم الذهبي العام في حال كان الخصم 100%
-      if (currentUser.discountPercent === 100) {
+      if (currentUser && Number(currentUser.discountPercent) === 100) {
         document.body.classList.add('gold-theme');
       } else {
         document.body.classList.remove('gold-theme');
@@ -483,7 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // تفعيل الثيم الذهبي الفخم في حال كان الخصم 100% (على كامل الصفحة)
-    if (currentUser.discountPercent === 100) {
+    if (currentUser && Number(currentUser.discountPercent) === 100) {
       document.body.classList.add('gold-theme');
     } else {
       document.body.classList.remove('gold-theme');
