@@ -634,10 +634,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      alert('تم إرسال استمارة طلب المشروع بنجاح! سيتم مراجعته وتسعيره قريباً.');
+      const notifyWhatsApp = confirm('تم تقديم طلب مشروعك الجديد بنجاح! 🎉\n\nهل ترغب في تأكيد الطلب فوراً مع المطور عبد الله هيثم عبر الواتساب لتسريع المراجعة والتسعير؟');
       newRequestForm.reset();
       showPortalPanel('requests');
       fetchStudentRequests();
+
+      if (notifyWhatsApp) {
+        const orderId = data.id || '';
+        const whatsappMsg = `مرحباً باشمهندس عبد الله، لقد قدمت طلب مشروع جديد على الموقع:\n\n- عنوان المشروع: ${data.title}\n- القسم: ${data.category}\n- الكلية والجامعة: ${data.college}\n- كود الطلب: ${orderId}\n\nيرجى مراجعته وتحديد السعر. شكراً لك!`;
+        const whatsappUrl = `https://wa.me/201014054673?text=${encodeURIComponent(whatsappMsg)}`;
+        window.open(whatsappUrl, '_blank');
+      }
     } catch (err) {
       console.error(err);
       alert('خطأ في الاتصال بالخادم');
@@ -967,6 +974,25 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // ----------------------------------------------------
+  // أزرار الإضافة السريعة للتقنيات والمستشعرات
+  // ----------------------------------------------------
+  const reqTechInput = document.getElementById('req-tech');
+  document.querySelectorAll('.btn-tech-suggest').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const tech = e.currentTarget.getAttribute('data-tech');
+      let currentVal = reqTechInput.value.trim();
+      if (currentVal === '') {
+        reqTechInput.value = tech;
+      } else {
+        const tags = currentVal.split(',').map(t => t.trim());
+        if (!tags.includes(tech)) {
+          reqTechInput.value = currentVal + ', ' + tech;
+        }
+      }
+    });
+  });
 
   // ----------------------------------------------------
   // بدء تشغيل الصفحة والتهيئة الأساسية

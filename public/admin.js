@@ -177,11 +177,42 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const res = await fetch('/api/requests');
       allRequests = await res.json();
-      renderRequestsTable(allRequests);
+      filterAdminRequests();
     } catch (err) {
       console.error(err);
     }
   }
+
+  function filterAdminRequests() {
+    const filterTabsContainer = document.getElementById('admin-requests-filters');
+    if (!filterTabsContainer) {
+      renderRequestsTable(allRequests);
+      return;
+    }
+    const activeTab = filterTabsContainer.querySelector('.filter-tab.active');
+    const status = activeTab ? activeTab.getAttribute('data-status') : 'all';
+
+    let filtered = allRequests;
+    if (status !== 'all') {
+      filtered = allRequests.filter(r => r.status === status);
+    }
+    renderRequestsTable(filtered);
+  }
+
+  // ربط مستمعات تصفية طلبات الأدمن
+  setTimeout(() => {
+    const filterTabsContainer = document.getElementById('admin-requests-filters');
+    if (filterTabsContainer) {
+      const tabs = filterTabsContainer.querySelectorAll('.filter-tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+          tabs.forEach(t => t.classList.remove('active'));
+          e.currentTarget.classList.add('active');
+          filterAdminRequests();
+        });
+      });
+    }
+  }, 100);
 
   function renderRequestsTable(requests) {
     adminRequestsTableBody.innerHTML = '';

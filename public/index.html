@@ -194,6 +194,17 @@
               <div class="form-group">
                 <label for="req-tech">التقنيات المطلوب استخدامها (إن وجدت)</label>
                 <input type="text" id="req-tech" class="form-control" placeholder="مثال: React, Python, Flutter, Matlab (اختياري)">
+                
+                <!-- أزرار الإضافة السريعة للتقنيات -->
+                <div class="tech-suggestions" style="margin-top: 0.6rem; display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                  <button type="button" class="btn-tech-suggest" data-tech="Arduino" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ Arduino</button>
+                  <button type="button" class="btn-tech-suggest" data-tech="MATLAB" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ MATLAB</button>
+                  <button type="button" class="btn-tech-suggest" data-tech="Python" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ Python</button>
+                  <button type="button" class="btn-tech-suggest" data-tech="SolidWorks" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ SolidWorks</button>
+                  <button type="button" class="btn-tech-suggest" data-tech="React" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ React</button>
+                  <button type="button" class="btn-tech-suggest" data-tech="Embedded Systems" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ Embedded Systems</button>
+                  <button type="button" class="btn-tech-suggest" data-tech="Flutter" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ Flutter</button>
+                </div>
               </div>
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">

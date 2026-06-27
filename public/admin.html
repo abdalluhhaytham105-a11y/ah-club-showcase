@@ -113,6 +113,18 @@
         <!-- ==================================================== -->
         <div id="admin-requests-panel" class="portal-panel hidden">
           <h3 style="margin-bottom: 1.5rem; font-weight: 700;">إدارة وتحديث طلبات المشاريع للطلاب</h3>
+          
+          <!-- أزرار التصفية السريعة لحالات الطلبات -->
+          <div class="filters-wrapper" id="admin-requests-filters" style="margin-bottom: 1.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="filter-tab active" data-status="all">الكل</button>
+            <button class="filter-tab" data-status="pending" style="border-color: rgba(255, 0, 127, 0.3); color: var(--secondary-magenta);">قيد المراجعة</button>
+            <button class="filter-tab" data-status="accepted" style="border-color: rgba(0, 240, 255, 0.3); color: var(--primary-cyan);">تم التسعير</button>
+            <button class="filter-tab" data-status="in_progress" style="border-color: rgba(0, 240, 255, 0.3); color: var(--primary-cyan);">جاري العمل</button>
+            <button class="filter-tab" data-status="ready_payment" style="border-color: rgba(255, 215, 0, 0.3); color: var(--accent-gold);">جاهز للدفع</button>
+            <button class="filter-tab" data-status="ready_payment_verify" style="border-color: rgba(255, 215, 0, 0.3); color: var(--accent-gold);">تأكيد التحويل</button>
+            <button class="filter-tab" data-status="completed" style="border-color: rgba(0, 255, 0, 0.3); color: #00ff00;">المكتملة</button>
+          </div>
+
           <div class="table-responsive">
             <table class="custom-table">
               <thead>
