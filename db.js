@@ -3,7 +3,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 
 const DB_PATH = path.join(__dirname, 'database.json');
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://abdalluhhaytham105_db_user:8KN5Tr6JWOhQy5zu@boda.udwjh9l.mongodb.net/?appName=boda";
 
 const initialDb = {
   categories: [
