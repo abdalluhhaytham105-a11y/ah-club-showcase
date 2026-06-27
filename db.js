@@ -76,7 +76,7 @@ async function connectToMongo() {
     return true;
   } catch (err) {
     console.error('Failed to connect to MongoDB Atlas:', err);
-    return false;
+    throw err;
   }
 }
 

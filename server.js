@@ -43,6 +43,19 @@ const archiveUpload = upload.fields([
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Middleware لضمان الاتصال بقاعدة البيانات السحابية قبل معالجة أي طلب
+async function ensureDbConnection(req, res, next) {
+  try {
+    await db.connectToMongo();
+    next();
+  } catch (err) {
+    console.error('Database connection error:', err);
+    res.status(500).json({ error: 'فشل الاتصال بقاعدة البيانات السحابية' });
+  }
+}
+
+app.use(ensureDbConnection);
+
 // ----------------------------------------------------
 // Middlewares للتحقق وفصل الصلاحيات (Authorization)
 // ----------------------------------------------------
@@ -114,7 +127,8 @@ app.post('/api/auth/register', async (req, res) => {
     const { password: _, ...userWithoutPassword } = newUser.toObject();
     res.status(201).json(userWithoutPassword);
   } catch (err) {
-    res.status(500).json({ error: 'حدث خطأ أثناء تسجيل حساب جديد' });
+    console.error('Registration error details:', err);
+    res.status(500).json({ error: 'حدث خطأ أثناء تسجيل حساب جديد: ' + err.message });
   }
 });
 
@@ -133,7 +147,8 @@ app.post('/api/auth/login', async (req, res) => {
     const { password: _, ...userWithoutPassword } = user.toObject();
     res.json(userWithoutPassword);
   } catch (err) {
-    res.status(500).json({ error: 'حدث خطأ أثناء تسجيل الدخول' });
+    console.error('Login error details:', err);
+    res.status(500).json({ error: 'حدث خطأ أثناء تسجيل الدخول: ' + err.message });
   }
 });
 
