@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://abdalluhhaytham105_db_user:8KN5Tr6JWOhQy5zu@boda.udwjh9l.mongodb.net/boda?retryWrites=true&w=majority&appName=boda";
+const envUri = process.env.MONGODB_URI;
+const MONGODB_URI = (envUri && envUri.trim().startsWith('mongodb')) 
+  ? envUri.trim() 
+  : "mongodb+srv://abdalluhhaytham105_db_user:8KN5Tr6JWOhQy5zu@boda.udwjh9l.mongodb.net/boda?retryWrites=true&w=majority&appName=boda";
 
 // 1. تعريف موديل المستخدم
 const userSchema = new mongoose.Schema({

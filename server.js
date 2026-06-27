@@ -52,7 +52,7 @@ async function ensureDbConnection(req, res, next) {
     next();
   } catch (err) {
     console.error('Database connection error:', err);
-    res.status(500).json({ error: 'فشل الاتصال بقاعدة البيانات السحابية' });
+    res.status(500).json({ error: 'فشل الاتصال بقاعدة البيانات السحابية: ' + err.message });
   }
 }
 
