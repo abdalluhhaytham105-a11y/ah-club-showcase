@@ -474,6 +474,16 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Error fetching fresh user privileges:', err);
     }
 
+    // تفعيل الثيم الذهبي الفخم في حال كان الخصم 100%
+    const portalView = document.getElementById('student-portal-view');
+    if (portalView) {
+      if (currentUser.discountPercent === 100) {
+        portalView.classList.add('gold-theme');
+      } else {
+        portalView.classList.remove('gold-theme');
+      }
+    }
+
     // تعبئة بيانات البروفايل الجانبي
     document.getElementById('portal-user-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
     document.getElementById('portal-user-name').innerText = currentUser.name;

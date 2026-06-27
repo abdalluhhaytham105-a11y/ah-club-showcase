@@ -996,3 +996,54 @@ textarea.form-control {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==================================================== */
+/* ثيم العضوية الذهبية للخصم 100% (Premium Gold Theme) */
+/* ==================================================== */
+.gold-theme {
+  --primary-cyan: hsl(45, 100%, 55%) !important; /* Gold */
+  --primary-glow: hsla(45, 100%, 55%, 0.35) !important;
+  --secondary-magenta: hsl(38, 100%, 50%) !important; /* Darker Gold / Orange-Gold */
+  --secondary-glow: hsla(38, 100%, 50%, 0.35) !important;
+  --border-light: rgba(212, 175, 55, 0.2) !important;
+  --neon-shadow-cyan: 0 0 10px var(--primary-cyan), 0 0 20px rgba(212, 175, 55, 0.15) !important;
+  --neon-shadow-magenta: 0 0 10px var(--secondary-magenta), 0 0 20px rgba(212, 175, 55, 0.15) !important;
+}
+
+#student-portal-view.gold-theme {
+  background: radial-gradient(circle at top left, rgba(212, 175, 55, 0.08), transparent 60%), var(--bg-deep) !important;
+}
+
+#student-portal-view.gold-theme .portal-sidebar {
+  border-left: 1px solid rgba(212, 175, 55, 0.25) !important;
+  background: linear-gradient(180deg, rgba(212, 175, 55, 0.04) 0%, rgba(0, 0, 0, 0.25) 100%) !important;
+  box-shadow: inset -5px 0 25px rgba(212, 175, 55, 0.02) !important;
+}
+
+#student-portal-view.gold-theme .user-avatar-circle {
+  background: linear-gradient(135deg, #ffe57f 0%, #d4af37 50%, #aa7c11 100%) !important;
+  color: #000 !important;
+  font-weight: 900 !important;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.5), inset 0 2px 4px rgba(255,255,255,0.4) !important;
+  text-shadow: 0 1px 1px rgba(255,255,255,0.3) !important;
+}
+
+#student-portal-view.gold-theme .portal-menu-item.active {
+  background: rgba(212, 175, 55, 0.12) !important;
+  color: var(--primary-cyan) !important; /* Gold */
+  box-shadow: inset -3px 0 0 var(--primary-cyan) !important;
+}
+
+#student-portal-view.gold-theme .btn-primary {
+  background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important;
+  color: #000 !important;
+  font-weight: 700 !important;
+  border: none !important;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.3) !important;
+}
+
+#student-portal-view.gold-theme .btn-primary:hover {
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.5) !important;
+}
+
