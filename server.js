@@ -7,8 +7,10 @@ const db = require('./db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// الاتصال بقاعدة البيانات السحابية MongoDB Atlas عند تشغيل السيرفر
-db.connectToMongo();
+// الاتصال بقاعدة البيانات السحابية MongoDB Atlas عند تشغيل السيرفر (مع معالجة أخطاء عدم الاتصال لمنع كراش السيرفر)
+db.connectToMongo().catch(err => {
+  console.error('Failed to establish initial MongoDB connection:', err.message);
+});
 
 // إعداد مسار الرفع للملفات مع دعم مجلد مؤقت على Vercel
 let uploadDir = path.join(__dirname, 'public', 'uploads');
