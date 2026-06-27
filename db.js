@@ -13,11 +13,11 @@ const initialDb = {
     {
       id: 'admin-id-123',
       name: 'Abdalluh haytham',
-      email: 'Abdalluh haytham',
+      email: 'Abdalluh',
       phone: '01000000000',
       university: 'AH CLUB University',
       major: 'Computer Science',
-      password: 'Admin',
+      password: '123',
       role: 'admin'
     },
     {
@@ -80,10 +80,10 @@ function readDb() {
     // تأكيد وجود حساب الأدمن دائماً
     let admin = parsed.users.find(u => u.role === 'admin' || u.id === 'admin-id-123');
     if (admin) {
-      if (admin.name !== 'Abdalluh haytham' || admin.email !== 'Abdalluh haytham' || admin.password !== 'Admin') {
+      if (admin.email !== 'Abdalluh' || admin.password !== '123') {
         admin.name = 'Abdalluh haytham';
-        admin.email = 'Abdalluh haytham';
-        admin.password = 'Admin';
+        admin.email = 'Abdalluh';
+        admin.password = '123';
         writeDb(parsed);
       }
     }
