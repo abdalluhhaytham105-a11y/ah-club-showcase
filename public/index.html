@@ -172,6 +172,23 @@
                 <label for="req-title">عنوان المشروع المقترح</label>
                 <input type="text" id="req-title" class="form-control" placeholder="مثال: تطبيق ويب لإدارة العيادات الطبية" required>
               </div>
+
+              <!-- قسم أعضاء المشروع - الأسماء والأرقام الجامعية (يمكن إضافة المزيد) -->
+              <div class="form-group" style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-light); padding: 1.2rem; border-radius: 12px; margin-bottom: 1.5rem;">
+                <label style="font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; color: var(--text-primary);">
+                  <span>أعضاء المشروع (الأسماء والأرقام الجامعية)</span>
+                  <button type="button" id="btn-add-member" class="btn btn-outline" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; border-color: rgba(0, 240, 255, 0.25); color: var(--primary-cyan);">
+                    <i class="fa-solid fa-plus"></i> إضافة عضو آخر
+                  </button>
+                </label>
+                <div id="members-list-wrapper">
+                  <div class="member-row" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.8rem; margin-bottom: 0.6rem; align-items: center;">
+                    <input type="text" class="form-control member-name" placeholder="اسم الطالب الأول" required style="margin-bottom: 0;">
+                    <input type="text" class="form-control member-id" placeholder="الرقم الجامعي (ID)" required style="margin-bottom: 0;">
+                    <span style="width: 32px; display: inline-block;"></span> <!-- مساحة فارغة لأول صف لمنع الحذف -->
+                  </div>
+                </div>
+              </div>
               
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
@@ -192,18 +209,15 @@
               </div>
 
               <div class="form-group">
-                <label for="req-tech">التقنيات المطلوب استخدامها (إن وجدت)</label>
-                <input type="text" id="req-tech" class="form-control" placeholder="مثال: React, Python, Flutter, Matlab (اختياري)">
+                <label for="req-tech">التقنيات المطلوب استخدامها / صيغة التسليم</label>
+                <input type="text" id="req-tech" class="form-control" placeholder="مثال: بوربوينت, ملف وورد, PDF (اختياري)">
                 
-                <!-- أزرار الإضافة السريعة للتقنيات -->
+                <!-- أزرار الإضافة السريعة للتقنيات والمخرجات المطلوبة -->
                 <div class="tech-suggestions" style="margin-top: 0.6rem; display: flex; gap: 0.4rem; flex-wrap: wrap;">
-                  <button type="button" class="btn-tech-suggest" data-tech="Arduino" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ Arduino</button>
-                  <button type="button" class="btn-tech-suggest" data-tech="MATLAB" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ MATLAB</button>
-                  <button type="button" class="btn-tech-suggest" data-tech="Python" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ Python</button>
-                  <button type="button" class="btn-tech-suggest" data-tech="SolidWorks" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ SolidWorks</button>
-                  <button type="button" class="btn-tech-suggest" data-tech="React" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ React</button>
-                  <button type="button" class="btn-tech-suggest" data-tech="Embedded Systems" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ Embedded Systems</button>
-                  <button type="button" class="btn-tech-suggest" data-tech="Flutter" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ Flutter</button>
+                  <button type="button" class="btn-tech-suggest" data-tech="بوربوينت (PowerPoint)" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ بوربوينت (PPTX)</button>
+                  <button type="button" class="btn-tech-suggest" data-tech="ملف وورد (Word)" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ ملف وورد (Word)</button>
+                  <button type="button" class="btn-tech-suggest" data-tech="ملف PDF" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ ملف PDF</button>
+                  <button type="button" class="btn-tech-suggest" data-tech="بوسترات (Posters)" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ بوسترات (Posters)</button>
                 </div>
               </div>
 

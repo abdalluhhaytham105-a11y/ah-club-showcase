@@ -700,8 +700,8 @@ document.addEventListener('DOMContentLoaded', () => {
         </td>
         <td style="font-family: 'Orbitron', sans-serif; text-align: center; font-weight:700;">${s.ordersCount}</td>
         <td style="font-family: 'Orbitron', sans-serif; color: var(--primary-cyan); font-weight: 700;">${s.totalSpent} EGP</td>
-        <td>
-          <button class="btn btn-outline btn-xs btn-admin-student-privileges" data-id="${s.id}" style="color: var(--accent-gold); border-color: rgba(255, 215, 0, 0.25); float: left;">
+        <td style="text-align: center; vertical-align: middle;">
+          <button class="btn btn-outline btn-xs btn-admin-student-privileges" data-id="${s.id}" style="color: var(--accent-gold); border-color: rgba(255, 215, 0, 0.25); display: inline-flex; justify-content: center; align-items: center; gap: 0.3rem;">
             <i class="fa-solid fa-gift"></i> الامتيازات
           </button>
         </td>

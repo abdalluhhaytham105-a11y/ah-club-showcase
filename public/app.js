@@ -494,6 +494,23 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('portal-user-name').innerText = currentUser.name;
     document.getElementById('portal-user-major').innerText = `${currentUser.university} - ${currentUser.major}`;
 
+    // تفريغ أعضاء المشروع الإضافيين وإبقاء الأول فقط مع ملء اسمه تلقائياً
+    const wrapper = document.getElementById('members-list-wrapper');
+    if (wrapper) {
+      const rows = wrapper.querySelectorAll('.member-row');
+      rows.forEach((r, idx) => {
+        if (idx > 0) r.remove();
+      });
+      const firstNameInput = wrapper.querySelector('.member-name');
+      const firstIdInput = wrapper.querySelector('.member-id');
+      if (firstNameInput) {
+        firstNameInput.value = currentUser.name;
+      }
+      if (firstIdInput) {
+        firstIdInput.value = '';
+      }
+    }
+
     // إدارة وتصيير كارت الامتيازات والعروض
     const privilegesCard = document.getElementById('portal-user-privileges');
     const discountBadge = document.getElementById('portal-discount-badge');
@@ -609,9 +626,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const deadline = document.getElementById('req-deadline').value;
     const fileInput = document.getElementById('req-file');
 
+    // تجميع أسماء وأرقام أعضاء المشروع بالكامل
+    const memberRows = document.querySelectorAll('#members-list-wrapper .member-row');
+    const members = [];
+    memberRows.forEach(row => {
+      const nameInput = row.querySelector('.member-name');
+      const idInput = row.querySelector('.member-id');
+      if (nameInput && idInput && nameInput.value.trim() !== '') {
+        members.push(`${nameInput.value.trim()} (${idInput.value.trim()})`);
+      }
+    });
+    const combinedStudentNames = members.join(' - ');
+
     const formData = new FormData();
     formData.append('studentId', currentUser.id);
-    formData.append('studentName', currentUser.name);
+    formData.append('studentName', combinedStudentNames);
     formData.append('title', title);
     formData.append('category', category);
     formData.append('college', college);
@@ -993,6 +1022,37 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  // ----------------------------------------------------
+  // إضافة أعضاء مشروع ديناميكي للطلاب
+  // ----------------------------------------------------
+  const btnAddMember = document.getElementById('btn-add-member');
+  const membersListWrapper = document.getElementById('members-list-wrapper');
+
+  if (btnAddMember && membersListWrapper) {
+    btnAddMember.addEventListener('click', () => {
+      const row = document.createElement('div');
+      row.className = 'member-row';
+      row.style.display = 'grid';
+      row.style.gridTemplateColumns = '1fr 1fr auto';
+      row.style.gap = '0.8rem';
+      row.style.marginBottom = '0.6rem';
+      row.style.alignItems = 'center';
+
+      row.innerHTML = `
+        <input type="text" class="form-control member-name" placeholder="اسم العضو الإضافي" required style="margin-bottom: 0;">
+        <input type="text" class="form-control member-id" placeholder="الرقم الجامعي (ID)" required style="margin-bottom: 0;">
+        <button type="button" class="btn-remove-member" style="background: none; border: none; color: var(--secondary-magenta); cursor: pointer; font-size: 1.5rem; padding: 0.2rem; line-height: 1;" title="حذف العضو">&times;</button>
+      `;
+
+      // ربط إجراء الحذف
+      row.querySelector('.btn-remove-member').addEventListener('click', () => {
+        row.remove();
+      });
+
+      membersListWrapper.appendChild(row);
+    });
+  }
 
   // ----------------------------------------------------
   // بدء تشغيل الصفحة والتهيئة الأساسية
