@@ -69,44 +69,115 @@ const initialDb = {
   announcements: []
 };
 
-function readDb() {
-  try {
-    if (!fs.existsSync(DB_PATH)) {
-      writeDb(initialDb);
+// فحص وجود Vercel KV للربط التلقائي في الاستضافة السحابية
+const isKvEnabled = !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+
+// استخدام ذاكرة مؤقتة لتقليل عدد مرات استدعاء الـ API من Vercel KV
+let memoryCache = null;
+let lastCacheTime = 0;
+const CACHE_TTL = 3000; // 3 ثوانٍ
+
+async function readDb() {
+  if (isKvEnabled) {
+    const now = Date.now();
+    if (memoryCache && (now - lastCacheTime < CACHE_TTL)) {
+      return memoryCache;
+    }
+    try {
+      const response = await fetch(`${process.env.KV_REST_API_URL}/get/ah_club_db`, {
+        headers: { Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}` }
+      });
+      const resData = await response.json();
+      let parsed = initialDb;
+      if (resData && resData.result) {
+        parsed = JSON.parse(resData.result);
+      } else {
+        // تهيئة قاعدة البيانات لأول مرة
+        await writeDb(initialDb);
+      }
+      
+      // تأكيد وجود حساب الأدمن دائماً
+      let admin = parsed.users.find(u => u.role === 'admin' || u.id === 'admin-id-123');
+      if (admin) {
+        if (admin.name !== 'Abdalluh haytham' || admin.email !== 'Abdalluh' || admin.password !== '123') {
+          admin.name = 'Abdalluh haytham';
+          admin.email = 'Abdalluh';
+          admin.password = '123';
+          await writeDb(parsed);
+        }
+      }
+      if (!parsed.announcements) {
+        parsed.announcements = [];
+        await writeDb(parsed);
+      }
+
+      memoryCache = parsed;
+      lastCacheTime = now;
+      return parsed;
+    } catch (err) {
+      console.error('Error reading from Vercel KV, falling back to initial data:', err);
+      return memoryCache || initialDb;
+    }
+  } else {
+    // التشغيل المحلي الافتراضي
+    try {
+      if (!fs.existsSync(DB_PATH)) {
+        writeDbSync(initialDb);
+        return initialDb;
+      }
+      const data = fs.readFileSync(DB_PATH, 'utf8');
+      let parsed = JSON.parse(data);
+      
+      let admin = parsed.users.find(u => u.role === 'admin' || u.id === 'admin-id-123');
+      if (admin) {
+        if (admin.name !== 'Abdalluh haytham' || admin.email !== 'Abdalluh' || admin.password !== '123') {
+          admin.name = 'Abdalluh haytham';
+          admin.email = 'Abdalluh';
+          admin.password = '123';
+          writeDbSync(parsed);
+        }
+      }
+      if (!parsed.announcements) {
+        parsed.announcements = [];
+        writeDbSync(parsed);
+      }
+      return parsed;
+    } catch (error) {
+      console.error('Error reading database file:', error);
       return initialDb;
     }
-    const data = fs.readFileSync(DB_PATH, 'utf8');
-    let parsed = JSON.parse(data);
-    
-    // تأكيد وجود حساب الأدمن دائماً
-    let admin = parsed.users.find(u => u.role === 'admin' || u.id === 'admin-id-123');
-    if (admin) {
-      if (admin.name !== 'Abdalluh haytham' || admin.email !== 'Abdalluh' || admin.password !== '123') {
-        admin.name = 'Abdalluh haytham';
-        admin.email = 'Abdalluh';
-        admin.password = '123';
-        writeDb(parsed);
-      }
-    }
-    
-    if (!parsed.announcements) {
-      parsed.announcements = [];
-      writeDb(parsed);
-    }
-    
-    return parsed;
-  } catch (error) {
-    console.error('Error reading database:', error);
-    return initialDb;
   }
 }
 
-function writeDb(data) {
+async function writeDb(data) {
+  memoryCache = data;
+  lastCacheTime = Date.now();
+  if (isKvEnabled) {
+    try {
+      const response = await fetch(process.env.KV_REST_API_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(['SET', 'ah_club_db', JSON.stringify(data)])
+      });
+      return response.ok;
+    } catch (err) {
+      console.error('Error writing to Vercel KV:', err);
+      return false;
+    }
+  } else {
+    return writeDbSync(data);
+  }
+}
+
+function writeDbSync(data) {
   try {
     fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
     return true;
   } catch (error) {
-    console.error('Error writing database:', error);
+    console.error('Error writing database file:', error);
     return false;
   }
 }

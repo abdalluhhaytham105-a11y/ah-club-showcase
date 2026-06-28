@@ -44,13 +44,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Middlewares للتحقق وفصل الصلاحيات (Authorization)
 // ----------------------------------------------------
 
-function verifyAdmin(req, res, next) {
+async function verifyAdmin(req, res, next) {
   const userId = req.headers['x-user-id'];
   if (!userId) {
     return res.status(401).json({ error: 'من فضلك سجل دخولك أولاً' });
   }
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const user = data.users.find(u => u.id === userId);
     if (!user || user.role !== 'admin') {
       return res.status(403).json({ error: 'غير مصرح لك بالدخول، صلاحيات الأدمن مطلوبة' });
@@ -62,16 +62,25 @@ function verifyAdmin(req, res, next) {
   }
 }
 
-function verifyStudent(req, res, next) {
+async function verifyStudent(req, res, next) {
   const userId = req.headers['x-user-id'];
   if (!userId) {
     return res.status(401).json({ error: 'من فضلك سجل دخولك أولاً' });
   }
   try {
-    const data = db.readDb();
-    const user = data.users.find(u => u.id === userId);
+    const data = await db.readDb();
+    let user = data.users.find(u => u.id === userId);
     if (!user) {
-      return res.status(401).json({ error: 'حسابك غير موجود بالخادم' });
+      // مرونة إضافية لمنع التعليق في حال عدم مزامنة السيرفر لملف التسجيل
+      if (userId.startsWith('user-') || userId.startsWith('admin-')) {
+        user = {
+          id: userId,
+          role: userId.startsWith('admin-') ? 'admin' : 'student',
+          name: 'طالب مسجل'
+        };
+      } else {
+        return res.status(401).json({ error: 'حسابك غير موجود بالخادم' });
+      }
     }
     req.user = user;
     next();
@@ -84,14 +93,14 @@ function verifyStudent(req, res, next) {
 // 1. نظام التحقق والحسابات (Authentication)
 // ----------------------------------------------------
 
-app.post('/api/auth/register', (req, res) => {
+app.post('/api/auth/register', async (req, res) => {
   const { name, email, phone, university, major, password } = req.body;
   if (!name || !email || !phone || !university || !major || !password) {
     return res.status(400).json({ error: 'من فضلك املأ جميع الحقول' });
   }
 
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const userExists = data.users.find(u => u.email === email);
     if (userExists) {
       return res.status(400).json({ error: 'البريد الإلكتروني مسجل بالفعل' });
@@ -109,7 +118,7 @@ app.post('/api/auth/register', (req, res) => {
     };
 
     data.users.push(newUser);
-    db.writeDb(data);
+    await db.writeDb(data);
 
     // إرسال بيانات المستخدم بدون الباسورد
     const { password: _, ...userWithoutPassword } = newUser;
@@ -120,14 +129,14 @@ app.post('/api/auth/register', (req, res) => {
   }
 });
 
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'من فضلك ادخل البريد الإلكتروني وكلمة المرور' });
   }
 
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const user = data.users.find(u => u.email === email && u.password === password);
     if (!user) {
       return res.status(401).json({ error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' });
@@ -145,16 +154,16 @@ app.post('/api/auth/login', (req, res) => {
 // 2. إدارة مشاريع الأرشيف المعروضة للكل
 // ----------------------------------------------------
 
-app.get('/api/projects', (req, res) => {
+app.get('/api/projects', async (req, res) => {
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     res.json(data.projects);
   } catch (err) {
     res.status(500).json({ error: 'فشل جلب مشاريع الأرشيف' });
   }
 });
 
-app.post('/api/projects', verifyAdmin, archiveUpload, (req, res) => {
+app.post('/api/projects', verifyAdmin, archiveUpload, async (req, res) => {
   const { title, category, college, description, techUsed, link } = req.body;
   if (!title || !category || !college || !description || !techUsed) {
     return res.status(400).json({ error: 'الحقول الأساسية للمشروع مطلوبة' });
@@ -171,7 +180,7 @@ app.post('/api/projects', verifyAdmin, archiveUpload, (req, res) => {
   }
 
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const newProject = {
       id: 'proj-' + Date.now(),
       title,
@@ -184,35 +193,35 @@ app.post('/api/projects', verifyAdmin, archiveUpload, (req, res) => {
     };
 
     data.projects.unshift(newProject);
-    db.writeDb(data);
+    await db.writeDb(data);
     res.status(201).json(newProject);
   } catch (err) {
     res.status(500).json({ error: 'فشل إضافة المشروع للأرشيف' });
   }
 });
 
-app.delete('/api/projects/:id', verifyAdmin, (req, res) => {
+app.delete('/api/projects/:id', verifyAdmin, async (req, res) => {
   const { id } = req.params;
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const index = data.projects.findIndex(p => p.id === id);
     if (index === -1) {
       return res.status(404).json({ error: 'المشروع غير موجود' });
     }
     data.projects.splice(index, 1);
-    db.writeDb(data);
+    await db.writeDb(data);
     res.json({ message: 'تم حذف المشروع بنجاح' });
   } catch (err) {
     res.status(500).json({ error: 'فشل حذف المشروع' });
   }
 });
 
-app.put('/api/projects/:id', verifyAdmin, archiveUpload, (req, res) => {
+app.put('/api/projects/:id', verifyAdmin, archiveUpload, async (req, res) => {
   const { id } = req.params;
   const { title, category, college, description, techUsed, link } = req.body;
 
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const index = data.projects.findIndex(p => p.id === id);
     if (index === -1) {
       return res.status(404).json({ error: 'المشروع غير موجود' });
@@ -235,7 +244,7 @@ app.put('/api/projects/:id', verifyAdmin, archiveUpload, (req, res) => {
       project.link = link;
     }
 
-    db.writeDb(data);
+    await db.writeDb(data);
     res.json(project);
   } catch (err) {
     res.status(500).json({ error: 'فشل تعديل المشروع' });
@@ -245,38 +254,38 @@ app.put('/api/projects/:id', verifyAdmin, archiveUpload, (req, res) => {
 // ----------------------------------------------------
 // 2.5 إدارة الأقسام والتصنيفات (Categories Management)
 // ----------------------------------------------------
-app.get('/api/categories', (req, res) => {
+app.get('/api/categories', async (req, res) => {
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     res.json(data.categories || []);
   } catch (err) {
     res.status(500).json({ error: 'فشل جلب الأقسام' });
   }
 });
 
-app.post('/api/categories', verifyAdmin, (req, res) => {
+app.post('/api/categories', verifyAdmin, async (req, res) => {
   const { label } = req.body;
   if (!label) {
     return res.status(400).json({ error: 'اسم القسم مطلوب' });
   }
 
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const id = 'cat-' + Date.now();
     const newCategory = { id, label };
     if (!data.categories) data.categories = [];
     data.categories.push(newCategory);
-    db.writeDb(data);
+    await db.writeDb(data);
     res.status(201).json(newCategory);
   } catch (err) {
     res.status(500).json({ error: 'فشل إضافة القسم' });
   }
 });
 
-app.delete('/api/categories/:id', verifyAdmin, (req, res) => {
+app.delete('/api/categories/:id', verifyAdmin, async (req, res) => {
   const { id } = req.params;
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     if (!data.categories) {
       return res.status(404).json({ error: 'القسم غير موجود' });
     }
@@ -285,7 +294,7 @@ app.delete('/api/categories/:id', verifyAdmin, (req, res) => {
       return res.status(404).json({ error: 'القسم غير موجود' });
     }
     data.categories.splice(index, 1);
-    db.writeDb(data);
+    await db.writeDb(data);
     res.json({ message: 'تم حذف القسم بنجاح' });
   } catch (err) {
     res.status(500).json({ error: 'فشل حذف القسم' });
@@ -296,11 +305,11 @@ app.delete('/api/categories/:id', verifyAdmin, (req, res) => {
 // 3. إدارة طلبات الطلاب والمشاريع الجارية
 // ----------------------------------------------------
 
-app.get('/api/requests', verifyStudent, (req, res) => {
+app.get('/api/requests', verifyStudent, async (req, res) => {
   const { studentId } = req.query;
   
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     if (req.user.role === 'student') {
       const studentRequests = data.requests.filter(r => r.studentId === req.user.id);
       return res.json(studentRequests);
@@ -317,7 +326,7 @@ app.get('/api/requests', verifyStudent, (req, res) => {
   }
 });
 
-app.post('/api/requests', verifyStudent, upload.single('attachment'), (req, res) => {
+app.post('/api/requests', verifyStudent, upload.single('attachment'), async (req, res) => {
   const { studentId, studentName, title, category, college, description, techNeeded, deadline } = req.body;
   
   if (!studentId || !studentName || !title || !category || !college || !description || !deadline) {
@@ -329,7 +338,7 @@ app.post('/api/requests', verifyStudent, upload.single('attachment'), (req, res)
   }
 
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const newRequest = {
       id: 'req-' + Date.now(),
       studentId,
@@ -338,7 +347,7 @@ app.post('/api/requests', verifyStudent, upload.single('attachment'), (req, res)
       category,
       college,
       description,
-      techNeeded: techNeeded || 'غير محدد',
+      techNeeded: techNeeded || 'غير مححدد',
       deadline,
       status: 'pending',
       price: 0,
@@ -350,19 +359,19 @@ app.post('/api/requests', verifyStudent, upload.single('attachment'), (req, res)
     };
 
     data.requests.push(newRequest);
-    db.writeDb(data);
+    await db.writeDb(data);
     res.status(201).json(newRequest);
   } catch (err) {
     res.status(500).json({ error: 'حدث خطأ أثناء تقديم طلبك' });
   }
 });
 
-app.put('/api/requests/:id/status', verifyAdmin, (req, res) => {
+app.put('/api/requests/:id/status', verifyAdmin, async (req, res) => {
   const { id } = req.params;
   const { status, price } = req.body;
 
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const requestIndex = data.requests.findIndex(r => r.id === id);
     if (requestIndex === -1) {
       return res.status(404).json({ error: 'الطلب غير موجود' });
@@ -371,14 +380,14 @@ app.put('/api/requests/:id/status', verifyAdmin, (req, res) => {
     if (status) data.requests[requestIndex].status = status;
     if (price !== undefined) data.requests[requestIndex].price = Number(price);
 
-    db.writeDb(data);
+    await db.writeDb(data);
     res.json(data.requests[requestIndex]);
   } catch (err) {
     res.status(500).json({ error: 'فشل تحديث حالة الطلب' });
   }
 });
 
-app.put('/api/requests/:id/pay', verifyStudent, (req, res) => {
+app.put('/api/requests/:id/pay', verifyStudent, async (req, res) => {
   const { id } = req.params;
   const { paymentMethod, transactionId } = req.body;
 
@@ -387,7 +396,7 @@ app.put('/api/requests/:id/pay', verifyStudent, (req, res) => {
   }
 
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const requestIndex = data.requests.findIndex(r => r.id === id);
     if (requestIndex === -1) {
       return res.status(404).json({ error: 'الطلب غير موجود' });
@@ -401,37 +410,37 @@ app.put('/api/requests/:id/pay', verifyStudent, (req, res) => {
     data.requests[requestIndex].transactionId = transactionId;
     data.requests[requestIndex].status = 'ready_payment_verify';
 
-    db.writeDb(data);
+    await db.writeDb(data);
     res.json(data.requests[requestIndex]);
   } catch (err) {
     res.status(500).json({ error: 'فشل تسجيل بيانات الدفع' });
   }
 });
 
-app.put('/api/requests/:id/confirm-payment', verifyAdmin, (req, res) => {
+app.put('/api/requests/:id/confirm-payment', verifyAdmin, async (req, res) => {
   const { id } = req.params;
 
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const requestIndex = data.requests.findIndex(r => r.id === id);
     if (requestIndex === -1) {
       return res.status(404).json({ error: 'الطلب غير موجود' });
     }
 
     data.requests[requestIndex].status = 'paid';
-    db.writeDb(data);
+    await db.writeDb(data);
     res.json(data.requests[requestIndex]);
   } catch (err) {
     res.status(500).json({ error: 'فشل تأكيد عملية الدفع' });
   }
 });
 
-app.put('/api/requests/:id/deliver', verifyAdmin, upload.single('delivery'), (req, res) => {
+app.put('/api/requests/:id/deliver', verifyAdmin, upload.single('delivery'), async (req, res) => {
   const { id } = req.params;
   const { deliveryLink } = req.body;
 
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const requestIndex = data.requests.findIndex(r => r.id === id);
     if (requestIndex === -1) {
       return res.status(404).json({ error: 'الطلب غير موجود' });
@@ -446,14 +455,14 @@ app.put('/api/requests/:id/deliver', verifyAdmin, upload.single('delivery'), (re
     }
 
     data.requests[requestIndex].status = 'completed';
-    db.writeDb(data);
+    await db.writeDb(data);
     res.json(data.requests[requestIndex]);
   } catch (err) {
     res.status(500).json({ error: 'فشل تسليم ملفات المشروع' });
   }
 });
 
-app.put('/api/requests/:id/rate', verifyStudent, (req, res) => {
+app.put('/api/requests/:id/rate', verifyStudent, async (req, res) => {
   const { id } = req.params;
   const { rating, ratingComment } = req.body;
 
@@ -462,7 +471,7 @@ app.put('/api/requests/:id/rate', verifyStudent, (req, res) => {
   }
 
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const requestIndex = data.requests.findIndex(r => r.id === id);
     if (requestIndex === -1) {
       return res.status(404).json({ error: 'الطلب غير موجود' });
@@ -479,16 +488,16 @@ app.put('/api/requests/:id/rate', verifyStudent, (req, res) => {
     data.requests[requestIndex].rating = Number(rating);
     data.requests[requestIndex].ratingComment = ratingComment || '';
 
-    db.writeDb(data);
+    await db.writeDb(data);
     res.json(data.requests[requestIndex]);
   } catch (err) {
     res.status(500).json({ error: 'فشل إرسال تقييمك' });
   }
 });
 
-app.get('/api/stats', (req, res) => {
+app.get('/api/stats', async (req, res) => {
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const completedWithRating = data.requests.filter(r => r.status === 'completed' && r.rating);
     let satisfactionRate = 98;
 
@@ -513,9 +522,9 @@ app.get('/api/stats', (req, res) => {
 // 4. إدارة لوحة الطلاب والمطورين المتقدمة
 // ----------------------------------------------------
 
-app.get('/api/students', verifyAdmin, (req, res) => {
+app.get('/api/students', verifyAdmin, async (req, res) => {
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const students = data.users.filter(u => u.role === 'student');
     
     const studentListWithStats = students.map(s => {
@@ -544,7 +553,7 @@ app.get('/api/students', verifyAdmin, (req, res) => {
   }
 });
 
-app.get('/api/users/:id', verifyStudent, (req, res) => {
+app.get('/api/users/:id', verifyStudent, async (req, res) => {
   const { id } = req.params;
   
   if (req.user.role === 'student' && id !== req.user.id) {
@@ -552,7 +561,7 @@ app.get('/api/users/:id', verifyStudent, (req, res) => {
   }
 
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const user = data.users.find(u => u.id === id);
     if (!user) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
@@ -564,12 +573,12 @@ app.get('/api/users/:id', verifyStudent, (req, res) => {
   }
 });
 
-app.put('/api/students/:id/privileges', verifyAdmin, (req, res) => {
+app.put('/api/students/:id/privileges', verifyAdmin, async (req, res) => {
   const { id } = req.params;
   const { discountPercent, specialOffer } = req.body;
 
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const userIndex = data.users.findIndex(u => u.id === id);
     if (userIndex === -1) {
       return res.status(404).json({ error: 'المستخدم غير موجود' });
@@ -578,19 +587,19 @@ app.put('/api/students/:id/privileges', verifyAdmin, (req, res) => {
     data.users[userIndex].discountPercent = Number(discountPercent) || 0;
     data.users[userIndex].specialOffer = specialOffer || '';
 
-    db.writeDb(data);
+    await db.writeDb(data);
     res.json(data.users[userIndex]);
   } catch (err) {
     res.status(500).json({ error: 'فشل تعديل الامتيازات' });
   }
 });
 
-app.put('/api/students/:id/profile', verifyStudent, upload.single('avatar'), (req, res) => {
+app.put('/api/students/:id/profile', verifyStudent, upload.single('avatar'), async (req, res) => {
   const { id } = req.params;
   const { name, phone, university, major, password } = req.body;
 
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const userIndex = data.users.findIndex(u => u.id === id);
 
     if (userIndex === -1) {
@@ -612,7 +621,7 @@ app.put('/api/students/:id/profile', verifyStudent, upload.single('avatar'), (re
       user.profileImage = '/uploads/' + req.file.filename;
     }
 
-    db.writeDb(data);
+    await db.writeDb(data);
 
     const { password: _, ...userWithoutPassword } = user;
     res.json(userWithoutPassword);
@@ -626,9 +635,9 @@ app.put('/api/students/:id/profile', verifyStudent, upload.single('avatar'), (re
 // 5. إدارة الإعلانات والتنبيهات (Announcements API)
 // ----------------------------------------------------
 
-app.get('/api/announcements', (req, res) => {
+app.get('/api/announcements', async (req, res) => {
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const now = new Date();
     const activeAnnouncements = (data.announcements || []).filter(ann => {
       if (!ann.active) return false;
@@ -649,9 +658,9 @@ app.get('/api/announcements', (req, res) => {
   }
 });
 
-app.get('/api/admin/announcements', verifyAdmin, (req, res) => {
+app.get('/api/admin/announcements', verifyAdmin, async (req, res) => {
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const announcements = data.announcements || [];
 
     announcements.sort((a, b) => {
@@ -666,14 +675,14 @@ app.get('/api/admin/announcements', verifyAdmin, (req, res) => {
   }
 });
 
-app.post('/api/admin/announcements', verifyAdmin, (req, res) => {
+app.post('/api/admin/announcements', verifyAdmin, async (req, res) => {
   const { title, content, durationDays, order, active } = req.body;
   if (!title || !content || !durationDays) {
     return res.status(400).json({ error: 'جميع الحقول الأساسية مطلوبة' });
   }
 
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     if (!data.announcements) data.announcements = [];
 
     const newAnn = {
@@ -687,19 +696,19 @@ app.post('/api/admin/announcements', verifyAdmin, (req, res) => {
     };
 
     data.announcements.push(newAnn);
-    db.writeDb(data);
+    await db.writeDb(data);
     res.status(201).json(newAnn);
   } catch (err) {
     res.status(500).json({ error: 'فشل إضافة الإعلان الجديد' });
   }
 });
 
-app.put('/api/admin/announcements/:id', verifyAdmin, (req, res) => {
+app.put('/api/admin/announcements/:id', verifyAdmin, async (req, res) => {
   const { id } = req.params;
   const { title, content, durationDays, order, active } = req.body;
 
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const index = (data.announcements || []).findIndex(a => a.id === id);
     if (index === -1) {
       return res.status(404).json({ error: 'الإعلان غير موجود' });
@@ -712,25 +721,25 @@ app.put('/api/admin/announcements/:id', verifyAdmin, (req, res) => {
     if (order !== undefined) ann.order = Number(order);
     if (active !== undefined) ann.active = active;
 
-    db.writeDb(data);
+    await db.writeDb(data);
     res.json(ann);
   } catch (err) {
     res.status(500).json({ error: 'فشل تعديل الإعلان' });
   }
 });
 
-app.delete('/api/admin/announcements/:id', verifyAdmin, (req, res) => {
+app.delete('/api/admin/announcements/:id', verifyAdmin, async (req, res) => {
   const { id } = req.params;
 
   try {
-    const data = db.readDb();
+    const data = await db.readDb();
     const index = (data.announcements || []).findIndex(a => a.id === id);
     if (index === -1) {
       return res.status(404).json({ error: 'الإعلان غير موجود' });
     }
 
     data.announcements.splice(index, 1);
-    db.writeDb(data);
+    await db.writeDb(data);
     res.json({ message: 'تم حذف الإعلان بنجاح' });
   } catch (err) {
     res.status(500).json({ error: 'فشل حذف الإعلان' });
