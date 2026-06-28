@@ -92,8 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileAuthBtn = document.getElementById('mobile-auth-btn');
     const mobileProfileAvatarBtn = document.getElementById('mobile-profile-avatar-btn');
 
-    // جعل حزمة الموبايل دائماً مرئية
-    if (mobileHeaderControls) mobileHeaderControls.style.display = 'flex';
 
     if (currentUser) {
       authButtonsContainer.classList.add('hidden');
