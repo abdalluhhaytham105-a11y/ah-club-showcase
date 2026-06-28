@@ -1418,6 +1418,10 @@ body.light-mode .circle-nav-btn {
   background: rgba(255, 85, 85, 0.05);
 }
 
+#mobile-logged-in-controls {
+  display: none !important;
+}
+
 @media (max-width: 768px) {
   header {
     padding: 0.6rem 1rem !important;
