@@ -33,8 +33,13 @@
       <button class="btn btn-outline" id="btn-logout">خروج <i class="fa-solid fa-right-from-bracket"></i></button>
     </div>
 
-    <!-- حزمة التحكم الخاصة بالموبايل (زر الدخول/الخروج والملف الشخصي) -->
+    <!-- حزمة التحكم الخاصة بالموبايل (زر الرئيسية، الدخول/الخروج والملف الشخصي) -->
     <div id="mobile-header-controls" style="display: flex; align-items: center; gap: 0.6rem;">
+      <!-- زر بيت العودة للرئيسية للموبايل -->
+      <button class="circle-nav-btn" id="mobile-home-btn" title="الرئيسية" style="width: 36px; height: 36px; border-radius: 50%; font-size: 1rem; display: flex; align-items: center; justify-content: center; background: rgba(0, 240, 255, 0.05) !important; border: 1px solid rgba(0, 240, 255, 0.25) !important; color: #fff !important; cursor: pointer; padding: 0;">
+        <i class="fa-solid fa-house"></i>
+      </button>
+
       <!-- زر الدخول/الخروج الديناميكي للموبايل -->
       <button class="btn" id="mobile-auth-btn" style="font-family: 'Cairo'; font-size: 0.75rem; padding: 0.35rem 0.75rem; border-radius: 20px; font-weight: 700; transition: all 0.3s ease;"></button>
       

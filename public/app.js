@@ -155,6 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function showSection(section) {
     const mobileProfileAvatarBtn = document.getElementById('mobile-profile-avatar-btn');
+    const brandName = document.querySelector('header .brand-name');
 
     if (section === 'landing') {
       landingView.classList.remove('hidden');
@@ -162,6 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
       navHome.classList.add('active');
       navPortal.classList.remove('active');
       if (mobileProfileAvatarBtn) mobileProfileAvatarBtn.classList.remove('active');
+      if (brandName) brandName.innerText = 'AH CLUB';
       animateCounters();
     } else if (section === 'portal') {
       if (!currentUser) {
@@ -180,6 +182,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // التنقل بين الأقسام
   navHome.addEventListener('click', (e) => { e.preventDefault(); showSection('landing'); });
   navPortal.addEventListener('click', (e) => { e.preventDefault(); showSection('portal'); });
+
+  // مستمع نقر لزر الرئيسية (أيقونة بيت) في الموبايل
+  const mobileHomeBtn = document.getElementById('mobile-home-btn');
+  if (mobileHomeBtn) {
+    mobileHomeBtn.addEventListener('click', () => {
+      showSection('landing');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
 
   // مستمع نقر لزر الدخول/الخروج في هيدر الموبايل
   const mobileAuthBtn = document.getElementById('mobile-auth-btn');
@@ -262,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
       updateAuthUI();
       closeAuthModal();
-      showSection('portal');
+      showSection('landing');
     } catch (err) {
       console.error(err);
       alert('خطأ في الاتصال بالخادم');
@@ -296,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
       updateAuthUI();
       closeAuthModal();
-      showSection('portal');
+      showSection('landing');
     } catch (err) {
       console.error(err);
       alert('خطأ في الاتصال بالخادم');
@@ -548,6 +559,18 @@ document.addEventListener('DOMContentLoaded', () => {
   function showPortalPanel(panel) {
     const discountNotice = document.getElementById('new-request-discount-notice');
     const discountVal = document.getElementById('request-discount-val');
+
+    // تحديث عنوان الهيدر تفاعلياً للموبايل
+    const brandName = document.querySelector('header .brand-name');
+    if (brandName) {
+      if (window.innerWidth <= 768) {
+        if (panel === 'dashboard') brandName.innerText = 'حسابي وإحصائياتي';
+        else if (panel === 'requests') brandName.innerText = 'طلباتي الجارية';
+        else brandName.innerText = 'طلب مشروع جديد';
+      } else {
+        brandName.innerText = 'AH CLUB';
+      }
+    }
 
     // إزالة التنشيط عن التبويبات
     menuMyDashboard.classList.remove('active');
