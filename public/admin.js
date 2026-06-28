@@ -159,6 +159,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const completedCount = allRequests.filter(r => r.status === 'completed').length;
       statCompletedProjects.innerText = completedCount;
 
+      // رسم وتحديث المخططات البيانية
+      renderDashboardCharts(allRequests);
+
       // ملء جدول أحدث الطلبات
       adminLatestOrdersTable.innerHTML = '';
       const latestOrders = allRequests.slice(-5).reverse(); // آخر 5 طلبات
@@ -1186,6 +1189,177 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ----------------------------------------------------
+  // 8. نظام اختيار وتبديل الثيمات المظهرية للأدمن
+  // ----------------------------------------------------
+  const themeMenuBtn = document.getElementById('theme-menu-btn');
+  const themeOptionsMenu = document.getElementById('theme-options-menu');
+  const themeOptions = document.querySelectorAll('.theme-option');
+
+  if (themeMenuBtn && themeOptionsMenu) {
+    themeMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      themeOptionsMenu.classList.toggle('active');
+    });
+
+    document.addEventListener('click', () => {
+      themeOptionsMenu.classList.remove('active');
+    });
+  }
+
+  function applyTheme(themeName) {
+    document.body.classList.remove('theme-space', 'theme-cyber', 'theme-gold', 'theme-green');
+    document.body.classList.add(`theme-${themeName}`);
+
+    themeOptions.forEach(opt => {
+      if (opt.getAttribute('data-theme') === themeName) {
+        opt.classList.add('active');
+      } else {
+        opt.classList.remove('active');
+      }
+    });
+
+    localStorage.setItem('selectedTheme', themeName);
+
+    // تحديث ألوان المخططات البيانية بالثيم الجديد
+    if (allRequests && allRequests.length > 0) {
+      setTimeout(() => renderDashboardCharts(allRequests), 100);
+    }
+  }
+
+  themeOptions.forEach(opt => {
+    opt.addEventListener('click', () => {
+      const selected = opt.getAttribute('data-theme');
+      applyTheme(selected);
+    });
+  });
+
+  const savedTheme = localStorage.getItem('selectedTheme') || 'space';
+  applyTheme(savedTheme);
+
+  // ----------------------------------------------------
+  // 9. المخططات البيانية التفاعلية (Chart.js Dashboard)
+  // ----------------------------------------------------
+  let revenueChartInstance = null;
+  let categoriesChartInstance = null;
+
+  function renderDashboardCharts(requests) {
+    const monthlyRevenue = {};
+    const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    
+    const currentMonth = new Date().getMonth();
+    for (let i = 0; i <= currentMonth; i++) {
+      monthlyRevenue[months[i]] = 0;
+    }
+
+    requests.forEach(r => {
+      if (r.status === 'completed' || r.status === 'paid') {
+        const date = new Date(r.createdAt || Date.now());
+        const mName = months[date.getMonth()];
+        if (monthlyRevenue[mName] !== undefined) {
+          monthlyRevenue[mName] += (r.price || 0);
+        }
+      }
+    });
+
+    const revenueLabels = Object.keys(monthlyRevenue);
+    const revenueValues = Object.values(monthlyRevenue);
+
+    const categoryCounts = {};
+    requests.forEach(r => {
+      const cat = r.category || 'غير مصنف';
+      categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+    });
+
+    const categoryLabels = Object.keys(categoryCounts);
+    const categoryValues = Object.values(categoryCounts);
+
+    const primaryColor = getComputedStyle(document.body).getPropertyValue('--primary-cyan').trim() || '#00f0ff';
+    const secondaryColor = getComputedStyle(document.body).getPropertyValue('--secondary-magenta').trim() || '#ff007f';
+    const accentColor = getComputedStyle(document.body).getPropertyValue('--accent-gold').trim() || '#d4af37';
+    const textColor = '#f1f5f9';
+
+    const ctxRevenue = document.getElementById('revenueLineChart');
+    if (ctxRevenue) {
+      if (revenueChartInstance) {
+        revenueChartInstance.destroy();
+      }
+      revenueChartInstance = new Chart(ctxRevenue, {
+        type: 'line',
+        data: {
+          labels: revenueLabels,
+          datasets: [{
+            label: 'إجمالي الأرباح المستلمة',
+            data: revenueValues,
+            borderColor: primaryColor,
+            backgroundColor: 'rgba(0, 240, 255, 0.05)',
+            borderWidth: 3,
+            pointBackgroundColor: secondaryColor,
+            pointBorderColor: '#fff',
+            pointRadius: 5,
+            tension: 0.3,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: textColor, font: { family: 'Cairo' } }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: textColor, font: { family: 'Cairo' } }
+            }
+          }
+        }
+      });
+    }
+
+    const ctxCategories = document.getElementById('categoriesPieChart');
+    if (ctxCategories) {
+      if (categoriesChartInstance) {
+        categoriesChartInstance.destroy();
+      }
+      categoriesChartInstance = new Chart(ctxCategories, {
+        type: 'doughnut',
+        data: {
+          labels: categoryLabels,
+          datasets: [{
+            data: categoryValues,
+            backgroundColor: [
+              primaryColor,
+              secondaryColor,
+              accentColor,
+              '#10b981',
+              '#8b5cf6',
+              '#f59e0b'
+            ],
+            borderWidth: 1,
+            borderColor: 'rgba(0,0,0,0.5)'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { color: textColor, font: { family: 'Cairo', size: 10 } }
+            }
+          },
+          cutout: '65%'
+        }
+      });
+    }
+  }
+
+  // ----------------------------------------------------
   // تشغيل الإحصائيات لأول مرة عند تحميل الملف
   loadOverviewStats();
 });

@@ -21,6 +21,20 @@
       <li><a href="#" id="nav-portal" class="hidden">بوابة الطالب</a></li>
       <li><a href="admin.html" id="nav-admin" class="hidden">لوحة المطور</a></li>
     </ul>
+
+    <!-- اختيار الثيم المظهري للموقع -->
+    <div class="theme-selector-dropdown">
+      <button class="theme-btn" id="theme-menu-btn">
+        <i class="fa-solid fa-palette"></i> المظهر
+      </button>
+      <div class="theme-menu" id="theme-options-menu">
+        <div class="theme-option active" data-theme="space"><i class="fa-solid fa-user-astronaut"></i> الفضائي المظلم</div>
+        <div class="theme-option" data-theme="cyber"><i class="fa-solid fa-bolt" style="color: #ff00b4;"></i> السايبربانك</div>
+        <div class="theme-option" data-theme="gold"><i class="fa-solid fa-crown" style="color: #d4af37;"></i> الذهبي الملكي</div>
+        <div class="theme-option" data-theme="green"><i class="fa-solid fa-leaf" style="color: #10b981;"></i> الشفق الأخضر</div>
+      </div>
+    </div>
+
     <div class="auth-buttons" id="auth-buttons-container">
       <button class="btn btn-outline" id="btn-login-trigger">تسجيل الدخول</button>
       <button class="btn btn-primary" id="btn-register-trigger">إنشاء حساب</button>
@@ -673,6 +687,9 @@
     <i class="fa-brands fa-whatsapp"></i>
     <span class="pulse-ring"></span>
   </a>
+
+  <!-- حاوية الإشعارات العائمة المنبثقة -->
+  <div id="toast-container" class="toast-container"></div>
 
   <script src="app.js?v=2.0"></script>
 </body>

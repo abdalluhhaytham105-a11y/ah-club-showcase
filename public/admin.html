@@ -7,6 +7,8 @@
   <!-- أيقونات FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css?v=2.0">
+  <!-- مكتبة الرسوم البيانية Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -19,6 +21,20 @@
     <ul class="nav-links">
       <li><a href="index.html"><i class="fa-solid fa-arrow-right-to-bracket"></i> العودة للموقع الرئيسي</a></li>
     </ul>
+    
+    <!-- اختيار الثيم المظهري للموقع بداخل لوحة الأدمن -->
+    <div class="theme-selector-dropdown">
+      <button class="theme-btn" id="theme-menu-btn">
+        <i class="fa-solid fa-palette"></i> المظهر
+      </button>
+      <div class="theme-menu" id="theme-options-menu">
+        <div class="theme-option active" data-theme="space"><i class="fa-solid fa-user-astronaut"></i> الفضائي المظلم</div>
+        <div class="theme-option" data-theme="cyber"><i class="fa-solid fa-bolt" style="color: #ff00b4;"></i> السايبربانك</div>
+        <div class="theme-option" data-theme="gold"><i class="fa-solid fa-crown" style="color: #d4af37;"></i> الذهبي الملكي</div>
+        <div class="theme-option" data-theme="green"><i class="fa-solid fa-leaf" style="color: #10b981;"></i> الشفق الأخضر</div>
+      </div>
+    </div>
+
     <div class="auth-buttons">
       <span style="font-weight: 700; color: var(--secondary-magenta);"><i class="fa-solid fa-user-gear"></i> لوحة المطور</span>
       <button class="btn btn-outline" id="admin-logout">خروج <i class="fa-solid fa-right-from-bracket"></i></button>
@@ -90,6 +106,26 @@
               <div class="admin-card-info">
                 <h3>المشاريع المنجزة</h3>
                 <p id="stat-completed-projects">0</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- لوحة الرسوم البيانية التفاعلية للأدمن -->
+          <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem; margin-top: 2rem; margin-bottom: 2rem;">
+            <div style="background: var(--bg-card); border: 1px solid var(--border-light); padding: 1.5rem; border-radius: 16px; min-height: 320px;">
+              <h4 style="font-weight: 700; margin-bottom: 1rem; color: var(--primary-cyan); font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-chart-line"></i> الأرباح والمبيعات الشهرية (EGP)
+              </h4>
+              <div style="position: relative; height: 250px; width: 100%;">
+                <canvas id="revenueLineChart"></canvas>
+              </div>
+            </div>
+            <div style="background: var(--bg-card); border: 1px solid var(--border-light); padding: 1.5rem; border-radius: 16px; min-height: 320px;">
+              <h4 style="font-weight: 700; margin-bottom: 1rem; color: var(--secondary-magenta); font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-chart-pie"></i> نسبة الطلبات حسب الأقسام
+              </h4>
+              <div style="position: relative; height: 250px; width: 100%; display: flex; justify-content: center; align-items: center;">
+                <canvas id="categoriesPieChart"></canvas>
               </div>
             </div>
           </div>
@@ -523,6 +559,9 @@
       </div>
     </div>
   </div>
+
+  <!-- حاوية الإشعارات العائمة المنبثقة -->
+  <div id="toast-container" class="toast-container"></div>
 
   <script src="admin.js?v=2.0"></script>
 </body>

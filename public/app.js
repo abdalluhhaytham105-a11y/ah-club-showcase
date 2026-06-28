@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let allProjects = [];
   let categories = [];
   let activeDetailProjectId = null;
+  let pollingStarted = false;
 
   // العناصر العامة بالصفحة
   const headerLogo = document.getElementById('header-logo');
@@ -522,6 +523,14 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadPortalData() {
     if (!currentUser) return;
     
+    // بدء الفحص الدوري لحالة الطلبات للطلاب
+    if (!pollingStarted) {
+      pollingStarted = true;
+      initializeOrdersState().then(() => {
+        startOrderStatePolling();
+      });
+    }
+
     try {
       // جلب بيانات الطالب المحدثة للتأكد من المزامنة اللحظية للخصومات
       const resUser = await fetch(`/api/users/${currentUser.id}`);
@@ -1558,6 +1567,180 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('خطأ في الاتصال بالخادم');
       }
     });
+  }
+
+  // ----------------------------------------------------
+  // 9. نظام اختيار وتبديل الثيمات المظهرية (Themes System)
+  // ----------------------------------------------------
+  const themeMenuBtn = document.getElementById('theme-menu-btn');
+  const themeOptionsMenu = document.getElementById('theme-options-menu');
+  const themeOptions = document.querySelectorAll('.theme-option');
+
+  if (themeMenuBtn && themeOptionsMenu) {
+    themeMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      themeOptionsMenu.classList.toggle('active');
+    });
+
+    document.addEventListener('click', () => {
+      themeOptionsMenu.classList.remove('active');
+    });
+  }
+
+  function applyTheme(themeName) {
+    document.body.classList.remove('theme-space', 'theme-cyber', 'theme-gold', 'theme-green');
+    document.body.classList.add(`theme-${themeName}`);
+
+    themeOptions.forEach(opt => {
+      if (opt.getAttribute('data-theme') === themeName) {
+        opt.classList.add('active');
+      } else {
+        opt.classList.remove('active');
+      }
+    });
+
+    localStorage.setItem('selectedTheme', themeName);
+  }
+
+  themeOptions.forEach(opt => {
+    opt.addEventListener('click', () => {
+      const selected = opt.getAttribute('data-theme');
+      applyTheme(selected);
+    });
+  });
+
+  const savedTheme = localStorage.getItem('selectedTheme') || 'space';
+  applyTheme(savedTheme);
+
+  // ----------------------------------------------------
+  // 10. نظام الإشعارات الصوتية والمرئية بالخلفية
+  // ----------------------------------------------------
+  function playSciFiChime() {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc1 = audioCtx.createOscillator();
+      const gain1 = audioCtx.createGain();
+      
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(880, audioCtx.currentTime);
+      osc1.frequency.exponentialRampToValueAtTime(1320, audioCtx.currentTime + 0.15);
+      
+      gain1.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+      
+      osc1.connect(gain1);
+      gain1.connect(audioCtx.destination);
+      osc1.start();
+      osc1.stop(audioCtx.currentTime + 0.4);
+      
+      setTimeout(() => {
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1046.5, audioCtx.currentTime);
+        osc2.frequency.exponentialRampToValueAtTime(1568, audioCtx.currentTime + 0.12);
+        gain2.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.start();
+        osc2.stop(audioCtx.currentTime + 0.35);
+      }, 80);
+    } catch (e) {
+      console.warn('Web Audio API not supported or blocked by browser:', e);
+    }
+  }
+
+  window.showNotificationToast = function(title, message, iconType = 'info') {
+    const toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-card';
+    
+    let iconClass = 'fa-solid fa-bell';
+    if (iconType === 'success') {
+      iconClass = 'fa-solid fa-circle-check';
+      toast.style.borderLeftColor = '#10b981';
+    } else if (iconType === 'warning') {
+      iconClass = 'fa-solid fa-triangle-exclamation';
+      toast.style.borderLeftColor = '#ffb000';
+    } else if (iconType === 'discount') {
+      iconClass = 'fa-solid fa-tag';
+      toast.style.borderLeftColor = 'var(--accent-gold)';
+    }
+
+    toast.innerHTML = `
+      <div class="toast-icon"><i class="${iconClass}"></i></div>
+      <div class="toast-content">
+        <div class="toast-title">${title}</div>
+        <div class="toast-message">${message}</div>
+      </div>
+    `;
+
+    toastContainer.appendChild(toast);
+    playSciFiChime();
+
+    setTimeout(() => {
+      toast.classList.add('removing');
+      toast.addEventListener('animationend', () => {
+        toast.remove();
+      });
+    }, 5000);
+  };
+
+  // ----------------------------------------------------
+  // 11. نظام الفحص الدوري وتنبيه الطالب بالتغيرات (Polling System)
+  // ----------------------------------------------------
+  let previousOrdersState = {};
+
+  function startOrderStatePolling() {
+    if (!currentUser) return;
+
+    setInterval(async () => {
+      try {
+        const response = await fetch(`/api/requests?studentId=${currentUser.id}`);
+        if (!response.ok) return;
+        const requests = await response.json();
+
+        let hasChanges = false;
+        requests.forEach(order => {
+          const prevStatus = previousOrdersState[order.id];
+          
+          if (prevStatus && prevStatus !== order.status) {
+            hasChanges = true;
+            let statusLabel = getStatusLabel(order.status);
+            showNotificationToast(
+              'تحديث حالة طلبك 🔔',
+              `تم تغيير حالة مشروعك "${order.title}" إلى: <strong>${statusLabel}</strong>`,
+              order.status === 'completed' ? 'success' : 'info'
+            );
+          }
+          previousOrdersState[order.id] = order.status;
+        });
+
+        if (hasChanges) {
+          fetchStudentRequests();
+          updateDashboardStats();
+        }
+      } catch (err) {
+        console.error('Polling error:', err);
+      }
+    }, 15000);
+  }
+
+  async function initializeOrdersState() {
+    if (!currentUser) return;
+    try {
+      const response = await fetch(`/api/requests?studentId=${currentUser.id}`);
+      if (!response.ok) return;
+      const requests = await response.json();
+      requests.forEach(order => {
+        previousOrdersState[order.id] = order.status;
+      });
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   // ----------------------------------------------------

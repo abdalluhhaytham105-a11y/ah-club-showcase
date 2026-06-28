@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Orbitron:wght@500;700;900&display=swap');
 
-:root {
+/* 1. ثيم العمق الفضائي المظلم - الافتراضي (Deep Space Theme) */
+body.theme-space, :root {
   --bg-deep: hsl(230, 30%, 6%);
   --bg-panel: hsla(230, 25%, 12%, 0.65);
   --bg-card: hsla(230, 20%, 16%, 0.7);
@@ -23,6 +24,66 @@
   --neon-shadow-magenta: 0 0 10px var(--secondary-magenta), 0 0 20px rgba(255, 0, 127, 0.1);
   
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 2. ثيم السايبربانك المضيء (Cyberpunk Theme) */
+body.theme-cyber {
+  --bg-deep: hsl(280, 40%, 6%);
+  --bg-panel: hsla(280, 30%, 12%, 0.65);
+  --bg-card: hsla(280, 25%, 16%, 0.7);
+  --border-light: rgba(255, 0, 180, 0.15);
+  
+  --primary-cyan: hsl(300, 100%, 55%); /* Bright Pink */
+  --primary-glow: hsla(300, 100%, 55%, 0.35);
+  
+  --secondary-magenta: hsl(260, 100%, 60%); /* Electric Purple */
+  --secondary-glow: hsla(260, 100%, 60%, 0.35);
+  
+  --accent-gold: hsl(190, 100%, 50%); /* Cyan accent instead of Gold */
+  --accent-gold-glow: hsla(190, 100%, 50%, 0.3);
+  
+  --neon-shadow-cyan: 0 0 10px var(--primary-cyan), 0 0 20px rgba(255, 0, 220, 0.15);
+  --neon-shadow-magenta: 0 0 10px var(--secondary-magenta), 0 0 20px rgba(120, 0, 255, 0.15);
+}
+
+/* 3. ثيم الذهب الملكي الفاخر (Royal Gold Theme) */
+body.theme-gold {
+  --bg-deep: hsl(30, 15%, 5%);
+  --bg-panel: hsla(30, 20%, 11%, 0.7);
+  --bg-card: hsla(30, 15%, 15%, 0.75);
+  --border-light: rgba(212, 175, 55, 0.15);
+  
+  --primary-cyan: hsl(45, 100%, 55%); /* Gold primary */
+  --primary-glow: hsla(45, 100%, 55%, 0.35);
+  
+  --secondary-magenta: hsl(38, 100%, 50%); /* Orange-Gold secondary */
+  --secondary-glow: hsla(38, 100%, 50%, 0.35);
+  
+  --accent-gold: hsl(45, 100%, 50%);
+  --accent-gold-glow: hsla(45, 100%, 50%, 0.3);
+  
+  --neon-shadow-cyan: 0 0 10px var(--primary-cyan), 0 0 20px rgba(212, 175, 55, 0.15);
+  --neon-shadow-magenta: 0 0 10px var(--secondary-magenta), 0 0 20px rgba(212, 175, 55, 0.1);
+}
+
+/* 4. ثيم الشفق الأخضر المضيء (Aurora Green Theme) */
+body.theme-green {
+  --bg-deep: hsl(160, 25%, 5%);
+  --bg-panel: hsla(160, 20%, 11%, 0.65);
+  --bg-card: hsla(160, 15%, 15%, 0.7);
+  --border-light: rgba(16, 185, 129, 0.15);
+  
+  --primary-cyan: hsl(150, 100%, 45%); /* Emerald Green */
+  --primary-glow: hsla(150, 100%, 45%, 0.35);
+  
+  --secondary-magenta: hsl(175, 100%, 40%); /* Teal Secondary */
+  --secondary-glow: hsla(175, 100%, 40%, 0.35);
+  
+  --accent-gold: hsl(45, 100%, 50%);
+  --accent-gold-glow: hsla(45, 100%, 50%, 0.3);
+  
+  --neon-shadow-cyan: 0 0 10px var(--primary-cyan), 0 0 20px rgba(16, 185, 129, 0.15);
+  --neon-shadow-magenta: 0 0 10px var(--secondary-magenta), 0 0 20px rgba(20, 184, 166, 0.15);
 }
 
 * {
@@ -1102,5 +1163,157 @@ body.gold-theme .btn-primary:hover {
     transform: scale(1.5);
     opacity: 0;
   }
+}
+
+/* ---------------------------------------------------- */
+/* نظام التنبيهات المرئية العائمة (Floating Toasts) */
+/* ---------------------------------------------------- */
+.toast-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  pointer-events: none;
+  max-width: 380px;
+  width: 100%;
+}
+
+.toast-card {
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-light);
+  border-left: 4px solid var(--primary-cyan);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 15px rgba(0, 240, 255, 0.05);
+  pointer-events: auto;
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+  animation: toast-slide-in 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  direction: rtl;
+}
+
+.toast-card.removing {
+  animation: toast-slide-out 0.3s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+}
+
+.toast-icon {
+  font-size: 1.2rem;
+  color: var(--primary-cyan);
+  margin-top: 0.1rem;
+}
+
+.toast-content {
+  flex: 1;
+}
+
+.toast-title {
+  font-weight: 700;
+  color: #fff;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.toast-message {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+@keyframes toast-slide-in {
+  0% {
+    transform: translateX(120%) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-slide-out {
+  0% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(120%) scale(0.9);
+    opacity: 0;
+  }
+}
+
+/* تنسيق التبويب والأزرار للثيمات */
+.theme-selector-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.theme-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.85rem;
+  transition: var(--transition-smooth);
+}
+
+.theme-btn:hover {
+  border-color: var(--primary-cyan);
+  color: var(--primary-cyan);
+  box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.theme-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  min-width: 160px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.theme-menu.active {
+  display: flex;
+}
+
+.theme-option {
+  padding: 0.6rem 1rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: var(--transition-smooth);
+  text-align: right;
+}
+
+.theme-option:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--primary-cyan);
+}
+
+.theme-option.active {
+  background: var(--primary-glow);
+  color: var(--primary-cyan);
+  font-weight: 700;
 }
 
