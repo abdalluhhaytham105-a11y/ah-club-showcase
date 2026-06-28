@@ -1312,10 +1312,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (logoContainerTrigger) {
     logoContainerTrigger.addEventListener('click', () => {
       showSection('landing');
-      const showcaseSec = document.getElementById('showcase-section');
-      if (showcaseSec) {
-        showcaseSec.scrollIntoView({ behavior: 'smooth' });
-      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
 
