@@ -498,12 +498,20 @@ app.put('/api/requests/:id/rate', verifyStudent, async (req, res) => {
 app.get('/api/stats', async (req, res) => {
   try {
     const data = await db.readDb();
+    
+    // التقييمات من طلبات الطلاب المكتملة
     const completedWithRating = data.requests.filter(r => r.status === 'completed' && r.rating);
-    let satisfactionRate = 98;
+    // التقييمات من زوار المعرض
+    const projectRatings = data.projectRatings || [];
+    
+    let allRatings = [];
+    completedWithRating.forEach(r => allRatings.push(r.rating));
+    projectRatings.forEach(r => allRatings.push(r.rating));
 
-    if (completedWithRating.length > 0) {
-      const totalRating = completedWithRating.reduce((sum, r) => sum + r.rating, 0);
-      const avgRating = totalRating / completedWithRating.length;
+    let satisfactionRate = 98;
+    if (allRatings.length > 0) {
+      const totalRating = allRatings.reduce((sum, r) => sum + r, 0);
+      const avgRating = totalRating / allRatings.length;
       satisfactionRate = Math.round((avgRating / 5) * 100);
     }
 
@@ -515,6 +523,103 @@ app.get('/api/stats', async (req, res) => {
     });
   } catch (err) {
     res.json({ completedCount: 300, satisfactionRate: 98 });
+  }
+});
+
+// تطبيق كود الخصم للطالب
+app.post('/api/promos/apply', async (req, res) => {
+  const { code } = req.body;
+  const userId = req.headers['x-user-id'];
+
+  if (!code) {
+    return res.status(400).json({ error: 'الرجاء إدخال كود الخصم' });
+  }
+
+  try {
+    const data = await db.readDb();
+    const now = new Date();
+    
+    // البحث عن إعلان خصم يحتوي على نفس الكود ويكون نشط وغير منتهي الصلاحية
+    const promo = (data.announcements || []).find(ann => {
+      if (ann.type !== 'discount' || !ann.discountCode) return false;
+      if (ann.discountCode.trim().toUpperCase() !== code.trim().toUpperCase()) return false;
+      if (!ann.active) return false;
+      
+      const created = new Date(ann.createdAt);
+      const expiry = new Date(created.getTime() + Number(ann.durationDays) * 24 * 60 * 60 * 1000);
+      return now <= expiry;
+    });
+
+    if (!promo) {
+      return res.status(400).json({ error: 'كود الخصم غير صحيح أو انتهت صلاحيته' });
+    }
+
+    // إذا كان الطالب مسجلاً، نقوم بحفظ الخصم في حسابه مباشرة لتطبيقه تلقائياً
+    let userMessage = 'تم التحقق من الكود بنجاح!';
+    if (userId) {
+      const userIndex = data.users.findIndex(u => u.id === userId);
+      if (userIndex !== -1) {
+        data.users[userIndex].discountPercent = promo.discountPercent;
+        data.users[userIndex].specialOffer = `خصم ${promo.discountPercent}% باستخدام كود ${promo.discountCode}`;
+        await db.writeDb(data);
+        userMessage = `تم تطبيق خصم بقيمة ${promo.discountPercent}% على حسابك تلقائياً!`;
+      }
+    }
+
+    res.json({
+      message: userMessage,
+      code: promo.discountCode,
+      percent: promo.discountPercent
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'فشل تطبيق كود الخصم' });
+  }
+});
+
+// تسجيل تقييم لمشروع في المعرض
+app.post('/api/projects/:id/rate', async (req, res) => {
+  const { id } = req.params;
+  const { rating, ratingComment, visitorName, visitorEmail } = req.body;
+
+  if (!rating || rating < 1 || rating > 5) {
+    return res.status(400).json({ error: 'الرجاء إدخال تقييم صحيح بين 1 و 5 نجوم' });
+  }
+
+  try {
+    const data = await db.readDb();
+    const project = data.projects.find(p => p.id === id);
+    if (!project) {
+      return res.status(404).json({ error: 'المشروع غير موجود' });
+    }
+
+    if (!data.projectRatings) data.projectRatings = [];
+
+    const newRating = {
+      id: 'rate-' + Date.now(),
+      projectId: id,
+      projectName: project.title,
+      rating: Number(rating),
+      comment: ratingComment || '',
+      visitorName: visitorName || 'زائر مجهول',
+      visitorEmail: visitorEmail || 'غير متوفر',
+      createdAt: new Date().toISOString()
+    };
+
+    data.projectRatings.unshift(newRating);
+    await db.writeDb(data);
+    res.status(201).json({ message: 'شكراً لتقييمك! تم تسجيل التقييم بنجاح' });
+  } catch (err) {
+    res.status(500).json({ error: 'فشل تسجيل تقييم المشروع' });
+  }
+});
+
+// جلب جميع تقييمات المعرض (للأدمن فقط)
+app.get('/api/admin/project-ratings', verifyAdmin, async (req, res) => {
+  try {
+    const data = await db.readDb();
+    res.json(data.projectRatings || []);
+  } catch (err) {
+    res.status(500).json({ error: 'فشل جلب تقييمات المعرض' });
   }
 });
 
@@ -641,6 +746,7 @@ app.get('/api/announcements', async (req, res) => {
     const now = new Date();
     const activeAnnouncements = (data.announcements || []).filter(ann => {
       if (!ann.active) return false;
+      if (ann.isPromoOnly) return false; // لا يظهر كإعلان عام منبثق
       const created = new Date(ann.createdAt);
       const expiry = new Date(created.getTime() + Number(ann.durationDays) * 24 * 60 * 60 * 1000);
       return now <= expiry;
@@ -676,7 +782,7 @@ app.get('/api/admin/announcements', verifyAdmin, async (req, res) => {
 });
 
 app.post('/api/admin/announcements', verifyAdmin, async (req, res) => {
-  const { title, content, durationDays, order, active } = req.body;
+  const { title, content, durationDays, order, active, type, discountCode, discountPercent, isPromoOnly } = req.body;
   if (!title || !content || !durationDays) {
     return res.status(400).json({ error: 'جميع الحقول الأساسية مطلوبة' });
   }
@@ -692,6 +798,10 @@ app.post('/api/admin/announcements', verifyAdmin, async (req, res) => {
       durationDays: Number(durationDays),
       order: Number(order) || 0,
       active: active !== undefined ? active : true,
+      type: type || 'normal',
+      discountCode: discountCode || '',
+      discountPercent: Number(discountPercent) || 0,
+      isPromoOnly: isPromoOnly !== undefined ? isPromoOnly : false,
       createdAt: new Date().toISOString()
     };
 
@@ -705,7 +815,7 @@ app.post('/api/admin/announcements', verifyAdmin, async (req, res) => {
 
 app.put('/api/admin/announcements/:id', verifyAdmin, async (req, res) => {
   const { id } = req.params;
-  const { title, content, durationDays, order, active } = req.body;
+  const { title, content, durationDays, order, active, type, discountCode, discountPercent, isPromoOnly } = req.body;
 
   try {
     const data = await db.readDb();
@@ -720,6 +830,10 @@ app.put('/api/admin/announcements/:id', verifyAdmin, async (req, res) => {
     if (durationDays !== undefined) ann.durationDays = Number(durationDays);
     if (order !== undefined) ann.order = Number(order);
     if (active !== undefined) ann.active = active;
+    if (type !== undefined) ann.type = type;
+    if (discountCode !== undefined) ann.discountCode = discountCode;
+    if (discountPercent !== undefined) ann.discountPercent = Number(discountPercent);
+    if (isPromoOnly !== undefined) ann.isPromoOnly = isPromoOnly;
 
     await db.writeDb(data);
     res.json(ann);

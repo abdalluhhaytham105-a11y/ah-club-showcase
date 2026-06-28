@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let allProjects = [];
   let categories = [];
+  let activeDetailProjectId = null;
 
   // العناصر العامة بالصفحة
   const headerLogo = document.getElementById('header-logo');
@@ -385,6 +386,33 @@ document.addEventListener('DOMContentLoaded', () => {
   function openProjectDetail(id) {
     const project = allProjects.find(p => p.id === id);
     if (!project) return;
+    activeDetailProjectId = id;
+
+    // إعادة تهيئة قسم تقييم المعرض
+    selectedShowcaseRating = 0;
+    highlightShowcaseStars(0);
+    const commentInput = document.getElementById('showcase-rating-comment');
+    const nameInput = document.getElementById('showcase-visitor-name');
+    const emailInput = document.getElementById('showcase-visitor-email');
+    const submitBtn = document.getElementById('btn-submit-showcase-rating');
+    const feedbackDiv = document.getElementById('showcase-rating-feedback');
+    if (commentInput) {
+      commentInput.value = '';
+      commentInput.disabled = false;
+    }
+    if (nameInput) {
+      nameInput.value = currentUser ? currentUser.name : '';
+      nameInput.disabled = false;
+    }
+    if (emailInput) {
+      emailInput.value = currentUser ? currentUser.email : '';
+      emailInput.disabled = false;
+    }
+    if (submitBtn) submitBtn.style.display = 'block';
+    if (feedbackDiv) {
+      feedbackDiv.innerText = '';
+      feedbackDiv.classList.add('hidden');
+    }
 
     projDetailTitle.innerText = project.title;
     projDetailCollege.innerHTML = `<i class="fa-solid fa-university"></i> ${project.college}`;
@@ -746,14 +774,28 @@ document.addEventListener('DOMContentLoaded', () => {
       paymentVerifyPending.classList.add('hidden');
       deliveryDownloadInfo.classList.add('hidden');
 
+      // حساب الخصم وعرض السعر
+      let finalPrice = order.price;
+      let discountMarkup = '';
+      if (currentUser && currentUser.discountPercent && order.price > 0) {
+        const discountAmount = Math.round(order.price * (currentUser.discountPercent / 100));
+        finalPrice = order.price - discountAmount;
+        discountMarkup = `
+          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.2rem; text-align: right;">
+            <span style="text-decoration: line-through; color: var(--text-muted);">${order.price} EGP</span>
+            <span style="color: #ff5555; margin-right: 0.5rem;">(خصم ${currentUser.discountPercent}%)</span>
+          </div>
+        `;
+      }
+
       if (order.status === 'pending') {
         orderPendingReviewInfo.classList.remove('hidden');
       } else if (order.status === 'accepted') {
         paymentPricingInfo.classList.remove('hidden');
-        orderPriceDisplay.innerText = `${order.price} EGP`;
+        orderPriceDisplay.innerHTML = `${finalPrice} EGP ${discountMarkup}`;
       } else if (order.status === 'in_progress' || order.status === 'paid') {
         paymentPricingInfo.classList.remove('hidden');
-        orderPriceDisplay.innerText = `${order.price} EGP`;
+        orderPriceDisplay.innerHTML = `${finalPrice} EGP ${discountMarkup}`;
         paymentVerifyPending.classList.remove('hidden');
         paymentVerifyPending.innerHTML = `
           <i class="fa-solid fa-gears fa-spin" style="font-size: 1.8rem; margin-bottom: 0.8rem; color: var(--primary-cyan);"></i>
@@ -762,10 +804,10 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (order.status === 'ready_payment') {
         paymentPricingInfo.classList.remove('hidden');
         paymentInstructions.classList.remove('hidden');
-        orderPriceDisplay.innerText = `${order.price} EGP`;
+        orderPriceDisplay.innerHTML = `${finalPrice} EGP ${discountMarkup}`;
       } else if (order.status === 'ready_payment_verify') {
         paymentPricingInfo.classList.remove('hidden');
-        orderPriceDisplay.innerText = `${order.price} EGP`;
+        orderPriceDisplay.innerHTML = `${finalPrice} EGP ${discountMarkup}`;
         paymentVerifyPending.classList.remove('hidden');
         paymentVerifyPending.innerHTML = `
           <i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 1.8rem; margin-bottom: 0.8rem; color: var(--accent-gold);"></i>
@@ -1272,10 +1314,53 @@ document.addEventListener('DOMContentLoaded', () => {
         const popupTitle = document.getElementById('popup-announcement-title');
         const popupContent = document.getElementById('popup-announcement-content');
         const btnClosePopup = document.getElementById('btn-close-announcement-popup');
+        const popupDiscountContainer = document.getElementById('popup-discount-container');
+        const popupDiscountText = document.getElementById('popup-discount-text');
+        const popupDiscountCodeBadge = document.getElementById('popup-discount-code-badge');
+        const btnApplyPopupDiscount = document.getElementById('btn-apply-popup-discount');
 
         if (popupModal && popupTitle && popupContent && btnClosePopup) {
           popupTitle.innerText = firstAnn.title;
           popupContent.innerText = firstAnn.content;
+
+          if (firstAnn.type === 'discount' && firstAnn.discountCode && firstAnn.discountPercent) {
+            if (popupDiscountContainer && popupDiscountText && popupDiscountCodeBadge && btnApplyPopupDiscount) {
+              popupDiscountText.innerText = `خصم ${firstAnn.discountPercent}% باستخدام كود الخصم`;
+              popupDiscountCodeBadge.innerText = firstAnn.discountCode;
+              popupDiscountContainer.classList.remove('hidden');
+
+              btnApplyPopupDiscount.onclick = async () => {
+                try {
+                  const applyRes = await fetch('/api/promos/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: firstAnn.discountCode })
+                  });
+                  const applyData = await applyRes.json();
+                  if (applyRes.ok) {
+                    alert(applyData.message || 'تم تطبيق كود الخصم بنجاح! ⚡');
+                    if (currentUser) {
+                      currentUser.discountPercent = firstAnn.discountPercent;
+                      currentUser.specialOffer = `خصم ${firstAnn.discountPercent}% باستخدام كود ${firstAnn.discountCode}`;
+                      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                      loadPortalData();
+                    }
+                    popupModal.classList.remove('active');
+                    seen.push(firstAnn.id);
+                    sessionStorage.setItem('seenAnnouncements', JSON.stringify(seen));
+                  } else {
+                    alert(applyData.error || 'فشل تطبيق الكود');
+                  }
+                } catch (e) {
+                  console.error(e);
+                  alert('خطأ في الاتصال بالخادم لتطبيق الخصم');
+                }
+              };
+            }
+          } else {
+            if (popupDiscountContainer) popupDiscountContainer.classList.add('hidden');
+          }
+
           popupModal.classList.add('active');
 
           btnClosePopup.onclick = () => {
@@ -1288,6 +1373,191 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       console.error('Error loading announcements:', err);
     }
+  }
+
+  // ----------------------------------------------------
+  // 6. الحاسبة التقديرية التفاعلية للمشاريع
+  // ----------------------------------------------------
+  const estComplexity = document.getElementById('est-complexity');
+  const estUrgency = document.getElementById('est-urgency');
+  const estMembers = document.getElementById('est-members');
+  const estMembersVal = document.getElementById('est-members-val');
+  const estPriceDisplay = document.getElementById('est-price-display');
+
+  function calculateEstimatedPrice() {
+    if (!estComplexity || !estUrgency || !estMembers || !estPriceDisplay) return;
+
+    const complexity = estComplexity.value;
+    const urgency = estUrgency.value;
+    const members = parseInt(estMembers.value);
+
+    // تحديث رقم الأعضاء المعروض
+    if (estMembersVal) estMembersVal.innerText = members;
+
+    // احتساب السعر الأساسي بناءً على الحجم والتعقيد
+    let basePrice = 300;
+    if (complexity === 'medium') basePrice = 600;
+    if (complexity === 'complex') basePrice = 1500;
+
+    // معامل ضرب بناءً على سرعة التسليم (عاجل جداً يزيد السعر)
+    let urgencyMultiplier = 1.0;
+    if (urgency === 'relaxed') urgencyMultiplier = 0.85; // خصم للمرن
+    if (urgency === 'urgent') urgencyMultiplier = 1.35; // زيادة للعاجل
+
+    // حساب السعر الإجمالي
+    let totalPrice = Math.round(basePrice * urgencyMultiplier);
+
+    // خصم بسيط للمجموعات / الأعضاء المتعددين لتشجيعهم
+    if (members > 1) {
+      // خصم 5% لكل عضو إضافي بحد أقصى 15%
+      const groupDiscount = Math.min((members - 1) * 0.05, 0.15);
+      totalPrice = Math.round(totalPrice * (1 - groupDiscount));
+    }
+
+    estPriceDisplay.innerText = `${totalPrice} EGP`;
+  }
+
+  if (estComplexity) estComplexity.addEventListener('change', calculateEstimatedPrice);
+  if (estUrgency) estUrgency.addEventListener('change', calculateEstimatedPrice);
+  if (estMembers) {
+    estMembers.addEventListener('input', calculateEstimatedPrice);
+    estMembers.addEventListener('change', calculateEstimatedPrice);
+  }
+  // تشغيل الحاسبة لأول مرة
+  calculateEstimatedPrice();
+
+  // ----------------------------------------------------
+  // 7. تطبيق كود الخصم بداخل بوابة الطلبات
+  // ----------------------------------------------------
+  const reqPromoCodeInput = document.getElementById('req-promo-code');
+  const btnApplyPromo = document.getElementById('btn-apply-promo');
+  const promoStatusMsg = document.getElementById('promo-status-msg');
+  let activeAppliedPromoCode = null;
+
+  if (btnApplyPromo && reqPromoCodeInput && promoStatusMsg) {
+    btnApplyPromo.addEventListener('click', async () => {
+      const code = reqPromoCodeInput.value.trim();
+      if (!code) {
+        promoStatusMsg.innerText = 'الرجاء إدخال الكود أولاً!';
+        promoStatusMsg.style.color = '#ff5555';
+        promoStatusMsg.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/promos/apply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code })
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+          promoStatusMsg.innerText = `تم تفعيل الكود بنجاح! خصم بقيمة ${data.percent}%`;
+          promoStatusMsg.style.color = '#10b981';
+          promoStatusMsg.classList.remove('hidden');
+          activeAppliedPromoCode = data.code;
+          
+          if (currentUser) {
+            currentUser.discountPercent = data.percent;
+            currentUser.specialOffer = `خصم ${data.percent}% باستخدام كود ${data.code}`;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            loadPortalData();
+          }
+        } else {
+          promoStatusMsg.innerText = data.error || 'كود الخصم غير صحيح!';
+          promoStatusMsg.style.color = '#ff5555';
+          promoStatusMsg.classList.remove('hidden');
+        }
+      } catch (err) {
+        console.error(err);
+        promoStatusMsg.innerText = 'خطأ في الاتصال بالخادم!';
+        promoStatusMsg.style.color = '#ff5555';
+        promoStatusMsg.classList.remove('hidden');
+      }
+    });
+  }
+
+  // ----------------------------------------------------
+  // 8. نظام تقييم مشاريع المعرض والأرشيف
+  // ----------------------------------------------------
+  let selectedShowcaseRating = 0;
+  const showcaseStarBtns = document.querySelectorAll('.showcase-star-btn');
+  const btnSubmitShowcaseRating = document.getElementById('btn-submit-showcase-rating');
+  const showcaseRatingComment = document.getElementById('showcase-rating-comment');
+  const showcaseVisitorName = document.getElementById('showcase-visitor-name');
+  const showcaseVisitorEmail = document.getElementById('showcase-visitor-email');
+  const showcaseRatingFeedback = document.getElementById('showcase-rating-feedback');
+
+  showcaseStarBtns.forEach(star => {
+    star.addEventListener('click', () => {
+      selectedShowcaseRating = parseInt(star.getAttribute('data-value'));
+      highlightShowcaseStars(selectedShowcaseRating);
+    });
+    star.addEventListener('mouseenter', () => {
+      const hoverVal = parseInt(star.getAttribute('data-value'));
+      highlightShowcaseStars(hoverVal);
+    });
+    star.addEventListener('mouseleave', () => {
+      highlightShowcaseStars(selectedShowcaseRating);
+    });
+  });
+
+  function highlightShowcaseStars(value) {
+    showcaseStarBtns.forEach(star => {
+      const starValue = parseInt(star.getAttribute('data-value'));
+      if (starValue <= value) {
+        star.classList.remove('fa-regular');
+        star.classList.add('fa-solid');
+      } else {
+        star.classList.remove('fa-solid');
+        star.classList.add('fa-regular');
+      }
+    });
+  }
+
+  if (btnSubmitShowcaseRating) {
+    btnSubmitShowcaseRating.addEventListener('click', async () => {
+      if (selectedShowcaseRating === 0) {
+        alert('من فضلك اختر التقييم بالنجوم أولاً');
+        return;
+      }
+      
+      const ratingComment = showcaseRatingComment.value.trim();
+      const visitorName = showcaseVisitorName.value.trim() || (currentUser ? currentUser.name : '');
+      const visitorEmail = showcaseVisitorEmail.value.trim() || (currentUser ? currentUser.email : '');
+      
+      try {
+        const response = await fetch(`/api/projects/${activeDetailProjectId}/rate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            rating: selectedShowcaseRating,
+            ratingComment,
+            visitorName,
+            visitorEmail
+          })
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+          showcaseRatingFeedback.innerText = data.message || 'تم تسجيل تقييمك بنجاح! شكرًا لك.';
+          showcaseRatingFeedback.classList.remove('hidden');
+          
+          btnSubmitShowcaseRating.style.display = 'none';
+          showcaseRatingComment.disabled = true;
+          showcaseVisitorName.disabled = true;
+          showcaseVisitorEmail.disabled = true;
+          
+          loadDynamicStats();
+        } else {
+          alert(data.error || 'فشل إرسال التقييم');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('خطأ في الاتصال بالخادم');
+      }
+    });
   }
 
   // ----------------------------------------------------

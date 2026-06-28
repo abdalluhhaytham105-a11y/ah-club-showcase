@@ -119,6 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadCategoriesPanel();
       } else if (targetPanelId === 'admin-announcements-panel') {
         fetchAnnouncements();
+      } else if (targetPanelId === 'admin-project-ratings-panel') {
+        fetchProjectRatings();
       }
     });
   });
@@ -1009,6 +1011,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('announcement-duration-input').value = ann.durationDays;
     document.getElementById('announcement-order-input').value = ann.order;
     document.getElementById('announcement-active-input').checked = ann.active;
+    
+    // التعبئة للميزات المتقدمة
+    document.getElementById('announcement-type-input').value = ann.type || 'normal';
+    document.getElementById('announcement-code-input').value = ann.discountCode || '';
+    document.getElementById('announcement-percent-input').value = ann.discountPercent || '';
+    document.getElementById('announcement-promo-only-input').checked = !!ann.isPromoOnly;
 
     btnSubmitAnnouncement.innerHTML = `حفظ التعديلات <i class="fa-solid fa-save"></i>`;
     btnCancelAnnouncementEdit.classList.remove('hidden');
@@ -1024,6 +1032,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('announcement-duration-input').value = '';
     document.getElementById('announcement-order-input').value = '0';
     document.getElementById('announcement-active-input').checked = true;
+
+    // تهيئة حقول الميزات المتقدمة
+    document.getElementById('announcement-type-input').value = 'normal';
+    document.getElementById('announcement-code-input').value = '';
+    document.getElementById('announcement-percent-input').value = '';
+    document.getElementById('announcement-promo-only-input').checked = false;
 
     btnSubmitAnnouncement.innerHTML = `إضافة إعلان جديد <i class="fa-solid fa-plus"></i>`;
     btnCancelAnnouncementEdit.classList.add('hidden');
@@ -1044,7 +1058,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const order = document.getElementById('announcement-order-input').value;
       const active = document.getElementById('announcement-active-input').checked;
 
-      const payload = { title, content, durationDays, order, active };
+      const type = document.getElementById('announcement-type-input').value;
+      const discountCode = document.getElementById('announcement-code-input').value;
+      const discountPercent = document.getElementById('announcement-percent-input').value;
+      const isPromoOnly = document.getElementById('announcement-promo-only-input').checked;
+
+      const payload = { title, content, durationDays, order, active, type, discountCode, discountPercent, isPromoOnly };
       const url = id ? `/api/admin/announcements/${id}` : '/api/admin/announcements';
       const method = id ? 'PUT' : 'POST';
 
@@ -1109,6 +1128,62 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       console.error('Error swapping announcement order:', err);
     }
+  }
+
+  // ----------------------------------------------------
+  // 7. إدارة وعرض تقييمات مشاريع المعرض
+  // ----------------------------------------------------
+  const adminProjectRatingsTableBody = document.getElementById('admin-project-ratings-table-body');
+
+  async function fetchProjectRatings() {
+    try {
+      const response = await fetch('/api/admin/project-ratings');
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          alert('غير مصرح لك بمشاهدة هذه التقييمات!');
+        }
+        return;
+      }
+      const ratings = await response.json();
+      renderProjectRatingsTable(ratings);
+    } catch (err) {
+      console.error('Error fetching project ratings:', err);
+    }
+  }
+
+  function renderProjectRatingsTable(ratings) {
+    if (!adminProjectRatingsTableBody) return;
+    adminProjectRatingsTableBody.innerHTML = '';
+
+    if (ratings.length === 0) {
+      adminProjectRatingsTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 2rem;">لا توجد تقييمات مسجلة للمشاريع حالياً.</td></tr>`;
+      return;
+    }
+
+    ratings.forEach(r => {
+      const tr = document.createElement('tr');
+      const formattedDate = new Date(r.createdAt).toLocaleDateString('ar-EG');
+      
+      // رسم النجوم الذهبية للتقييم
+      let starsHtml = '';
+      for (let i = 1; i <= 5; i++) {
+        if (i <= r.rating) {
+          starsHtml += '<i class="fa-solid fa-star" style="color: var(--accent-gold); font-size: 0.8rem; margin: 0 1px;"></i>';
+        } else {
+          starsHtml += '<i class="fa-regular fa-star" style="color: var(--text-muted); font-size: 0.8rem; margin: 0 1px;"></i>';
+        }
+      }
+
+      tr.innerHTML = `
+        <td style="font-weight: 600;">${r.projectTitle || 'مشروع محذوف أو غير معرف'}</td>
+        <td><div style="direction: ltr; display: inline-block;">${starsHtml}</div></td>
+        <td>${r.visitorName || 'زائر مجهول'}</td>
+        <td style="font-family: 'Orbitron', sans-serif; font-size: 0.8rem;">${r.visitorEmail || '-'}</td>
+        <td style="color: var(--text-secondary); font-size: 0.85rem; max-width: 250px; white-space: normal; line-height: 1.5;">${r.comment || '-'}</td>
+        <td>${formattedDate}</td>
+      `;
+      adminProjectRatingsTableBody.appendChild(tr);
+    });
   }
 
   // تشغيل الإحصائيات لأول مرة عند تحميل الملف

@@ -48,6 +48,9 @@
           <li class="portal-menu-item" id="admin-menu-announcements" data-target="admin-announcements-panel">
             <i class="fa-solid fa-bullhorn"></i> إدارة الإعلانات 📢
           </li>
+          <li class="portal-menu-item" id="admin-menu-project-ratings" data-target="admin-project-ratings-panel">
+            <i class="fa-solid fa-star"></i> تقييمات المعرض ⭐
+          </li>
         </ul>
       </aside>
 
@@ -290,6 +293,25 @@
               <label for="announcement-content-input">محتوى ونص الإعلان (يدعم السطور المتعددة)</label>
               <textarea id="announcement-content-input" class="form-control" placeholder="اكتب تفاصيل الإعلان هنا..." required style="min-height: 100px; resize: vertical; font-family: 'Cairo', sans-serif; padding: 0.8rem;"></textarea>
             </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div class="form-group">
+                <label for="announcement-type-input">نوع الإعلان</label>
+                <select id="announcement-type-input" class="form-control" style="padding: 0.4rem 0.8rem;">
+                  <option value="normal" selected>إعلان عادي 📢</option>
+                  <option value="discount">خصومات بكود خصم 🏷️</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="announcement-code-input">كود الخصم (Promo Code)</label>
+                <input type="text" id="announcement-code-input" class="form-control" placeholder="مثال: AH10" style="font-family: 'Orbitron', sans-serif; text-transform: uppercase;">
+              </div>
+              <div class="form-group">
+                <label for="announcement-percent-input">نسبة الخصم المئوية (%)</label>
+                <input type="number" id="announcement-percent-input" class="form-control" placeholder="مثال: 10" min="0" max="100">
+              </div>
+            </div>
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
               <div class="form-group">
                 <label for="announcement-duration-input">مدة العرض / الإعلان (بالأيام)</label>
@@ -300,6 +322,12 @@
                 <input type="number" id="announcement-order-input" class="form-control" placeholder="مثال: 1" required min="0" value="0">
               </div>
             </div>
+
+            <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.8rem;">
+              <input type="checkbox" id="announcement-promo-only-input" style="width: auto; cursor: pointer;">
+              <label for="announcement-promo-only-input" style="margin-bottom: 0; cursor: pointer; font-weight: 700;">كود خصم سري للتوزيع اليدوي فقط (لا يعرض كـ Pop-up)</label>
+            </div>
+
             <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
               <input type="checkbox" id="announcement-active-input" checked style="width: auto; cursor: pointer;">
               <label for="announcement-active-input" style="margin-bottom: 0; cursor: pointer; font-weight: 700;">تنشيط وعرض الإعلان فوراً</label>
@@ -324,6 +352,31 @@
                 </tr>
               </thead>
               <tbody id="admin-announcements-list-table">
+                <!-- ديناميكي -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ==================================================== -->
+        <!-- 7. لوحة تقييمات المعرض والأرشيف (Project Ratings Panel) -->
+        <!-- ==================================================== -->
+        <div id="admin-project-ratings-panel" class="portal-panel hidden">
+          <h3 style="margin-bottom: 1.5rem; font-weight: 700;">سجلات تقييمات ومراجعات زوار المعرض 🌟</h3>
+          
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>اسم المشروع</th>
+                  <th>التقييم</th>
+                  <th>اسم الزائر</th>
+                  <th>البريد الإلكتروني</th>
+                  <th>التعليق والمراجعة</th>
+                  <th>التاريخ</th>
+                </tr>
+              </thead>
+              <tbody id="admin-project-ratings-table-body">
                 <!-- ديناميكي -->
               </tbody>
             </table>

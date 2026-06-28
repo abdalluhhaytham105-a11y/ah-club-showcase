@@ -66,7 +66,8 @@ const initialDb = {
       ratingComment: ""
     }
   ],
-  announcements: []
+  announcements: [],
+  projectRatings: []
 };
 
 // تحديد المتغيرات وعناوين الـ API لقاعدة بيانات Upstash / Vercel KV بمختلف المسميات الممكنة
@@ -118,6 +119,10 @@ async function readDb() {
         parsed.announcements = [];
         await writeDb(parsed);
       }
+      if (!parsed.projectRatings) {
+        parsed.projectRatings = [];
+        await writeDb(parsed);
+      }
 
       memoryCache = parsed;
       lastCacheTime = now;
@@ -147,6 +152,10 @@ async function readDb() {
       }
       if (!parsed.announcements) {
         parsed.announcements = [];
+        writeDbSync(parsed);
+      }
+      if (!parsed.projectRatings) {
+        parsed.projectRatings = [];
         writeDbSync(parsed);
       }
       return parsed;
