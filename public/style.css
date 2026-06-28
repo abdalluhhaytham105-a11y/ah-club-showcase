@@ -1736,3 +1736,107 @@ body.light-mode .circle-nav-btn {
   }
 }
 
+/* ==================================================== */
+/* أنماط القائمة الجانبية المنزلقة للموبايل (Mobile Slide-out Drawer) */
+/* ==================================================== */
+.mobile-drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 2500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.mobile-drawer-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobile-drawer-content {
+  position: absolute;
+  top: 0;
+  left: -290px;
+  width: 290px;
+  height: 100%;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border-light);
+  box-shadow: 15px 0 40px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  direction: rtl; /* اتجاه عربي متناسق */
+}
+
+.mobile-drawer-overlay.active .mobile-drawer-content {
+  left: 0;
+}
+
+.mobile-drawer-header {
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.drawer-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 2rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  line-height: 1;
+}
+
+.drawer-close:hover {
+  color: #ff5555;
+}
+
+.mobile-drawer-menu {
+  list-style: none;
+  padding: 1.5rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.drawer-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 1.2rem;
+  color: var(--text-secondary);
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.drawer-menu-item:hover,
+.drawer-menu-item.active {
+  background: rgba(0, 240, 255, 0.06);
+  color: var(--primary-cyan);
+  box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.05);
+}
+
+.drawer-menu-item.logout {
+  color: #ff5555;
+}
+
+.drawer-menu-item.logout:hover {
+  background: rgba(255, 85, 85, 0.08) !important;
+  color: #ff5555 !important;
+}
+

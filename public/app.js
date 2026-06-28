@@ -89,7 +89,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // ----------------------------------------------------
   function updateAuthUI() {
     const mobileLoggedInControls = document.getElementById('mobile-logged-in-controls');
-    const mobileNavAdmin = document.getElementById('mobile-nav-admin');
+    
+    // عناصر القائمة الجانبية المنزلقة للموبايل (Mobile Slide Drawer)
+    const drawerAvatar = document.getElementById('drawer-avatar');
+    const drawerUsername = document.getElementById('drawer-username');
+    const drawerUserRole = document.getElementById('drawer-user-role');
+    const drawerNavAdmin = document.getElementById('drawer-nav-admin');
 
     if (currentUser) {
       authButtonsContainer.classList.add('hidden');
@@ -97,14 +102,21 @@ document.addEventListener('DOMContentLoaded', () => {
       userWelcomeMsg.innerHTML = `<i class="fa-solid fa-user-astronaut"></i> مرحباً، ${currentUser.name.split(' ')[0]}`;
       navPortal.classList.remove('hidden');
       document.body.classList.add('user-logged-in');
-      if (mobileLoggedInControls) mobileLoggedInControls.classList.remove('hidden');
+      if (mobileLoggedInControls) mobileLoggedInControls.style.display = 'flex';
       
+      // تعبئة بيانات الطالب بداخل القائمة الجانبية المنزلقة
+      if (drawerAvatar) drawerAvatar.innerText = currentUser.name ? currentUser.name[0].toUpperCase() : '?';
+      if (drawerUsername) drawerUsername.innerText = currentUser.name;
+      if (drawerUserRole) {
+        drawerUserRole.innerText = currentUser.role === 'admin' ? 'مطور المنصة ⚙️' : 'طالب علم 🚀';
+      }
+
       if (currentUser.role === 'admin') {
         navAdmin.classList.remove('hidden');
-        if (mobileNavAdmin) mobileNavAdmin.classList.remove('hidden');
+        if (drawerNavAdmin) drawerNavAdmin.classList.remove('hidden');
       } else {
         navAdmin.classList.add('hidden');
-        if (mobileNavAdmin) mobileNavAdmin.classList.add('hidden');
+        if (drawerNavAdmin) drawerNavAdmin.classList.add('hidden');
       }
 
       // تفعيل الثيم الذهبي العام في حال كان الخصم 100%
@@ -119,23 +131,19 @@ document.addEventListener('DOMContentLoaded', () => {
       navPortal.classList.add('hidden');
       navAdmin.classList.add('hidden');
       document.body.classList.remove('user-logged-in');
-      if (mobileLoggedInControls) mobileLoggedInControls.classList.add('hidden');
+      if (mobileLoggedInControls) mobileLoggedInControls.style.display = 'none';
       showSection('landing');
       document.body.classList.remove('gold-theme');
     }
   }
 
   function showSection(section) {
-    const mobHome = document.getElementById('mobile-nav-home');
-    const mobPortal = document.getElementById('mobile-nav-portal');
-
     if (section === 'landing') {
       landingView.classList.remove('hidden');
       studentPortalView.classList.add('hidden');
       navHome.classList.add('active');
       navPortal.classList.remove('active');
-      if (mobHome) mobHome.classList.add('active');
-      if (mobPortal) mobPortal.classList.remove('active');
+      updateDrawerActiveItem('drawer-nav-home');
       animateCounters();
     } else if (section === 'portal') {
       if (!currentUser) {
@@ -146,8 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
       studentPortalView.classList.remove('hidden');
       navHome.classList.remove('active');
       navPortal.classList.add('active');
-      if (mobHome) mobHome.classList.remove('active');
-      if (mobPortal) mobPortal.classList.add('active');
+      updateDrawerActiveItem('drawer-nav-portal');
       loadPortalData();
     }
   }
@@ -156,24 +163,80 @@ document.addEventListener('DOMContentLoaded', () => {
   navHome.addEventListener('click', (e) => { e.preventDefault(); showSection('landing'); });
   navPortal.addEventListener('click', (e) => { e.preventDefault(); showSection('portal'); });
 
-  // مستمعات النقر لأيقونات الموبايل الدائرية
-  const mobHomeBtn = document.getElementById('mobile-nav-home');
-  const mobPortalBtn = document.getElementById('mobile-nav-portal');
-  const mobToggleModeBtn = document.getElementById('mobile-btn-toggle-dark-mode');
-  const mobLogoutBtn = document.getElementById('mobile-btn-logout');
+  // ----------------------------------------------------
+  // إدارة القائمة الجانبية المنزلقة للموبايل (Mobile Drawer Setup)
+  // ----------------------------------------------------
+  const mobileDrawer = document.getElementById('mobile-drawer');
+  const mobileMenuTrigger = document.getElementById('mobile-menu-trigger');
+  const mobileDrawerClose = document.getElementById('mobile-drawer-close');
 
-  if (mobHomeBtn) mobHomeBtn.addEventListener('click', () => showSection('landing'));
-  if (mobPortalBtn) mobPortalBtn.addEventListener('click', () => showSection('portal'));
-  if (mobToggleModeBtn) {
-    mobToggleModeBtn.addEventListener('click', () => {
+  if (mobileMenuTrigger && mobileDrawer) {
+    mobileMenuTrigger.addEventListener('click', () => {
+      mobileDrawer.classList.add('active');
+    });
+  }
+
+  if (mobileDrawerClose && mobileDrawer) {
+    mobileDrawerClose.addEventListener('click', () => {
+      mobileDrawer.classList.remove('active');
+    });
+  }
+
+  if (mobileDrawer) {
+    mobileDrawer.addEventListener('click', (e) => {
+      if (e.target === mobileDrawer) {
+        mobileDrawer.classList.remove('active');
+      }
+    });
+  }
+
+  // عناصر القائمة الجانبية في الـ Drawer
+  const drawerNavHome = document.getElementById('drawer-nav-home');
+  const drawerNavPortal = document.getElementById('drawer-nav-portal');
+  const drawerNavAdmin = document.getElementById('drawer-nav-admin');
+  const drawerBtnToggleTheme = document.getElementById('drawer-btn-toggle-theme');
+  const drawerBtnLogout = document.getElementById('drawer-btn-logout');
+
+  function updateDrawerActiveItem(activeId) {
+    document.querySelectorAll('.drawer-menu-item').forEach(item => {
+      item.classList.remove('active');
+    });
+    const activeItem = document.getElementById(activeId);
+    if (activeItem) activeItem.classList.add('active');
+  }
+
+  if (drawerNavHome) {
+    drawerNavHome.addEventListener('click', () => {
+      showSection('landing');
+      if (mobileDrawer) mobileDrawer.classList.remove('active');
+    });
+  }
+
+  if (drawerNavPortal) {
+    drawerNavPortal.addEventListener('click', () => {
+      showSection('portal');
+      if (mobileDrawer) mobileDrawer.classList.remove('active');
+    });
+  }
+
+  if (drawerNavAdmin) {
+    drawerNavAdmin.addEventListener('click', () => {
+      window.location.href = 'admin.html';
+    });
+  }
+
+  if (drawerBtnToggleTheme) {
+    drawerBtnToggleTheme.addEventListener('click', () => {
       const desktopBtn = document.getElementById('btn-toggle-dark-mode');
       if (desktopBtn) desktopBtn.click();
     });
   }
-  if (mobLogoutBtn) {
-    mobLogoutBtn.addEventListener('click', () => {
+
+  if (drawerBtnLogout) {
+    drawerBtnLogout.addEventListener('click', () => {
       const desktopLogout = document.getElementById('btn-logout');
       if (desktopLogout) desktopLogout.click();
+      if (mobileDrawer) mobileDrawer.classList.remove('active');
     });
   }
 
