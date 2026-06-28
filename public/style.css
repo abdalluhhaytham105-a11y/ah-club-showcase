@@ -1385,37 +1385,50 @@ body.light-mode .portal-alert-card.alert-green {
 /* ---------------------------------------------------- */
 
 .circle-nav-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-light);
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: var(--transition-smooth);
-  text-decoration: none;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: rgba(3, 7, 18, 0.6) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(0, 240, 255, 0.25) !important;
+  color: var(--primary-cyan) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  font-size: 1.15rem !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  text-decoration: none !important;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.15), inset 0 0 5px rgba(0, 240, 255, 0.1) !important;
 }
 
 body.light-mode .circle-nav-btn {
-  background: rgba(0, 0, 0, 0.02);
+  background: rgba(255, 255, 255, 0.7) !important;
+  border-color: rgba(0, 240, 255, 0.4) !important;
+  box-shadow: 0 4px 10px rgba(0, 240, 255, 0.1) !important;
 }
 
 .circle-nav-btn:hover, .circle-nav-btn.active {
-  border-color: var(--primary-cyan);
-  color: var(--primary-cyan);
-  box-shadow: 0 0 10px var(--primary-glow);
-  background: rgba(0, 240, 255, 0.05);
+  border-color: rgba(0, 240, 255, 0.8) !important;
+  color: #ffffff !important;
+  background: rgba(0, 240, 255, 0.15) !important;
+  box-shadow: 0 0 18px rgba(0, 240, 255, 0.6), inset 0 0 8px rgba(0, 240, 255, 0.3) !important;
+  transform: translateY(-2px) scale(1.05) !important;
+}
+
+.circle-nav-btn.logout {
+  border-color: rgba(255, 85, 85, 0.3) !important;
+  color: #ff5555 !important;
+  box-shadow: 0 0 10px rgba(255, 85, 85, 0.15), inset 0 0 5px rgba(255, 85, 85, 0.1) !important;
 }
 
 .circle-nav-btn.logout:hover {
-  border-color: #ff5555;
-  color: #ff5555;
-  box-shadow: 0 0 10px rgba(255, 85, 85, 0.2);
-  background: rgba(255, 85, 85, 0.05);
+  border-color: rgba(255, 85, 85, 0.8) !important;
+  color: #ffffff !important;
+  background: rgba(255, 85, 85, 0.15) !important;
+  box-shadow: 0 0 18px rgba(255, 85, 85, 0.6), inset 0 0 8px rgba(255, 85, 85, 0.3) !important;
+  transform: translateY(-2px) scale(1.05) !important;
 }
 
 #mobile-logged-in-controls {
@@ -1423,95 +1436,109 @@ body.light-mode .circle-nav-btn {
 }
 
 @media (max-width: 768px) {
-  header {
-    padding: 0.6rem 1rem !important;
-    flex-direction: row !important;
+  /* إجبار الهيدر على أن يكون صف واحد متناسق عند تسجيل الدخول */
+  body.user-logged-in header {
+    flex-direction: row-reverse !important;
     justify-content: space-between !important;
     align-items: center !important;
-    height: auto !important;
+    padding: 0.5rem 1rem !important;
     gap: 0 !important;
+    height: 70px !important;
+    background: rgba(3, 7, 18, 0.9) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.15) !important;
   }
   
-  header .logo-container {
+  body.user-logged-in header .logo-container {
     margin-bottom: 0 !important;
   }
   
-  header .nav-links {
+  body.user-logged-in header .nav-links {
     display: none !important;
   }
   
-  #user-profile-container {
+  body.user-logged-in #user-profile-container {
     display: none !important;
   }
   
-  /* تبديل حالة الهيدر للموبايل عند تسجيل الدخول */
   body.user-logged-in #btn-toggle-dark-mode {
     display: none !important;
   }
   
   body.user-logged-in #mobile-logged-in-controls {
     display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
   }
 
   /* شبكة المشاريع ثنائية الأعمدة للمحمول */
   .projects-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.6rem !important;
-    padding: 0.5rem !important;
+    gap: 0.5rem !important;
+    padding: 0.4rem !important;
   }
   
   .project-card {
-    border-radius: 10px !important;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+    background: rgba(15, 23, 42, 0.45) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(0, 240, 255, 0.1) !important;
   }
   
   .project-card-image-wrapper {
-    height: 95px !important;
+    height: 80px !important;
   }
   
   .project-card-content {
-    padding: 0.6rem !important;
+    padding: 0.5rem !important;
   }
   
   .project-card-title {
-    font-size: 0.78rem !important;
-    margin-bottom: 0.3rem !important;
-    line-height: 1.35 !important;
+    font-size: 0.72rem !important;
+    margin-bottom: 0.2rem !important;
+    line-height: 1.3 !important;
+    font-weight: 700 !important;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   
   .project-card-desc {
-    font-size: 0.68rem !important;
-    line-height: 1.4 !important;
-    margin-bottom: 0.5rem !important;
+    font-size: 0.62rem !important;
+    line-height: 1.3 !important;
+    margin-bottom: 0.4rem !important;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    height: 32px !important;
+    height: 28px !important;
   }
   
-  .project-card-college, .project-card-tech {
-    font-size: 0.62rem !important;
+  .project-card-college {
+    font-size: 0.58rem !important;
+    color: var(--primary-cyan) !important;
   }
   
   .project-card-tech {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-top: 0.2rem !important;
+    display: none !important;
   }
   
   .project-card-footer {
-    padding: 0.5rem 0.6rem !important;
+    padding: 0.4rem 0.5rem !important;
     margin-top: 0 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
   }
   
   .project-card-footer .btn {
-    font-size: 0.65rem !important;
-    padding: 0.3rem 0.6rem !important;
+    font-size: 0.62rem !important;
+    padding: 0.25rem 0.5rem !important;
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
   }
 }
 
