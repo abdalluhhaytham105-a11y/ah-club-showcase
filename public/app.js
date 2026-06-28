@@ -154,11 +154,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showSection(section) {
+    const mobileProfileAvatarBtn = document.getElementById('mobile-profile-avatar-btn');
+
     if (section === 'landing') {
       landingView.classList.remove('hidden');
       studentPortalView.classList.add('hidden');
       navHome.classList.add('active');
       navPortal.classList.remove('active');
+      if (mobileProfileAvatarBtn) mobileProfileAvatarBtn.classList.remove('active');
       animateCounters();
     } else if (section === 'portal') {
       if (!currentUser) {
@@ -169,6 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
       studentPortalView.classList.remove('hidden');
       navHome.classList.remove('active');
       navPortal.classList.add('active');
+      if (mobileProfileAvatarBtn) mobileProfileAvatarBtn.classList.add('active');
       loadPortalData();
     }
   }
@@ -190,11 +194,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // مستمع نقر لزر أفاتار الموبايل لفتح بوابة الطالب مباشرة
+  // مستمع نقر لزر أفاتار الموبايل لفتح بوابة الطالب مباشرة والرجوع للوحة التحكم
   const mobileProfileAvatarBtn = document.getElementById('mobile-profile-avatar-btn');
   if (mobileProfileAvatarBtn) {
     mobileProfileAvatarBtn.addEventListener('click', () => {
       showSection('portal');
+      showPortalPanel('dashboard'); // دائماً يرجع لـ حسابي وإحصائياتي عند النقر
     });
   }
 
