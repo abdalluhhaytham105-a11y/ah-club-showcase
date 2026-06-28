@@ -60,11 +60,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // تابات البوابة للطلاب
   const menuMyDashboard = document.getElementById('menu-my-dashboard');
   const menuMyRequests = document.getElementById('menu-my-requests');
+  const menuProjectsRegistry = document.getElementById('menu-projects-registry');
   const menuNewRequest = document.getElementById('menu-new-request');
   const portalDashboardPanel = document.getElementById('portal-dashboard-panel');
   const portalRequestsPanel = document.getElementById('portal-requests-panel');
+  const portalRegistryPanel = document.getElementById('portal-registry-panel');
   const portalNewRequestPanel = document.getElementById('portal-new-request-panel');
   const studentRequestsTableBody = document.getElementById('student-requests-table-body');
+  const studentRegistryTableBody = document.getElementById('student-registry-table-body');
   const newRequestForm = document.getElementById('new-request-form');
 
   // مودال تتبع الطلب والدفع
@@ -488,11 +491,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // إزالة التنشيط عن التبويبات
     menuMyDashboard.classList.remove('active');
     menuMyRequests.classList.remove('active');
+    if (menuProjectsRegistry) menuProjectsRegistry.classList.remove('active');
     menuNewRequest.classList.remove('active');
 
     // إخفاء جميع اللوحات
     portalDashboardPanel.classList.add('hidden');
     portalRequestsPanel.classList.add('hidden');
+    if (portalRegistryPanel) portalRegistryPanel.classList.add('hidden');
     portalNewRequestPanel.classList.add('hidden');
 
     if (panel === 'dashboard') {
@@ -502,6 +507,10 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (panel === 'requests') {
       menuMyRequests.classList.add('active');
       portalRequestsPanel.classList.remove('hidden');
+    } else if (panel === 'registry') {
+      if (menuProjectsRegistry) menuProjectsRegistry.classList.add('active');
+      if (portalRegistryPanel) portalRegistryPanel.classList.remove('hidden');
+      loadRegistryData();
     } else {
       menuNewRequest.classList.add('active');
       portalNewRequestPanel.classList.remove('hidden');
@@ -520,6 +529,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   menuMyDashboard.addEventListener('click', () => showPortalPanel('dashboard'));
   menuMyRequests.addEventListener('click', () => showPortalPanel('requests'));
+  if (menuProjectsRegistry) {
+    menuProjectsRegistry.addEventListener('click', () => showPortalPanel('registry'));
+  }
   menuNewRequest.addEventListener('click', () => showPortalPanel('new-request'));
 
   async function loadPortalData() {
@@ -634,6 +646,110 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       console.error(err);
     }
+  }
+
+  // ----------------------------------------------------
+  // سجل المشاريع والطلبات المنظم للطالب
+  // ----------------------------------------------------
+  let allStudentRegistryRequests = [];
+
+  async function loadRegistryData() {
+    try {
+      const response = await fetch(`/api/requests?studentId=${currentUser.id}`);
+      allStudentRegistryRequests = await response.json();
+      filterStudentRegistry();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  window.loadRegistryData = loadRegistryData; // جعلها عالمية للوصول إليها من التبويبات
+
+  function filterStudentRegistry() {
+    const filterTabsContainer = document.getElementById('student-registry-filters');
+    if (!filterTabsContainer) {
+      renderStudentRegistry(allStudentRegistryRequests);
+      return;
+    }
+    const activeTab = filterTabsContainer.querySelector('.filter-tab.active');
+    const statusFilter = activeTab ? activeTab.getAttribute('data-status') : 'all';
+
+    let filtered = allStudentRegistryRequests;
+    if (statusFilter === 'completed') {
+      filtered = allStudentRegistryRequests.filter(r => r.status === 'completed');
+    } else if (statusFilter === 'active') {
+      filtered = allStudentRegistryRequests.filter(r => r.status !== 'completed' && r.status !== 'cancelled');
+    } else if (statusFilter === 'cancelled') {
+      filtered = allStudentRegistryRequests.filter(r => r.status === 'cancelled');
+    }
+
+    renderStudentRegistry(filtered);
+  }
+
+  // ربط مستمعات تصفية السجل المطور للطلاب
+  setTimeout(() => {
+    const filterTabsContainer = document.getElementById('student-registry-filters');
+    if (filterTabsContainer) {
+      const tabs = filterTabsContainer.querySelectorAll('.filter-tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+          tabs.forEach(t => t.classList.remove('active'));
+          e.currentTarget.classList.add('active');
+          filterStudentRegistry();
+        });
+      });
+    }
+  }, 100);
+
+  function renderStudentRegistry(requests) {
+    if (!studentRegistryTableBody) return;
+    studentRegistryTableBody.innerHTML = '';
+
+    if (requests.length === 0) {
+      studentRegistryTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 2rem;">لا توجد مشاريع مسجلة مطابقة في هذا الفلتر حالياً.</td></tr>`;
+      return;
+    }
+
+    requests.slice().reverse().forEach(r => {
+      const tr = document.createElement('tr');
+      const formattedDate = new Date(r.createdAt).toLocaleDateString('ar-EG');
+      const priceText = r.price > 0 ? `${r.price} EGP` : 'يحدد لاحقاً';
+      
+      let actionColumn = '';
+      if (r.status === 'completed') {
+        actionColumn = `
+          <a href="${r.deliveryFile}" class="btn btn-secondary btn-xs btn-dl-proj" download style="display:inline-flex; align-items:center; gap:0.3rem;">
+            تحميل المشروع <i class="fa-solid fa-cloud-arrow-down"></i>
+          </a>
+        `;
+      } else {
+        actionColumn = `
+          <button class="btn btn-outline btn-xs btn-track-order" data-id="${r.id}" style="display:inline-flex; align-items:center; gap:0.3rem;">
+            تتبع التفاصيل <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        `;
+      }
+
+      tr.innerHTML = `
+        <td style="font-weight: 700;">
+          <div>${r.title}</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">رقم الطلب: ${r.id}</div>
+        </td>
+        <td>${formattedDate}</td>
+        <td style="font-family: 'Orbitron', sans-serif;">${priceText}</td>
+        <td><span class="badge ${getBadgeClass(r.status)}">${getStatusLabel(r.status)}</span></td>
+        <td>${actionColumn}</td>
+      `;
+      studentRegistryTableBody.appendChild(tr);
+    });
+
+    // ربط الأحداث بالأزرار
+    document.querySelectorAll('#student-registry-table-body .btn-track-order').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        openOrderStatusModal(id);
+      });
+    });
   }
 
   function renderStudentRequests(requests) {
