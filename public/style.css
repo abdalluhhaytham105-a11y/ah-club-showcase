@@ -1478,13 +1478,12 @@ body.light-mode .circle-nav-btn {
   transform: translateY(-2px) scale(1.05) !important;
 }
 
-#mobile-logged-in-controls {
+#mobile-header-controls {
   display: none !important;
 }
 
 @media (max-width: 768px) {
-  /* إجبار الهيدر على أن يكون صف واحد متناسق عند تسجيل الدخول */
-  body.user-logged-in header {
+  header {
     flex-direction: row-reverse !important;
     justify-content: space-between !important;
     align-items: center !important;
@@ -1497,38 +1496,58 @@ body.light-mode .circle-nav-btn {
     border-bottom: 1px solid rgba(0, 240, 255, 0.15) !important;
   }
   
-  body.user-logged-in header .logo-container {
+  header .logo-container {
     margin-bottom: 0 !important;
   }
 
-  body.user-logged-in header .logo-container img {
+  header .logo-container img {
     height: 28px !important;
   }
 
-  body.user-logged-in header .logo-container h1 {
+  header .logo-container h1 {
     font-size: 0.95rem !important;
   }
   
-  body.user-logged-in header .nav-links {
+  header .nav-links {
     display: none !important;
   }
   
-  body.user-logged-in #user-profile-container {
+  #user-profile-container {
     display: none !important;
   }
   
-  body.user-logged-in #btn-toggle-dark-mode {
+  #auth-buttons-container {
     display: none !important;
   }
   
-  body.user-logged-in #mobile-logged-in-controls {
+  #mobile-header-controls {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
     gap: 0.5rem !important;
   }
 
-  body.user-logged-in header .circle-nav-btn {
+  #mobile-auth-btn {
+    font-size: 0.72rem !important;
+    padding: 0.35rem 0.65rem !important;
+    border-radius: 20px !important;
+    font-weight: 700 !important;
+    font-family: 'Cairo' !important;
+  }
+
+  #mobile-auth-btn.logged-out {
+    background: rgba(0, 240, 255, 0.05) !important;
+    border: 1px solid var(--primary-cyan) !important;
+    color: var(--primary-cyan) !important;
+  }
+
+  #mobile-auth-btn.logged-in {
+    background: rgba(255, 85, 85, 0.08) !important;
+    border: 1px solid #ff5555 !important;
+    color: #ff5555 !important;
+  }
+
+  header .circle-nav-btn {
     width: 38px !important;
     height: 38px !important;
     font-size: 1.05rem !important;

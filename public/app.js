@@ -88,13 +88,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // تهيئة وتنسيق الدخول
   // ----------------------------------------------------
   function updateAuthUI() {
-    const mobileLoggedInControls = document.getElementById('mobile-logged-in-controls');
+    const mobileHeaderControls = document.getElementById('mobile-header-controls');
+    const mobileAuthBtn = document.getElementById('mobile-auth-btn');
     
     // عناصر القائمة الجانبية المنزلقة للموبايل (Mobile Slide Drawer)
     const drawerAvatar = document.getElementById('drawer-avatar');
     const drawerUsername = document.getElementById('drawer-username');
     const drawerUserRole = document.getElementById('drawer-user-role');
     const drawerNavAdmin = document.getElementById('drawer-nav-admin');
+    const drawerNavPortal = document.getElementById('drawer-nav-portal');
+    const drawerBtnLogout = document.getElementById('drawer-btn-logout');
+
+    // جعل حزمة الموبايل دائماً مرئية
+    if (mobileHeaderControls) mobileHeaderControls.style.display = 'flex';
 
     if (currentUser) {
       authButtonsContainer.classList.add('hidden');
@@ -102,13 +108,23 @@ document.addEventListener('DOMContentLoaded', () => {
       userWelcomeMsg.innerHTML = `<i class="fa-solid fa-user-astronaut"></i> مرحباً، ${currentUser.name.split(' ')[0]}`;
       navPortal.classList.remove('hidden');
       document.body.classList.add('user-logged-in');
-      if (mobileLoggedInControls) mobileLoggedInControls.style.display = 'flex';
+      
+      // تحديث زر الدخول/الخروج في الهيدر للمسجلين (أحمر)
+      if (mobileAuthBtn) {
+        mobileAuthBtn.className = 'btn logged-in';
+        mobileAuthBtn.innerHTML = 'خروج <i class="fa-solid fa-right-from-bracket"></i>';
+      }
       
       // تعبئة بيانات الطالب بداخل القائمة الجانبية المنزلقة
       if (drawerAvatar) drawerAvatar.innerText = currentUser.name ? currentUser.name[0].toUpperCase() : '?';
       if (drawerUsername) drawerUsername.innerText = currentUser.name;
       if (drawerUserRole) {
         drawerUserRole.innerText = currentUser.role === 'admin' ? 'مطور المنصة ⚙️' : 'طالب علم 🚀';
+      }
+      if (drawerNavPortal) drawerNavPortal.classList.remove('hidden');
+      if (drawerBtnLogout) {
+        drawerBtnLogout.innerHTML = '<i class="fa-solid fa-right-from-bracket" style="width: 20px;"></i> تسجيل الخروج';
+        drawerBtnLogout.style.color = '#ff5555';
       }
 
       if (currentUser.role === 'admin') {
@@ -131,7 +147,21 @@ document.addEventListener('DOMContentLoaded', () => {
       navPortal.classList.add('hidden');
       navAdmin.classList.add('hidden');
       document.body.classList.remove('user-logged-in');
-      if (mobileLoggedInControls) mobileLoggedInControls.style.display = 'none';
+      
+      // تحديث زر الدخول/الخروج في الهيدر للزوار (سماوي)
+      if (mobileAuthBtn) {
+        mobileAuthBtn.className = 'btn logged-out';
+        mobileAuthBtn.innerHTML = 'دخول <i class="fa-solid fa-arrow-right-to-bracket"></i>';
+      }
+      
+      // تعديل خيارات القائمة الجانبية لغير المسجلين
+      if (drawerNavPortal) drawerNavPortal.classList.add('hidden');
+      if (drawerNavAdmin) drawerNavAdmin.classList.add('hidden');
+      if (drawerBtnLogout) {
+        drawerBtnLogout.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket" style="width: 20px;"></i> تسجيل الدخول';
+        drawerBtnLogout.style.color = 'var(--primary-cyan)';
+      }
+      
       showSection('landing');
       document.body.classList.remove('gold-theme');
     }
@@ -225,17 +255,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (drawerBtnToggleTheme) {
-    drawerBtnToggleTheme.addEventListener('click', () => {
-      const desktopBtn = document.getElementById('btn-toggle-dark-mode');
-      if (desktopBtn) desktopBtn.click();
+  // مستمع نقر لزر الدخول/الخروج في هيدر الموبايل
+  const mobileAuthBtn = document.getElementById('mobile-auth-btn');
+  if (mobileAuthBtn) {
+    mobileAuthBtn.addEventListener('click', () => {
+      if (currentUser) {
+        const desktopLogout = document.getElementById('btn-logout');
+        if (desktopLogout) desktopLogout.click();
+      } else {
+        openAuthModal('login');
+      }
     });
   }
 
   if (drawerBtnLogout) {
     drawerBtnLogout.addEventListener('click', () => {
-      const desktopLogout = document.getElementById('btn-logout');
-      if (desktopLogout) desktopLogout.click();
+      if (currentUser) {
+        const desktopLogout = document.getElementById('btn-logout');
+        if (desktopLogout) desktopLogout.click();
+      } else {
+        openAuthModal('login');
+      }
       if (mobileDrawer) mobileDrawer.classList.remove('active');
     });
   }

@@ -24,11 +24,6 @@
       <li><a href="admin.html" id="nav-admin" class="hidden">لوحة المطور</a></li>
     </ul>
 
-    <!-- زر التبديل البسيط بين الوضع الفاتح والداكن -->
-    <button class="theme-btn" id="btn-toggle-dark-mode" title="تبديل المظهر الفاتح/الداكن" style="font-size: 1.1rem; padding: 0.4rem 0.6rem;">
-      <i class="fa-solid fa-moon" id="toggle-mode-icon"></i>
-    </button>
-
     <div class="auth-buttons" id="auth-buttons-container">
       <button class="btn btn-outline" id="btn-login-trigger">تسجيل الدخول</button>
       <button class="btn btn-primary" id="btn-register-trigger">إنشاء حساب</button>
@@ -38,9 +33,10 @@
       <button class="btn btn-outline" id="btn-logout">خروج <i class="fa-solid fa-right-from-bracket"></i></button>
     </div>
 
-    <!-- زر القائمة الجانبية المنزلقة للموبايل عند تسجيل الدخول -->
-    <div class="mobile-logged-in-nav" id="mobile-logged-in-controls" style="align-items: center; display: none;">
-      <button class="circle-nav-btn" id="mobile-menu-trigger" title="القائمة الرئيسية ☰" style="width: 38px; height: 38px; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.25);">
+    <!-- حزمة التحكم الخاصة بالموبايل (الهامبرغر وزر الدخول/الخروج) -->
+    <div id="mobile-header-controls" style="display: flex; align-items: center; gap: 0.6rem;">
+      <button class="btn" id="mobile-auth-btn" style="font-family: 'Cairo'; font-size: 0.75rem; padding: 0.35rem 0.75rem; border-radius: 20px; font-weight: 700; transition: all 0.3s ease;"></button>
+      <button class="circle-nav-btn" id="mobile-menu-trigger" title="القائمة الرئيسية ☰" style="width: 38px; height: 38px; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 50%; color: #fff;">
         <i class="fa-solid fa-bars"></i>
       </button>
     </div>
@@ -770,9 +766,7 @@
         <li class="drawer-menu-item hidden" id="drawer-nav-admin">
           <i class="fa-solid fa-user-gear" style="width: 20px;"></i> لوحة المطور
         </li>
-        <li class="drawer-menu-item" id="drawer-btn-toggle-theme">
-          <i class="fa-solid fa-moon" style="width: 20px;"></i> تبديل المظهر
-        </li>
+
         <li class="drawer-menu-item logout" id="drawer-btn-logout" style="margin-top: auto; border-top: 1px solid rgba(255, 85, 85, 0.1); padding-top: 1rem; color: #ff5555; display: flex; align-items: center; gap: 1rem; cursor: pointer;">
           <i class="fa-solid fa-right-from-bracket" style="width: 20px;"></i> تسجيل الخروج
         </li>
