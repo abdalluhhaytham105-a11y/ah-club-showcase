@@ -11,6 +11,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+  <!-- خلفية النجوم التفاعلية المضيئة -->
+  <canvas id="starfield-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;"></canvas>
 
   <!-- هيدر صفحة الأدمن -->
   <header>
@@ -22,18 +24,10 @@
       <li><a href="index.html"><i class="fa-solid fa-arrow-right-to-bracket"></i> العودة للموقع الرئيسي</a></li>
     </ul>
     
-    <!-- اختيار الثيم المظهري للموقع بداخل لوحة الأدمن -->
-    <div class="theme-selector-dropdown">
-      <button class="theme-btn" id="theme-menu-btn">
-        <i class="fa-solid fa-palette"></i> المظهر
-      </button>
-      <div class="theme-menu" id="theme-options-menu">
-        <div class="theme-option active" data-theme="space"><i class="fa-solid fa-user-astronaut"></i> الفضائي المظلم</div>
-        <div class="theme-option" data-theme="cyber"><i class="fa-solid fa-bolt" style="color: #ff00b4;"></i> السايبربانك</div>
-        <div class="theme-option" data-theme="gold"><i class="fa-solid fa-crown" style="color: #d4af37;"></i> الذهبي الملكي</div>
-        <div class="theme-option" data-theme="green"><i class="fa-solid fa-leaf" style="color: #10b981;"></i> الشفق الأخضر</div>
-      </div>
-    </div>
+    <!-- زر التبديل البسيط بين الوضع الفاتح والداكن -->
+    <button class="theme-btn" id="btn-toggle-dark-mode" title="تبديل المظهر الفاتح/الداكن" style="font-size: 1.1rem; padding: 0.4rem 0.6rem;">
+      <i class="fa-solid fa-moon" id="toggle-mode-icon"></i>
+    </button>
 
     <div class="auth-buttons">
       <span style="font-weight: 700; color: var(--secondary-magenta);"><i class="fa-solid fa-user-gear"></i> لوحة المطور</span>
@@ -442,6 +436,26 @@
             <input type="number" id="order-price-input" class="form-control" placeholder="مثال: 1200" required min="1">
           </div>
           <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">قبول الطلب وإرسال التسعيرة للطلاب</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- هـ) مودال إلغاء الطلب وكتابة السبب -->
+  <div class="modal-overlay" id="admin-cancel-modal">
+    <div class="modal-container" style="max-width: 450px;">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color: #ff5555;">إلغاء طلب المشروع 🚫</h3>
+        <button class="modal-close" id="admin-cancel-modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h4 id="cancel-modal-order-title" style="font-weight: 700; margin-bottom: 1rem;">عنوان الطلب المختار</h4>
+        <form id="cancel-order-form">
+          <div class="form-group">
+            <label for="order-cancel-reason-input">اكتب سبب إلغاء الطلب بالتفصيل (سيظهر للطالب مباشرة):</label>
+            <textarea id="order-cancel-reason-input" class="form-control" placeholder="مثال: نعتذر منك، لا توجد إمكانية لتنفيذ هذا المشروع خلال الوقت المطلوب..." required style="min-height: 80px; resize: vertical; font-family: 'Cairo', sans-serif; padding: 0.6rem;"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #ff5555 0%, #b91c1c 100%); border-color: #ff5555; box-shadow: 0 0 10px rgba(255, 85, 85, 0.25); color: #fff;">تأكيد إلغاء الطلب وإبلاغ الطالب</button>
         </form>
       </div>
     </div>

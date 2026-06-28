@@ -1,7 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Orbitron:wght@500;700;900&display=swap');
 
-/* 1. ثيم العمق الفضائي المظلم - الافتراضي (Deep Space Theme) */
-body.theme-space, :root {
+:root {
   --bg-deep: hsl(230, 30%, 6%);
   --bg-panel: hsla(230, 25%, 12%, 0.65);
   --bg-card: hsla(230, 20%, 16%, 0.7);
@@ -26,64 +25,67 @@ body.theme-space, :root {
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 2. ثيم السايبربانك المضيء (Cyberpunk Theme) */
-body.theme-cyber {
-  --bg-deep: hsl(280, 40%, 6%);
-  --bg-panel: hsla(280, 30%, 12%, 0.65);
-  --bg-card: hsla(280, 25%, 16%, 0.7);
-  --border-light: rgba(255, 0, 180, 0.15);
+/* الوضع الفاتح (Light Mode Override) */
+body.light-mode {
+  --bg-deep: hsl(210, 20%, 95%);
+  --bg-panel: hsla(210, 25%, 90%, 0.85);
+  --bg-card: hsla(0, 0%, 100%, 0.9);
+  --border-light: rgba(15, 23, 42, 0.08);
   
-  --primary-cyan: hsl(300, 100%, 55%); /* Bright Pink */
-  --primary-glow: hsla(300, 100%, 55%, 0.35);
+  --primary-cyan: hsl(195, 100%, 40%); /* Cyan adjust for high contrast */
+  --primary-glow: hsla(195, 100%, 40%, 0.15);
   
-  --secondary-magenta: hsl(260, 100%, 60%); /* Electric Purple */
-  --secondary-glow: hsla(260, 100%, 60%, 0.35);
+  --secondary-magenta: hsl(325, 90%, 45%);
+  --secondary-glow: hsla(325, 90%, 45%, 0.15);
   
-  --accent-gold: hsl(190, 100%, 50%); /* Cyan accent instead of Gold */
-  --accent-gold-glow: hsla(190, 100%, 50%, 0.3);
+  --accent-gold: hsl(35, 90%, 42%);
+  --accent-gold-glow: hsla(35, 90%, 42%, 0.12);
   
-  --neon-shadow-cyan: 0 0 10px var(--primary-cyan), 0 0 20px rgba(255, 0, 220, 0.15);
-  --neon-shadow-magenta: 0 0 10px var(--secondary-magenta), 0 0 20px rgba(120, 0, 255, 0.15);
+  --text-primary: #0f172a; /* Slate 900 */
+  --text-secondary: #475569; /* Slate 600 */
+  --text-muted: #94a3b8; /* Slate 400 */
+  
+  --neon-shadow-cyan: 0 4px 12px rgba(14, 116, 144, 0.15);
+  --neon-shadow-magenta: 0 4px 12px rgba(190, 24, 74, 0.15);
 }
 
-/* 3. ثيم الذهب الملكي الفاخر (Royal Gold Theme) */
-body.theme-gold {
-  --bg-deep: hsl(30, 15%, 5%);
-  --bg-panel: hsla(30, 20%, 11%, 0.7);
-  --bg-card: hsla(30, 15%, 15%, 0.75);
-  --border-light: rgba(212, 175, 55, 0.15);
-  
-  --primary-cyan: hsl(45, 100%, 55%); /* Gold primary */
-  --primary-glow: hsla(45, 100%, 55%, 0.35);
-  
-  --secondary-magenta: hsl(38, 100%, 50%); /* Orange-Gold secondary */
-  --secondary-glow: hsla(38, 100%, 50%, 0.35);
-  
-  --accent-gold: hsl(45, 100%, 50%);
-  --accent-gold-glow: hsla(45, 100%, 50%, 0.3);
-  
-  --neon-shadow-cyan: 0 0 10px var(--primary-cyan), 0 0 20px rgba(212, 175, 55, 0.15);
-  --neon-shadow-magenta: 0 0 10px var(--secondary-magenta), 0 0 20px rgba(212, 175, 55, 0.1);
+body.light-mode header {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02) !important;
 }
 
-/* 4. ثيم الشفق الأخضر المضيء (Aurora Green Theme) */
-body.theme-green {
-  --bg-deep: hsl(160, 25%, 5%);
-  --bg-panel: hsla(160, 20%, 11%, 0.65);
-  --bg-card: hsla(160, 15%, 15%, 0.7);
-  --border-light: rgba(16, 185, 129, 0.15);
-  
-  --primary-cyan: hsl(150, 100%, 45%); /* Emerald Green */
-  --primary-glow: hsla(150, 100%, 45%, 0.35);
-  
-  --secondary-magenta: hsl(175, 100%, 40%); /* Teal Secondary */
-  --secondary-glow: hsla(175, 100%, 40%, 0.35);
-  
-  --accent-gold: hsl(45, 100%, 50%);
-  --accent-gold-glow: hsla(45, 100%, 50%, 0.3);
-  
-  --neon-shadow-cyan: 0 0 10px var(--primary-cyan), 0 0 20px rgba(16, 185, 129, 0.15);
-  --neon-shadow-magenta: 0 0 10px var(--secondary-magenta), 0 0 20px rgba(20, 184, 166, 0.15);
+body.light-mode .portal-sidebar {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-left: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+body.light-mode .portal-menu-item.active {
+  background: rgba(14, 116, 144, 0.08) !important;
+}
+
+body.light-mode .custom-table th {
+  background: rgba(14, 116, 144, 0.06) !important;
+  color: #0f172a !important;
+}
+
+body.light-mode .custom-table td {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+body.light-mode .custom-table tr:hover {
+  background: rgba(0, 0, 0, 0.02) !important;
+}
+
+body.light-mode .form-control {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  color: #0f172a !important;
+}
+
+body.light-mode .form-control:focus {
+  border-color: var(--primary-cyan) !important;
+  box-shadow: 0 0 8px rgba(14, 116, 144, 0.2) !important;
 }
 
 * {
@@ -873,6 +875,12 @@ textarea.form-control {
   border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
+.badge-cancelled {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
 /* واجهة الأدمن */
 .admin-grid {
   display: grid;
@@ -1275,45 +1283,100 @@ body.gold-theme .btn-primary:hover {
 }
 
 .theme-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  margin-top: 0.5rem;
-  background: var(--bg-card);
+/* تنسيق زر تبديل الوضع الفاتح والداكن */
+.theme-btn {
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-light);
-  border-radius: 12px;
-  min-width: 160px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-  display: none;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.theme-menu.active {
-  display: flex;
-}
-
-.theme-option {
-  padding: 0.6rem 1rem;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
   color: var(--text-secondary);
   cursor: pointer;
-  font-size: 0.8rem;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  justify-content: center;
   transition: var(--transition-smooth);
-  text-align: right;
 }
 
-.theme-option:hover {
-  background: rgba(255, 255, 255, 0.05);
+.theme-btn:hover {
+  border-color: var(--primary-cyan);
   color: var(--primary-cyan);
+  box-shadow: 0 0 10px var(--primary-glow);
+  transform: rotate(15deg);
 }
 
-.theme-option.active {
-  background: var(--primary-glow);
-  color: var(--primary-cyan);
-  font-weight: 700;
+/* تنسيق بنر إشعارات لوحة التحكم الرئيسية */
+.portal-alert-card {
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  border: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.8rem;
+  animation: slide-down 0.3s ease;
+  direction: rtl;
+}
+
+.portal-alert-info {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex: 1;
+}
+
+.portal-alert-info i {
+  font-size: 1.4rem;
+}
+
+.portal-alert-card.alert-blue {
+  background: rgba(0, 240, 255, 0.05);
+  border-color: rgba(0, 240, 255, 0.15);
+  color: #00f0ff;
+}
+body.light-mode .portal-alert-card.alert-blue {
+  background: rgba(14, 116, 144, 0.06);
+  border-color: rgba(14, 116, 144, 0.2);
+  color: #0e7490;
+}
+
+.portal-alert-card.alert-gold {
+  background: rgba(212, 175, 55, 0.05);
+  border-color: rgba(212, 175, 55, 0.15);
+  color: var(--accent-gold);
+}
+body.light-mode .portal-alert-card.alert-gold {
+  background: rgba(161, 98, 7, 0.06);
+  border-color: rgba(161, 98, 7, 0.18);
+  color: #a16207;
+}
+
+.portal-alert-card.alert-red {
+  background: rgba(255, 85, 85, 0.05);
+  border-color: rgba(255, 85, 85, 0.15);
+  color: #ff5555;
+}
+body.light-mode .portal-alert-card.alert-red {
+  background: rgba(185, 28, 28, 0.06);
+  border-color: rgba(185, 28, 28, 0.18);
+  color: #b91c1c;
+}
+
+.portal-alert-card.alert-green {
+  background: rgba(16, 185, 129, 0.05);
+  border-color: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+body.light-mode .portal-alert-card.alert-green {
+  background: rgba(4, 120, 87, 0.06);
+  border-color: rgba(4, 120, 87, 0.18);
+  color: #047857;
+}
+
+@keyframes slide-down {
+  0% { transform: translateY(-10px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
 }
 

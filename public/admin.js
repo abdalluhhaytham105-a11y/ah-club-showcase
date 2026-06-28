@@ -256,15 +256,24 @@ document.addEventListener('DOMContentLoaded', () => {
         actionButtons = `<span style="font-size: 0.8rem; color: var(--text-muted);">في انتظار تحويل الطالب</span>`;
       } else if (r.status === 'ready_payment_verify') {
         actionButtons = `
-          <div style="display: flex; gap: 0.4rem;">
-            <button class="btn btn-primary btn-xs btn-admin-confirm-pay" data-id="${r.id}">تأكيد الدفع</button>
-            <button class="btn btn-outline btn-xs btn-view-tx" data-tx="${r.transactionId}" data-method="${r.paymentMethod}">عرض رقم التحويل</button>
+          <div style="display: flex; gap: 0.4rem; flex-direction: column;">
+            <button class="btn btn-primary btn-xs btn-admin-confirm-pay" data-id="${r.id}" style="width: 100%;">تأكيد الدفع</button>
+            <button class="btn btn-outline btn-xs btn-view-tx" data-tx="${r.transactionId}" data-method="${r.paymentMethod}" style="width: 100%;">عرض رقم التحويل</button>
           </div>
         `;
       } else if (r.status === 'paid') {
         actionButtons = `<button class="btn btn-secondary btn-xs btn-admin-deliver" data-id="${r.id}">رفع وتسليم الكود</button>`;
       } else if (r.status === 'completed') {
         actionButtons = `<a href="${r.deliveryFile}" class="btn btn-outline btn-xs" download><i class="fa-solid fa-download"></i> ملف التسليم</a>`;
+      } else if (r.status === 'cancelled') {
+        actionButtons = `<span style="font-size: 0.75rem; color: #ff5555; font-weight: 700;">تم إلغاء الطلب</span>`;
+      }
+
+      // إضافة زر إلغاء الطلب للأدمن لكل الحالات عدا مكتمل وملغي
+      if (r.status !== 'completed' && r.status !== 'cancelled') {
+        actionButtons += `
+          <button class="btn btn-outline btn-xs btn-admin-cancel" data-id="${r.id}" style="color:#ff5555; border-color:rgba(255,85,85,0.25); margin-top:0.4rem; display:block; width:100%; text-align:center;" title="إلغاء الطلب">إلغاء 🚫</button>
+        `;
       }
 
       tr.innerHTML = `
@@ -337,6 +346,13 @@ document.addEventListener('DOMContentLoaded', () => {
         openDeliverModal(id);
       });
     });
+
+    document.querySelectorAll('.btn-admin-cancel').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        openCancelModal(id);
+      });
+    });
   }
 
   // تحديث حالة الطلب
@@ -392,6 +408,57 @@ document.addEventListener('DOMContentLoaded', () => {
     await updateOrderStatus(activeOrderId, 'accepted', price);
     adminPriceModal.classList.remove('active');
   });
+
+  // فتح وإغلاق مودال إلغاء الطلب بالسبب
+  const adminCancelModal = document.getElementById('admin-cancel-modal');
+  const adminCancelModalClose = document.getElementById('admin-cancel-modal-close');
+  const cancelModalOrderTitle = document.getElementById('cancel-modal-order-title');
+  const cancelOrderForm = document.getElementById('cancel-order-form');
+  const orderCancelReasonInput = document.getElementById('order-cancel-reason-input');
+
+  function openCancelModal(id) {
+    activeOrderId = id;
+    const order = allRequests.find(r => r.id === id);
+    if (!order) return;
+
+    if (cancelModalOrderTitle) cancelModalOrderTitle.innerText = order.title;
+    if (orderCancelReasonInput) orderCancelReasonInput.value = '';
+    if (adminCancelModal) adminCancelModal.classList.add('active');
+  }
+
+  if (adminCancelModalClose) {
+    adminCancelModalClose.addEventListener('click', () => {
+      if (adminCancelModal) adminCancelModal.classList.remove('active');
+    });
+  }
+
+  if (cancelOrderForm) {
+    cancelOrderForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const reason = orderCancelReasonInput.value.trim();
+      if (!reason) return;
+
+      try {
+        const response = await fetch(`/api/requests/${activeOrderId}/cancel`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason })
+        });
+
+        if (response.ok) {
+          alert('تم إلغاء الطلب بنجاح وإرسال السبب للطالب!');
+          if (adminCancelModal) adminCancelModal.classList.remove('active');
+          loadRequestsData();
+        } else {
+          const errData = await response.json();
+          alert(errData.error || 'فشل إلغاء الطلب');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('خطأ في الاتصال بالخادم');
+      }
+    });
+  }
 
   // متغيرات تبديل تابات التسليم للأدمن
   let activeDeliverType = 'file';
@@ -804,7 +871,8 @@ document.addEventListener('DOMContentLoaded', () => {
       ready_payment: 'badge-ready-payment',
       ready_payment_verify: 'badge-verify',
       paid: 'badge-progress',
-      completed: 'badge-completed'
+      completed: 'badge-completed',
+      cancelled: 'badge-cancelled'
     };
     return classes[status] || 'badge-pending';
   }
@@ -817,7 +885,8 @@ document.addEventListener('DOMContentLoaded', () => {
       ready_payment: 'جاهز (في انتظار الدفع)',
       ready_payment_verify: 'جاري تأكيد التحويل',
       paid: 'تم تأكيد الدفع وجاري الرفع',
-      completed: 'تم التسليم بنجاح'
+      completed: 'تم التسليم بنجاح',
+      cancelled: 'تم إلغاء الطلب'
     };
     return labels[status] || status;
   }
@@ -1190,36 +1259,27 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ----------------------------------------------------
-  // 8. نظام اختيار وتبديل الثيمات المظهرية للأدمن
+  // 8. نظام اختيار وتبديل الثيمات المظهرية للأدمن البسيط (Light/Dark Mode)
   // ----------------------------------------------------
-  const themeMenuBtn = document.getElementById('theme-menu-btn');
-  const themeOptionsMenu = document.getElementById('theme-options-menu');
-  const themeOptions = document.querySelectorAll('.theme-option');
+  const btnToggleDarkMode = document.getElementById('btn-toggle-dark-mode');
+  const toggleModeIcon = document.getElementById('toggle-mode-icon');
 
-  if (themeMenuBtn && themeOptionsMenu) {
-    themeMenuBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      themeOptionsMenu.classList.toggle('active');
-    });
-
-    document.addEventListener('click', () => {
-      themeOptionsMenu.classList.remove('active');
-    });
-  }
-
-  function applyTheme(themeName) {
-    document.body.classList.remove('theme-space', 'theme-cyber', 'theme-gold', 'theme-green');
-    document.body.classList.add(`theme-${themeName}`);
-
-    themeOptions.forEach(opt => {
-      if (opt.getAttribute('data-theme') === themeName) {
-        opt.classList.add('active');
-      } else {
-        opt.classList.remove('active');
+  function setThemeMode(isLight) {
+    if (isLight) {
+      document.body.classList.add('light-mode');
+      if (toggleModeIcon) {
+        toggleModeIcon.className = 'fa-solid fa-sun';
+        toggleModeIcon.style.color = '#ffb000';
       }
-    });
-
-    localStorage.setItem('selectedTheme', themeName);
+      localStorage.setItem('themeMode', 'light');
+    } else {
+      document.body.classList.remove('light-mode');
+      if (toggleModeIcon) {
+        toggleModeIcon.className = 'fa-solid fa-moon';
+        toggleModeIcon.style.color = '';
+      }
+      localStorage.setItem('themeMode', 'dark');
+    }
 
     // تحديث ألوان المخططات البيانية بالثيم الجديد
     if (allRequests && allRequests.length > 0) {
@@ -1227,15 +1287,101 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  themeOptions.forEach(opt => {
-    opt.addEventListener('click', () => {
-      const selected = opt.getAttribute('data-theme');
-      applyTheme(selected);
+  if (btnToggleDarkMode) {
+    btnToggleDarkMode.addEventListener('click', () => {
+      const isLight = document.body.classList.contains('light-mode');
+      setThemeMode(!isLight);
     });
-  });
+  }
 
-  const savedTheme = localStorage.getItem('selectedTheme') || 'space';
-  applyTheme(savedTheme);
+  const savedThemeMode = localStorage.getItem('themeMode') || 'dark';
+  setThemeMode(savedThemeMode === 'light');
+
+  // ----------------------------------------------------
+  // 8.5 خلفية النجوم التفاعلية المضيئة للأدمن
+  // ----------------------------------------------------
+  const canvas = document.getElementById('starfield-canvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    let mouseX = 0;
+    let mouseY = 0;
+    let mouseActive = false;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      initStars();
+    }
+
+    function initStars() {
+      stars = [];
+      const starsCount = Math.min(Math.round((canvas.width * canvas.height) / 10000), 150);
+      for (let i = 0; i < starsCount; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 1.5 + 0.5,
+          alpha: Math.random(),
+          twinkleSpeed: Math.random() * 0.02 + 0.005,
+          twinkleDirection: Math.random() > 0.5 ? 1 : -1,
+          depth: Math.random() * 0.4 + 0.1
+        });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const isLight = document.body.classList.contains('light-mode');
+      const starColor = isLight ? '15, 23, 42' : '255, 255, 255';
+      
+      stars.forEach(star => {
+        star.alpha += star.twinkleSpeed * star.twinkleDirection;
+        if (star.alpha >= 1) {
+          star.alpha = 1;
+          star.twinkleDirection = -1;
+        } else if (star.alpha <= 0.1) {
+          star.alpha = 0.1;
+          star.twinkleDirection = 1;
+        }
+
+        let driftX = 0;
+        let driftY = 0;
+        if (mouseActive) {
+          const centerX = canvas.width / 2;
+          const centerY = canvas.height / 2;
+          driftX = (mouseX - centerX) * star.depth * 0.1;
+          driftY = (mouseY - centerY) * star.depth * 0.1;
+        }
+
+        ctx.fillStyle = `rgba(${starColor}, ${star.alpha})`;
+        ctx.shadowBlur = isLight ? 0 : star.size * 3;
+        ctx.shadowColor = `rgba(0, 240, 255, ${star.alpha * 0.5})`;
+        ctx.beginPath();
+        ctx.arc(star.x + driftX, star.y + driftY, star.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+    }
+
+    function animate() {
+      drawStars();
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      mouseActive = true;
+    });
+    window.addEventListener('mouseout', () => {
+      mouseActive = false;
+    });
+
+    resizeCanvas();
+    animate();
+  }
 
   // ----------------------------------------------------
   // 9. المخططات البيانية التفاعلية (Chart.js Dashboard)

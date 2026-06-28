@@ -77,6 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const paymentVerifyPending = document.getElementById('payment-verify-pending');
   const deliveryDownloadInfo = document.getElementById('delivery-download-info');
   const orderPendingReviewInfo = document.getElementById('order-pending-review-info');
+  const orderCancelledInfo = document.getElementById('order-cancelled-info');
+  const orderCancelReasonDisplay = document.getElementById('order-cancel-reason-display');
   const paymentSubmissionForm = document.getElementById('payment-submission-form');
   const btnDownloadProjectFiles = document.getElementById('btn-download-project-files');
 
@@ -676,7 +678,8 @@ document.addEventListener('DOMContentLoaded', () => {
       ready_payment: 'badge-ready-payment',
       ready_payment_verify: 'badge-verify',
       paid: 'badge-progress',
-      completed: 'badge-completed'
+      completed: 'badge-completed',
+      cancelled: 'badge-cancelled'
     };
     return classes[status] || 'badge-pending';
   }
@@ -689,7 +692,8 @@ document.addEventListener('DOMContentLoaded', () => {
       ready_payment: 'جاهز (في انتظار الدفع)',
       ready_payment_verify: 'جاري تأكيد التحويل',
       paid: 'تم تأكيد الدفع وجاري الرفع',
-      completed: 'تم التسليم بنجاح'
+      completed: 'تم التسليم بنجاح',
+      cancelled: 'تم إلغاء الطلب'
     };
     return labels[status] || status;
   }
@@ -778,6 +782,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // إخفاء كل أقسام تفاصيل الحالة أولاً
       orderPendingReviewInfo.classList.add('hidden');
+      if (orderCancelledInfo) orderCancelledInfo.classList.add('hidden');
       paymentPricingInfo.classList.add('hidden');
       paymentInstructions.classList.add('hidden');
       paymentVerifyPending.classList.add('hidden');
@@ -822,6 +827,11 @@ document.addEventListener('DOMContentLoaded', () => {
           <i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 1.8rem; margin-bottom: 0.8rem; color: var(--accent-gold);"></i>
           <p style="font-weight: 700;">تم إرسال التحويل الافتراضي! في انتظار تأكيد الأدمن لتفعيل خيار التحميل للبروجيكت.</p>
         `;
+      } else if (order.status === 'cancelled') {
+        if (orderCancelledInfo) orderCancelledInfo.classList.remove('hidden');
+        if (orderCancelReasonDisplay) {
+          orderCancelReasonDisplay.innerText = order.cancellationReason || 'لم يتم ذكر سبب محدد للطلب المرفوض.';
+        }
       } else if (order.status === 'completed') {
         deliveryDownloadInfo.classList.remove('hidden');
         btnDownloadProjectFiles.setAttribute('href', order.deliveryFile);
@@ -1203,6 +1213,63 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('student-stat-total-requests').innerText = totalRequests;
       document.getElementById('student-stat-completed').innerText = completedRequests;
       document.getElementById('student-stat-total-spent').innerText = totalSpent + ' EGP';
+
+      // تحديث بنرات التنبيهات في بوابة الطالب
+      const alertBannerContainer = document.getElementById('portal-alert-banner');
+      if (alertBannerContainer) {
+        alertBannerContainer.innerHTML = '';
+        let hasAlerts = false;
+
+        requests.forEach(r => {
+          let cardClass = '';
+          let icon = '';
+          let text = '';
+          let actionBtn = '';
+
+          if (r.status === 'pending') {
+            cardClass = 'alert-blue';
+            icon = '<i class="fa-solid fa-hourglass-half" style="color: var(--primary-cyan);"></i>';
+            text = `طلبك لـ <strong>"${r.title}"</strong> قيد المراجعة حالياً من قبل المسؤول لتحديد التكلفة ووقت التنفيذ.`;
+            hasAlerts = true;
+          } else if (r.status === 'accepted') {
+            cardClass = 'alert-gold';
+            icon = '<i class="fa-solid fa-circle-check" style="color: var(--accent-gold);"></i>';
+            text = `تمت الموافقة على طلبك لـ <strong>"${r.title}"</strong> وتحديد التكلفة بقيمة <strong style="font-family: 'Orbitron';">${r.price} EGP</strong>. يرجى تأكيد الدفع لبدء العمل.`;
+            actionBtn = `<button class="btn btn-primary btn-xs" onclick="document.getElementById('menu-my-requests').click();" style="font-size:0.75rem; padding:0.3rem 0.6rem; font-family:'Cairo';">الذهاب للدفع ⚡</button>`;
+            hasAlerts = true;
+          } else if (r.status === 'cancelled') {
+            cardClass = 'alert-red';
+            icon = '<i class="fa-solid fa-circle-xmark" style="color: #ff5555;"></i>';
+            text = `تم إلغاء طلبك لـ <strong>"${r.title}"</strong>. السبب: <span style="font-weight:700; text-decoration:underline;">"${r.cancellationReason || 'لا يوجد سبب محدد'}"</span>`;
+            hasAlerts = true;
+          } else if (r.status === 'completed') {
+            cardClass = 'alert-green';
+            icon = '<i class="fa-solid fa-champagne-glasses" style="color: #10b981;"></i>';
+            text = `مبروك! تم الانتهاء من تنفيذ مشروعك <strong>"${r.title}"</strong> بنجاح وجاهز للتحميل الآن!`;
+            actionBtn = `<button class="btn btn-secondary btn-xs" onclick="document.getElementById('menu-my-requests').click();" style="font-size:0.75rem; padding:0.3rem 0.6rem; font-family:'Cairo';">تحميل الملفات 📂</button>`;
+            hasAlerts = true;
+          }
+
+          if (cardClass) {
+            const card = document.createElement('div');
+            card.className = `portal-alert-card ${cardClass}`;
+            card.innerHTML = `
+              <div class="portal-alert-info">
+                ${icon}
+                <span style="margin-right: 0.5rem;">${text}</span>
+              </div>
+              ${actionBtn ? `<div style="margin-right: auto; padding-right: 1rem;">${actionBtn}</div>` : ''}
+            `;
+            alertBannerContainer.appendChild(card);
+          }
+        });
+
+        if (hasAlerts) {
+          alertBannerContainer.classList.remove('hidden');
+        } else {
+          alertBannerContainer.classList.add('hidden');
+        }
+      }
     } catch (err) {
       console.error('Error loading dashboard stats:', err);
     }
@@ -1570,47 +1637,124 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ----------------------------------------------------
-  // 9. نظام اختيار وتبديل الثيمات المظهرية (Themes System)
+  // 9. نظام اختيار وتبديل الثيمات المظهرية البسيط (Light/Dark Mode Switcher)
   // ----------------------------------------------------
-  const themeMenuBtn = document.getElementById('theme-menu-btn');
-  const themeOptionsMenu = document.getElementById('theme-options-menu');
-  const themeOptions = document.querySelectorAll('.theme-option');
+  const btnToggleDarkMode = document.getElementById('btn-toggle-dark-mode');
+  const toggleModeIcon = document.getElementById('toggle-mode-icon');
 
-  if (themeMenuBtn && themeOptionsMenu) {
-    themeMenuBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      themeOptionsMenu.classList.toggle('active');
-    });
-
-    document.addEventListener('click', () => {
-      themeOptionsMenu.classList.remove('active');
-    });
-  }
-
-  function applyTheme(themeName) {
-    document.body.classList.remove('theme-space', 'theme-cyber', 'theme-gold', 'theme-green');
-    document.body.classList.add(`theme-${themeName}`);
-
-    themeOptions.forEach(opt => {
-      if (opt.getAttribute('data-theme') === themeName) {
-        opt.classList.add('active');
-      } else {
-        opt.classList.remove('active');
+  function setThemeMode(isLight) {
+    if (isLight) {
+      document.body.classList.add('light-mode');
+      if (toggleModeIcon) {
+        toggleModeIcon.className = 'fa-solid fa-sun';
+        toggleModeIcon.style.color = '#ffb000';
       }
-    });
-
-    localStorage.setItem('selectedTheme', themeName);
+      localStorage.setItem('themeMode', 'light');
+    } else {
+      document.body.classList.remove('light-mode');
+      if (toggleModeIcon) {
+        toggleModeIcon.className = 'fa-solid fa-moon';
+        toggleModeIcon.style.color = '';
+      }
+      localStorage.setItem('themeMode', 'dark');
+    }
   }
 
-  themeOptions.forEach(opt => {
-    opt.addEventListener('click', () => {
-      const selected = opt.getAttribute('data-theme');
-      applyTheme(selected);
+  if (btnToggleDarkMode) {
+    btnToggleDarkMode.addEventListener('click', () => {
+      const isLight = document.body.classList.contains('light-mode');
+      setThemeMode(!isLight);
     });
-  });
+  }
 
-  const savedTheme = localStorage.getItem('selectedTheme') || 'space';
-  applyTheme(savedTheme);
+  const savedThemeMode = localStorage.getItem('themeMode') || 'dark';
+  setThemeMode(savedThemeMode === 'light');
+
+  // ----------------------------------------------------
+  // 9.5 خلفية النجوم التفاعلية المضيئة (Twinkling Canvas Starfield)
+  // ----------------------------------------------------
+  const canvas = document.getElementById('starfield-canvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    let mouseX = 0;
+    let mouseY = 0;
+    let mouseActive = false;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      initStars();
+    }
+
+    function initStars() {
+      stars = [];
+      const starsCount = Math.min(Math.round((canvas.width * canvas.height) / 10000), 150);
+      for (let i = 0; i < starsCount; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 1.5 + 0.5,
+          alpha: Math.random(),
+          twinkleSpeed: Math.random() * 0.02 + 0.005,
+          twinkleDirection: Math.random() > 0.5 ? 1 : -1,
+          depth: Math.random() * 0.4 + 0.1
+        });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const isLight = document.body.classList.contains('light-mode');
+      const starColor = isLight ? '15, 23, 42' : '255, 255, 255';
+      
+      stars.forEach(star => {
+        star.alpha += star.twinkleSpeed * star.twinkleDirection;
+        if (star.alpha >= 1) {
+          star.alpha = 1;
+          star.twinkleDirection = -1;
+        } else if (star.alpha <= 0.1) {
+          star.alpha = 0.1;
+          star.twinkleDirection = 1;
+        }
+
+        let driftX = 0;
+        let driftY = 0;
+        if (mouseActive) {
+          const centerX = canvas.width / 2;
+          const centerY = canvas.height / 2;
+          driftX = (mouseX - centerX) * star.depth * 0.1;
+          driftY = (mouseY - centerY) * star.depth * 0.1;
+        }
+
+        ctx.fillStyle = `rgba(${starColor}, ${star.alpha})`;
+        ctx.shadowBlur = isLight ? 0 : star.size * 3;
+        ctx.shadowColor = `rgba(0, 240, 255, ${star.alpha * 0.5})`;
+        ctx.beginPath();
+        ctx.arc(star.x + driftX, star.y + driftY, star.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+    }
+
+    function animate() {
+      drawStars();
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      mouseActive = true;
+    });
+    window.addEventListener('mouseout', () => {
+      mouseActive = false;
+    });
+
+    resizeCanvas();
+    animate();
+  }
 
   // ----------------------------------------------------
   // 10. نظام الإشعارات الصوتية والمرئية بالخلفية
@@ -1665,6 +1809,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (iconType === 'warning') {
       iconClass = 'fa-solid fa-triangle-exclamation';
       toast.style.borderLeftColor = '#ffb000';
+    } else if (iconType === 'error') {
+      iconClass = 'fa-solid fa-circle-xmark';
+      toast.style.borderLeftColor = '#ff5555';
     } else if (iconType === 'discount') {
       iconClass = 'fa-solid fa-tag';
       toast.style.borderLeftColor = 'var(--accent-gold)';
@@ -1710,10 +1857,14 @@ document.addEventListener('DOMContentLoaded', () => {
           if (prevStatus && prevStatus !== order.status) {
             hasChanges = true;
             let statusLabel = getStatusLabel(order.status);
+            let toastType = 'info';
+            if (order.status === 'completed') toastType = 'success';
+            if (order.status === 'cancelled') toastType = 'error';
+
             showNotificationToast(
               'تحديث حالة طلبك 🔔',
               `تم تغيير حالة مشروعك "${order.title}" إلى: <strong>${statusLabel}</strong>`,
-              order.status === 'completed' ? 'success' : 'info'
+              toastType
             );
           }
           previousOrdersState[order.id] = order.status;

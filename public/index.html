@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="style.css?v=2.0">
 </head>
 <body>
+  <!-- خلفية النجوم التفاعلية المضيئة -->
+  <canvas id="starfield-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;"></canvas>
 
   <!-- هيدر الصفحة الرئيسي -->
   <header>
@@ -22,18 +24,10 @@
       <li><a href="admin.html" id="nav-admin" class="hidden">لوحة المطور</a></li>
     </ul>
 
-    <!-- اختيار الثيم المظهري للموقع -->
-    <div class="theme-selector-dropdown">
-      <button class="theme-btn" id="theme-menu-btn">
-        <i class="fa-solid fa-palette"></i> المظهر
-      </button>
-      <div class="theme-menu" id="theme-options-menu">
-        <div class="theme-option active" data-theme="space"><i class="fa-solid fa-user-astronaut"></i> الفضائي المظلم</div>
-        <div class="theme-option" data-theme="cyber"><i class="fa-solid fa-bolt" style="color: #ff00b4;"></i> السايبربانك</div>
-        <div class="theme-option" data-theme="gold"><i class="fa-solid fa-crown" style="color: #d4af37;"></i> الذهبي الملكي</div>
-        <div class="theme-option" data-theme="green"><i class="fa-solid fa-leaf" style="color: #10b981;"></i> الشفق الأخضر</div>
-      </div>
-    </div>
+    <!-- زر التبديل البسيط بين الوضع الفاتح والداكن -->
+    <button class="theme-btn" id="btn-toggle-dark-mode" title="تبديل المظهر الفاتح/الداكن" style="font-size: 1.1rem; padding: 0.4rem 0.6rem;">
+      <i class="fa-solid fa-moon" id="toggle-mode-icon"></i>
+    </button>
 
     <div class="auth-buttons" id="auth-buttons-container">
       <button class="btn btn-outline" id="btn-login-trigger">تسجيل الدخول</button>
@@ -170,6 +164,9 @@
           <!-- ==================================================== -->
           <div id="portal-dashboard-panel" class="portal-panel">
             <h3 style="margin-bottom: 1.5rem; font-weight: 700;">مرحباً بك في لوحتك الشخصية 🚀</h3>
+            
+            <!-- بنر الإشعارات والتنبيهات المباشرة للطالب (Dashboard Banner Alert) -->
+            <div id="portal-alert-banner" class="hidden" style="margin-bottom: 1.5rem;"></div>
             
             <!-- شبكة الإحصائيات الخاصة بالطالب -->
             <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; margin-top: 1rem;">
@@ -648,6 +645,12 @@
           <div id="order-pending-review-info" class="hidden" style="text-align: center; color: var(--text-secondary);">
             <i class="fa-solid fa-spinner fa-spin" style="font-size: 1.8rem; margin-bottom: 0.8rem;"></i>
             <p style="font-weight: 700;">الطلب قيد المراجعة الفنية حالياً بواسطة مطوري AH CLUB. سيتم تحديد السعر وتأكيد الطلب قريباً.</p>
+          </div>
+
+          <div id="order-cancelled-info" class="hidden" style="text-align: center; color: #ff5555;">
+            <i class="fa-solid fa-circle-xmark" style="font-size: 2.2rem; margin-bottom: 0.8rem;"></i>
+            <p style="font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">عذراً، لقد تم إلغاء هذا الطلب بواسطة المسؤول.</p>
+            <p id="order-cancel-reason-display" style="font-size: 0.85rem; color: var(--text-secondary); background: rgba(255,85,85,0.05); border: 1px solid rgba(255,85,85,0.15); padding: 0.6rem; border-radius: 8px; max-width: 480px; margin: 0.5rem auto 0 auto; line-height: 1.5;"></p>
           </div>
 
         </div>

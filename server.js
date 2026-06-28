@@ -435,6 +435,31 @@ app.put('/api/requests/:id/confirm-payment', verifyAdmin, async (req, res) => {
   }
 });
 
+app.put('/api/requests/:id/cancel', verifyAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { reason } = req.body;
+
+  if (!reason || reason.trim() === '') {
+    return res.status(400).json({ error: 'الرجاء إدخال سبب الإلغاء للطلاب' });
+  }
+
+  try {
+    const data = await db.readDb();
+    const requestIndex = data.requests.findIndex(r => r.id === id);
+    if (requestIndex === -1) {
+      return res.status(404).json({ error: 'الطلب غير موجود' });
+    }
+
+    data.requests[requestIndex].status = 'cancelled';
+    data.requests[requestIndex].cancellationReason = reason;
+
+    await db.writeDb(data);
+    res.json(data.requests[requestIndex]);
+  } catch (err) {
+    res.status(500).json({ error: 'فشل إلغاء الطلب' });
+  }
+});
+
 app.put('/api/requests/:id/deliver', verifyAdmin, upload.single('delivery'), async (req, res) => {
   const { id } = req.params;
   const { deliveryLink } = req.body;
