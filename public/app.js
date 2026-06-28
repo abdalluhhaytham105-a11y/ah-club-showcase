@@ -90,14 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateAuthUI() {
     const mobileHeaderControls = document.getElementById('mobile-header-controls');
     const mobileAuthBtn = document.getElementById('mobile-auth-btn');
-    
-    // عناصر القائمة الجانبية المنزلقة للموبايل (Mobile Slide Drawer)
-    const drawerAvatar = document.getElementById('drawer-avatar');
-    const drawerUsername = document.getElementById('drawer-username');
-    const drawerUserRole = document.getElementById('drawer-user-role');
-    const drawerNavAdmin = document.getElementById('drawer-nav-admin');
-    const drawerNavPortal = document.getElementById('drawer-nav-portal');
-    const drawerBtnLogout = document.getElementById('drawer-btn-logout');
+    const mobileProfileAvatarBtn = document.getElementById('mobile-profile-avatar-btn');
 
     // جعل حزمة الموبايل دائماً مرئية
     if (mobileHeaderControls) mobileHeaderControls.style.display = 'flex';
@@ -114,25 +107,23 @@ document.addEventListener('DOMContentLoaded', () => {
         mobileAuthBtn.className = 'btn logged-in';
         mobileAuthBtn.innerHTML = 'خروج <i class="fa-solid fa-right-from-bracket"></i>';
       }
-      
-      // تعبئة بيانات الطالب بداخل القائمة الجانبية المنزلقة
-      if (drawerAvatar) drawerAvatar.innerText = currentUser.name ? currentUser.name[0].toUpperCase() : '?';
-      if (drawerUsername) drawerUsername.innerText = currentUser.name;
-      if (drawerUserRole) {
-        drawerUserRole.innerText = currentUser.role === 'admin' ? 'مطور المنصة ⚙️' : 'طالب علم 🚀';
-      }
-      if (drawerNavPortal) drawerNavPortal.classList.remove('hidden');
-      if (drawerBtnLogout) {
-        drawerBtnLogout.innerHTML = '<i class="fa-solid fa-right-from-bracket" style="width: 20px;"></i> تسجيل الخروج';
-        drawerBtnLogout.style.color = '#ff5555';
-      }
 
+      // تحديث زر الأفاتار الدائري للمسجلين
+      if (mobileProfileAvatarBtn) {
+        mobileProfileAvatarBtn.style.display = 'flex';
+        if (currentUser.avatar) {
+          mobileProfileAvatarBtn.style.backgroundImage = `url(${currentUser.avatar})`;
+          mobileProfileAvatarBtn.innerText = '';
+        } else {
+          mobileProfileAvatarBtn.style.backgroundImage = 'none';
+          mobileProfileAvatarBtn.innerText = currentUser.name ? currentUser.name[0].toUpperCase() : '?';
+        }
+      }
+      
       if (currentUser.role === 'admin') {
         navAdmin.classList.remove('hidden');
-        if (drawerNavAdmin) drawerNavAdmin.classList.remove('hidden');
       } else {
         navAdmin.classList.add('hidden');
-        if (drawerNavAdmin) drawerNavAdmin.classList.add('hidden');
       }
 
       // تفعيل الثيم الذهبي العام في حال كان الخصم 100%
@@ -153,13 +144,10 @@ document.addEventListener('DOMContentLoaded', () => {
         mobileAuthBtn.className = 'btn logged-out';
         mobileAuthBtn.innerHTML = 'دخول <i class="fa-solid fa-arrow-right-to-bracket"></i>';
       }
-      
-      // تعديل خيارات القائمة الجانبية لغير المسجلين
-      if (drawerNavPortal) drawerNavPortal.classList.add('hidden');
-      if (drawerNavAdmin) drawerNavAdmin.classList.add('hidden');
-      if (drawerBtnLogout) {
-        drawerBtnLogout.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket" style="width: 20px;"></i> تسجيل الدخول';
-        drawerBtnLogout.style.color = 'var(--primary-cyan)';
+
+      // إخفاء زر الأفاتار للزوار
+      if (mobileProfileAvatarBtn) {
+        mobileProfileAvatarBtn.style.display = 'none';
       }
       
       showSection('landing');
@@ -173,7 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
       studentPortalView.classList.add('hidden');
       navHome.classList.add('active');
       navPortal.classList.remove('active');
-      updateDrawerActiveItem('drawer-nav-home');
       animateCounters();
     } else if (section === 'portal') {
       if (!currentUser) {
@@ -184,7 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
       studentPortalView.classList.remove('hidden');
       navHome.classList.remove('active');
       navPortal.classList.add('active');
-      updateDrawerActiveItem('drawer-nav-portal');
       loadPortalData();
     }
   }
@@ -192,68 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // التنقل بين الأقسام
   navHome.addEventListener('click', (e) => { e.preventDefault(); showSection('landing'); });
   navPortal.addEventListener('click', (e) => { e.preventDefault(); showSection('portal'); });
-
-  // ----------------------------------------------------
-  // إدارة القائمة الجانبية المنزلقة للموبايل (Mobile Drawer Setup)
-  // ----------------------------------------------------
-  const mobileDrawer = document.getElementById('mobile-drawer');
-  const mobileMenuTrigger = document.getElementById('mobile-menu-trigger');
-  const mobileDrawerClose = document.getElementById('mobile-drawer-close');
-
-  if (mobileMenuTrigger && mobileDrawer) {
-    mobileMenuTrigger.addEventListener('click', () => {
-      mobileDrawer.classList.add('active');
-    });
-  }
-
-  if (mobileDrawerClose && mobileDrawer) {
-    mobileDrawerClose.addEventListener('click', () => {
-      mobileDrawer.classList.remove('active');
-    });
-  }
-
-  if (mobileDrawer) {
-    mobileDrawer.addEventListener('click', (e) => {
-      if (e.target === mobileDrawer) {
-        mobileDrawer.classList.remove('active');
-      }
-    });
-  }
-
-  // عناصر القائمة الجانبية في الـ Drawer
-  const drawerNavHome = document.getElementById('drawer-nav-home');
-  const drawerNavPortal = document.getElementById('drawer-nav-portal');
-  const drawerNavAdmin = document.getElementById('drawer-nav-admin');
-  const drawerBtnToggleTheme = document.getElementById('drawer-btn-toggle-theme');
-  const drawerBtnLogout = document.getElementById('drawer-btn-logout');
-
-  function updateDrawerActiveItem(activeId) {
-    document.querySelectorAll('.drawer-menu-item').forEach(item => {
-      item.classList.remove('active');
-    });
-    const activeItem = document.getElementById(activeId);
-    if (activeItem) activeItem.classList.add('active');
-  }
-
-  if (drawerNavHome) {
-    drawerNavHome.addEventListener('click', () => {
-      showSection('landing');
-      if (mobileDrawer) mobileDrawer.classList.remove('active');
-    });
-  }
-
-  if (drawerNavPortal) {
-    drawerNavPortal.addEventListener('click', () => {
-      showSection('portal');
-      if (mobileDrawer) mobileDrawer.classList.remove('active');
-    });
-  }
-
-  if (drawerNavAdmin) {
-    drawerNavAdmin.addEventListener('click', () => {
-      window.location.href = 'admin.html';
-    });
-  }
 
   // مستمع نقر لزر الدخول/الخروج في هيدر الموبايل
   const mobileAuthBtn = document.getElementById('mobile-auth-btn');
@@ -268,15 +192,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (drawerBtnLogout) {
-    drawerBtnLogout.addEventListener('click', () => {
-      if (currentUser) {
-        const desktopLogout = document.getElementById('btn-logout');
-        if (desktopLogout) desktopLogout.click();
-      } else {
-        openAuthModal('login');
-      }
-      if (mobileDrawer) mobileDrawer.classList.remove('active');
+  // مستمع نقر لزر أفاتار الموبايل لفتح بوابة الطالب مباشرة
+  const mobileProfileAvatarBtn = document.getElementById('mobile-profile-avatar-btn');
+  if (mobileProfileAvatarBtn) {
+    mobileProfileAvatarBtn.addEventListener('click', () => {
+      showSection('portal');
     });
   }
 

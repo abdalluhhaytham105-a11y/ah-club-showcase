@@ -33,11 +33,14 @@
       <button class="btn btn-outline" id="btn-logout">خروج <i class="fa-solid fa-right-from-bracket"></i></button>
     </div>
 
-    <!-- حزمة التحكم الخاصة بالموبايل (الهامبرغر وزر الدخول/الخروج) -->
+    <!-- حزمة التحكم الخاصة بالموبايل (زر الدخول/الخروج والملف الشخصي) -->
     <div id="mobile-header-controls" style="display: flex; align-items: center; gap: 0.6rem;">
+      <!-- زر الدخول/الخروج الديناميكي للموبايل -->
       <button class="btn" id="mobile-auth-btn" style="font-family: 'Cairo'; font-size: 0.75rem; padding: 0.35rem 0.75rem; border-radius: 20px; font-weight: 700; transition: all 0.3s ease;"></button>
-      <button class="circle-nav-btn" id="mobile-menu-trigger" title="القائمة الرئيسية ☰" style="width: 38px; height: 38px; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 50%; color: #fff;">
-        <i class="fa-solid fa-bars"></i>
+      
+      <!-- أيقونة الملف الشخصي للطالب (تظهر عند الدخول وتنقله لبوابة الطالب) -->
+      <button id="mobile-profile-avatar-btn" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--primary-cyan); background-size: cover; background-position: center; font-size: 1rem; font-weight: 700; display: none; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary-cyan), var(--secondary-magenta)); color: #030712; cursor: pointer; box-shadow: 0 0 8px rgba(0, 240, 255, 0.25); padding: 0; font-family: 'Orbitron', sans-serif;">
+        ?
       </button>
     </div>
   </header>
@@ -739,40 +742,7 @@
     <span class="pulse-ring"></span>
   </a>
 
-  <!-- القائمة الجانبية المنزلقة للموبايل (Mobile Slide-out Drawer) -->
-  <div class="mobile-drawer-overlay" id="mobile-drawer">
-    <div class="mobile-drawer-content">
-      <div class="mobile-drawer-header">
-        <div class="logo-container" style="display: flex; align-items: center; gap: 0.5rem;">
-          <img src="logo.png" alt="AH CLUB Logo" style="height: 28px;">
-          <span class="brand-name" style="font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 800; color: #fff;">AH CLUB</span>
-        </div>
-        <button class="drawer-close" id="mobile-drawer-close">&times;</button>
-      </div>
-      
-      <div class="mobile-drawer-user-info" id="drawer-user-info" style="padding: 1.5rem 1rem; border-bottom: 1px solid var(--border-light); text-align: center;">
-        <div class="user-avatar-circle" id="drawer-avatar" style="width: 55px; height: 55px; font-size: 1.4rem; margin: 0 auto 0.5rem auto; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: linear-gradient(135deg, var(--primary-cyan), var(--secondary-magenta)); color: #030712; font-weight: 700; box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);">?</div>
-        <div id="drawer-username" style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">اسم الطالب</div>
-        <div id="drawer-user-role" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">طالب</div>
-      </div>
 
-      <ul class="mobile-drawer-menu">
-        <li class="drawer-menu-item active" id="drawer-nav-home">
-          <i class="fa-solid fa-house" style="width: 20px;"></i> المعرض العام
-        </li>
-        <li class="drawer-menu-item" id="drawer-nav-portal">
-          <i class="fa-solid fa-user-graduate" style="width: 20px;"></i> بوابة الطالب
-        </li>
-        <li class="drawer-menu-item hidden" id="drawer-nav-admin">
-          <i class="fa-solid fa-user-gear" style="width: 20px;"></i> لوحة المطور
-        </li>
-
-        <li class="drawer-menu-item logout" id="drawer-btn-logout" style="margin-top: auto; border-top: 1px solid rgba(255, 85, 85, 0.1); padding-top: 1rem; color: #ff5555; display: flex; align-items: center; gap: 1rem; cursor: pointer;">
-          <i class="fa-solid fa-right-from-bracket" style="width: 20px;"></i> تسجيل الخروج
-        </li>
-      </ul>
-    </div>
-  </div>
 
   <!-- حاوية الإشعارات العائمة المنبثقة -->
   <div id="toast-container" class="toast-container"></div>
