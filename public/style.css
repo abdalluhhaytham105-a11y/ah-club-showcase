@@ -1037,14 +1037,61 @@ textarea.form-control {
 /* التوافق مع الشاشات الصغيرة */
 @media (max-width: 768px) {
   header {
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
+    flex-direction: row-reverse !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 0.3rem 0.8rem !important;
+    gap: 0 !important;
+    height: 58px !important;
+    background: rgba(3, 7, 18, 0.9) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.15) !important;
+  }
+  header .logo-container {
+    margin-bottom: 0 !important;
+  }
+  header .logo-container img {
+    height: 28px !important;
+  }
+  header .logo-container h1,
+  header .logo-container .brand-name {
+    font-size: 0.95rem !important;
   }
   .nav-links {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
+    display: none !important;
+  }
+  #btn-toggle-dark-mode {
+    display: none !important;
+  }
+  #user-profile-container {
+    display: none !important;
+  }
+  #auth-buttons-container {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+  }
+  #auth-buttons-container .btn {
+    font-size: 0.75rem !important;
+    padding: 0.35rem 0.7rem !important;
+    border-radius: 20px !important;
+  }
+  #auth-buttons-container #btn-register-trigger {
+    display: none !important;
+  }
+  body:not(.user-logged-in) header #btn-toggle-dark-mode {
+    display: flex !important;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50% !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid var(--border-light) !important;
+    order: 2 !important;
   }
   .hero {
     flex-direction: column-reverse;
