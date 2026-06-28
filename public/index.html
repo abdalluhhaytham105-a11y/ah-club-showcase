@@ -37,6 +37,30 @@
       <span id="user-welcome-msg" style="font-weight: 600; color: var(--primary-cyan);"></span>
       <button class="btn btn-outline" id="btn-logout">خروج <i class="fa-solid fa-right-from-bracket"></i></button>
     </div>
+
+    <!-- حاوية التحكم الدائرية للموبايل عند تسجيل الدخول -->
+    <div class="mobile-logged-in-nav hidden" id="mobile-logged-in-controls" style="display: none; gap: 0.5rem; align-items: center;">
+      <!-- أيقونة المعرض العام -->
+      <button class="circle-nav-btn active" id="mobile-nav-home" title="المعرض العام">
+        <i class="fa-solid fa-house"></i>
+      </button>
+      <!-- أيقونة بوابة الطالب -->
+      <button class="circle-nav-btn" id="mobile-nav-portal" title="بوابة الطالب">
+        <i class="fa-solid fa-user-graduate"></i>
+      </button>
+      <!-- أيقونة لوحة المطور (تظهر فقط للأدمن) -->
+      <a href="admin.html" class="circle-nav-btn hidden" id="mobile-nav-admin" title="لوحة المطور">
+        <i class="fa-solid fa-user-gear"></i>
+      </a>
+      <!-- زر تبديل الثيم المظهري للموبايل -->
+      <button class="circle-nav-btn" id="mobile-btn-toggle-dark-mode" title="تبديل المظهر">
+        <i class="fa-solid fa-moon" id="mobile-toggle-mode-icon"></i>
+      </button>
+      <!-- أيقونة تسجيل الخروج -->
+      <button class="circle-nav-btn logout" id="mobile-btn-logout" title="تسجيل الخروج">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </button>
+    </div>
   </header>
 
   <main>

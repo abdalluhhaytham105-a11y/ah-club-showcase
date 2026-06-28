@@ -88,16 +88,23 @@ document.addEventListener('DOMContentLoaded', () => {
   // تهيئة وتنسيق الدخول
   // ----------------------------------------------------
   function updateAuthUI() {
+    const mobileLoggedInControls = document.getElementById('mobile-logged-in-controls');
+    const mobileNavAdmin = document.getElementById('mobile-nav-admin');
+
     if (currentUser) {
       authButtonsContainer.classList.add('hidden');
       userProfileContainer.classList.remove('hidden');
       userWelcomeMsg.innerHTML = `<i class="fa-solid fa-user-astronaut"></i> مرحباً، ${currentUser.name.split(' ')[0]}`;
       navPortal.classList.remove('hidden');
+      document.body.classList.add('user-logged-in');
+      if (mobileLoggedInControls) mobileLoggedInControls.classList.remove('hidden');
       
       if (currentUser.role === 'admin') {
         navAdmin.classList.remove('hidden');
+        if (mobileNavAdmin) mobileNavAdmin.classList.remove('hidden');
       } else {
         navAdmin.classList.add('hidden');
+        if (mobileNavAdmin) mobileNavAdmin.classList.add('hidden');
       }
 
       // تفعيل الثيم الذهبي العام في حال كان الخصم 100%
@@ -111,17 +118,24 @@ document.addEventListener('DOMContentLoaded', () => {
       userProfileContainer.classList.add('hidden');
       navPortal.classList.add('hidden');
       navAdmin.classList.add('hidden');
+      document.body.classList.remove('user-logged-in');
+      if (mobileLoggedInControls) mobileLoggedInControls.classList.add('hidden');
       showSection('landing');
       document.body.classList.remove('gold-theme');
     }
   }
 
   function showSection(section) {
+    const mobHome = document.getElementById('mobile-nav-home');
+    const mobPortal = document.getElementById('mobile-nav-portal');
+
     if (section === 'landing') {
       landingView.classList.remove('hidden');
       studentPortalView.classList.add('hidden');
       navHome.classList.add('active');
       navPortal.classList.remove('active');
+      if (mobHome) mobHome.classList.add('active');
+      if (mobPortal) mobPortal.classList.remove('active');
       animateCounters();
     } else if (section === 'portal') {
       if (!currentUser) {
@@ -132,6 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
       studentPortalView.classList.remove('hidden');
       navHome.classList.remove('active');
       navPortal.classList.add('active');
+      if (mobHome) mobHome.classList.remove('active');
+      if (mobPortal) mobPortal.classList.add('active');
       loadPortalData();
     }
   }
@@ -139,6 +155,28 @@ document.addEventListener('DOMContentLoaded', () => {
   // التنقل بين الأقسام
   navHome.addEventListener('click', (e) => { e.preventDefault(); showSection('landing'); });
   navPortal.addEventListener('click', (e) => { e.preventDefault(); showSection('portal'); });
+
+  // مستمعات النقر لأيقونات الموبايل الدائرية
+  const mobHomeBtn = document.getElementById('mobile-nav-home');
+  const mobPortalBtn = document.getElementById('mobile-nav-portal');
+  const mobToggleModeBtn = document.getElementById('mobile-btn-toggle-dark-mode');
+  const mobLogoutBtn = document.getElementById('mobile-btn-logout');
+
+  if (mobHomeBtn) mobHomeBtn.addEventListener('click', () => showSection('landing'));
+  if (mobPortalBtn) mobPortalBtn.addEventListener('click', () => showSection('portal'));
+  if (mobToggleModeBtn) {
+    mobToggleModeBtn.addEventListener('click', () => {
+      const desktopBtn = document.getElementById('btn-toggle-dark-mode');
+      if (desktopBtn) desktopBtn.click();
+    });
+  }
+  if (mobLogoutBtn) {
+    mobLogoutBtn.addEventListener('click', () => {
+      const desktopLogout = document.getElementById('btn-logout');
+      if (desktopLogout) desktopLogout.click();
+    });
+  }
+
   heroOrderBtn.addEventListener('click', () => { showSection('portal'); showPortalPanel('new-request'); });
 
   // ----------------------------------------------------
@@ -1666,11 +1704,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggleModeIcon = document.getElementById('toggle-mode-icon');
 
   function setThemeMode(isLight) {
+    const mobileToggleModeIcon = document.getElementById('mobile-toggle-mode-icon');
     if (isLight) {
       document.body.classList.add('light-mode');
       if (toggleModeIcon) {
         toggleModeIcon.className = 'fa-solid fa-sun';
         toggleModeIcon.style.color = '#ffb000';
+      }
+      if (mobileToggleModeIcon) {
+        mobileToggleModeIcon.className = 'fa-solid fa-sun';
+        mobileToggleModeIcon.style.color = '#ffb000';
       }
       localStorage.setItem('themeMode', 'light');
     } else {
@@ -1678,6 +1721,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (toggleModeIcon) {
         toggleModeIcon.className = 'fa-solid fa-moon';
         toggleModeIcon.style.color = '';
+      }
+      if (mobileToggleModeIcon) {
+        mobileToggleModeIcon.className = 'fa-solid fa-moon';
+        mobileToggleModeIcon.style.color = '';
       }
       localStorage.setItem('themeMode', 'dark');
     }
