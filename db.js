@@ -69,10 +69,14 @@ const initialDb = {
   announcements: []
 };
 
-// فحص وجود Vercel KV للربط التلقائي في الاستضافة السحابية
-const isKvEnabled = !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+// تحديد المتغيرات وعناوين الـ API لقاعدة بيانات Upstash / Vercel KV بمختلف المسميات الممكنة
+const KV_URL = process.env.KV_REST_API_URL || process.env.STORAGE_REST_API_URL || process.env.STORAGE_URL;
+const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.STORAGE_REST_API_TOKEN || process.env.STORAGE_TOKEN;
 
-// استخدام ذاكرة مؤقتة لتقليل عدد مرات استدعاء الـ API من Vercel KV
+// فحص وجود تفعيل قاعدة بيانات سحابية Upstash Redis
+const isKvEnabled = !!(KV_URL && KV_TOKEN);
+
+// استخدام ذاكرة مؤقتة لتقليل عدد مرات استدعاء الـ API من Upstash
 let memoryCache = null;
 let lastCacheTime = 0;
 const CACHE_TTL = 3000; // 3 ثوانٍ
@@ -84,8 +88,12 @@ async function readDb() {
       return memoryCache;
     }
     try {
-      const response = await fetch(`${process.env.KV_REST_API_URL}/get/ah_club_db`, {
-        headers: { Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}` }
+      // تنظيف الروابط للتأكد من عدم وجود مسافات أو مشكلات
+      const cleanUrl = KV_URL.trim();
+      const cleanToken = KV_TOKEN.trim();
+
+      const response = await fetch(`${cleanUrl}/get/ah_club_db`, {
+        headers: { Authorization: `Bearer ${cleanToken}` }
       });
       const resData = await response.json();
       let parsed = initialDb;
@@ -115,7 +123,7 @@ async function readDb() {
       lastCacheTime = now;
       return parsed;
     } catch (err) {
-      console.error('Error reading from Vercel KV, falling back to initial data:', err);
+      console.error('Error reading from Upstash Redis, falling back to local database:', err);
       return memoryCache || initialDb;
     }
   } else {
@@ -154,17 +162,20 @@ async function writeDb(data) {
   lastCacheTime = Date.now();
   if (isKvEnabled) {
     try {
-      const response = await fetch(process.env.KV_REST_API_URL, {
+      const cleanUrl = KV_URL.trim();
+      const cleanToken = KV_TOKEN.trim();
+
+      const response = await fetch(cleanUrl, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}`,
+          Authorization: `Bearer ${cleanToken}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(['SET', 'ah_club_db', JSON.stringify(data)])
       });
       return response.ok;
     } catch (err) {
-      console.error('Error writing to Vercel KV:', err);
+      console.error('Error writing to Upstash Redis:', err);
       return false;
     }
   } else {
