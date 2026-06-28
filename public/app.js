@@ -114,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
           mobileProfileAvatarBtn.innerText = '';
         } else {
           mobileProfileAvatarBtn.style.backgroundImage = 'none';
+          mobileProfileAvatarBtn.style.background = 'linear-gradient(135deg, var(--primary-cyan), var(--secondary-magenta))';
           mobileProfileAvatarBtn.innerText = currentUser.name ? currentUser.name[0].toUpperCase() : '?';
         }
       }
@@ -155,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function showSection(section) {
     const mobileProfileAvatarBtn = document.getElementById('mobile-profile-avatar-btn');
-    const brandName = document.querySelector('header .brand-name');
 
     if (section === 'landing') {
       landingView.classList.remove('hidden');
@@ -163,7 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
       navHome.classList.add('active');
       navPortal.classList.remove('active');
       if (mobileProfileAvatarBtn) mobileProfileAvatarBtn.classList.remove('active');
-      if (brandName) brandName.innerText = 'AH CLUB';
       animateCounters();
     } else if (section === 'portal') {
       if (!currentUser) {
@@ -559,18 +558,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function showPortalPanel(panel) {
     const discountNotice = document.getElementById('new-request-discount-notice');
     const discountVal = document.getElementById('request-discount-val');
-
-    // تحديث عنوان الهيدر تفاعلياً للموبايل
-    const brandName = document.querySelector('header .brand-name');
-    if (brandName) {
-      if (window.innerWidth <= 768) {
-        if (panel === 'dashboard') brandName.innerText = 'حسابي وإحصائياتي';
-        else if (panel === 'requests') brandName.innerText = 'طلباتي الجارية';
-        else brandName.innerText = 'طلب مشروع جديد';
-      } else {
-        brandName.innerText = 'AH CLUB';
-      }
-    }
 
     // إزالة التنشيط عن التبويبات
     menuMyDashboard.classList.remove('active');

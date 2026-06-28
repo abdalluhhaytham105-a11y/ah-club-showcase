@@ -1628,8 +1628,16 @@ body.light-mode .circle-nav-btn {
   }
   
   .portal-sidebar {
-    padding: 1rem !important;
+    padding: 0.8rem !important;
     border-radius: 12px !important;
+    position: sticky !important;
+    top: 68px !important;
+    z-index: 90 !important;
+    background: rgba(3, 7, 18, 0.95) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(0, 240, 255, 0.15) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
   }
   
   .user-profile-summary {
@@ -1735,8 +1743,9 @@ body.light-mode .circle-nav-btn {
 
 
 #mobile-profile-avatar-btn.active {
-  border-color: var(--primary-cyan) !important;
-  box-shadow: 0 0 12px var(--primary-glow), inset 0 0 4px var(--primary-cyan) !important;
-  transform: scale(1.05);
+  border-color: #ff007f !important;
+  box-shadow: 0 0 14px #ff007f, 0 0 4px #ff007f !important;
+  transform: scale(1.08);
+  color: #ffffff !important;
 }
 
