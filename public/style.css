@@ -1068,30 +1068,7 @@ textarea.form-control {
     display: none !important;
   }
   #auth-buttons-container {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 0.4rem !important;
-  }
-  #auth-buttons-container .btn {
-    font-size: 0.75rem !important;
-    padding: 0.35rem 0.7rem !important;
-    border-radius: 20px !important;
-  }
-  #auth-buttons-container #btn-register-trigger {
     display: none !important;
-  }
-  body:not(.user-logged-in) header #btn-toggle-dark-mode {
-    display: flex !important;
-    width: 34px !important;
-    height: 34px !important;
-    border-radius: 50% !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 0 !important;
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid var(--border-light) !important;
-    order: 2 !important;
   }
   .hero {
     flex-direction: column-reverse;
