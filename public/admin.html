@@ -430,10 +430,16 @@
       </div>
       <div class="modal-body">
         <h4 id="price-modal-order-title" style="font-weight: 700; margin-bottom: 1rem;">عنوان الطلب</h4>
+        
+        <!-- صندوق تفاصيل الطالب الكاملة للتسعير السهل والواتس -->
+        <div id="price-modal-details-box" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; font-size: 0.85rem; line-height: 1.5;">
+          <!-- سيتم تعبئتها ديناميكياً -->
+        </div>
+
         <form id="price-order-form">
           <div class="form-group">
-            <label for="order-price-input">تحديد التكلفة بالجنيه المصري (EGP)</label>
-            <input type="number" id="order-price-input" class="form-control" placeholder="مثال: 1200" required min="1">
+            <label for="order-price-input">تحديد التكلفة بالجنيه المصري (EGP) (اكتب 0 للطلبات المجانية 🎁)</label>
+            <input type="number" id="order-price-input" class="form-control" placeholder="مثال: 100" required min="0">
           </div>
           <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">قبول الطلب وإرسال التسعيرة للطلاب</button>
         </form>

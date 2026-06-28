@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const priceModalOrderTitle = document.getElementById('price-modal-order-title');
   const priceOrderForm = document.getElementById('price-order-form');
   const orderPriceInput = document.getElementById('order-price-input');
+  const priceModalDetailsBox = document.getElementById('price-modal-details-box');
   
   // مودال التسليم والتوصيل
   const adminDeliverModal = document.getElementById('admin-deliver-modal');
@@ -241,7 +242,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     requests.slice().reverse().forEach(r => {
       const tr = document.createElement('tr');
-      const formattedDate = new Date(r.deadline).toLocaleDateString('ar-EG');
+      const formattedDate = new Date(r.deadline).toLocaleDateString('ar-EG', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
       const priceText = r.price > 0 ? `${r.price} EGP` : 'يحدد لاحقاً';
       
       // توليد زر الإجراء بناءً على الحالة الحالية للطلب
@@ -257,8 +264,9 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (r.status === 'ready_payment_verify') {
         actionButtons = `
           <div style="display: flex; gap: 0.4rem; flex-direction: column;">
-            <button class="btn btn-primary btn-xs btn-admin-confirm-pay" data-id="${r.id}" style="width: 100%;">تأكيد الدفع</button>
-            <button class="btn btn-outline btn-xs btn-view-tx" data-tx="${r.transactionId}" data-method="${r.paymentMethod}" style="width: 100%;">عرض رقم التحويل</button>
+            <button class="btn btn-primary btn-xs btn-admin-confirm-pay" data-id="${r.id}" style="width: 100%;">تأكيد الدفع ✅</button>
+            ${r.paymentReceipt ? `<a href="${r.paymentReceipt}" target="_blank" class="btn btn-outline btn-xs" style="width: 100%; color: var(--accent-gold); border-color: rgba(212,175,55,0.3); text-align:center;"><i class="fa-solid fa-image"></i> عرض إثبات الدفع 📸</a>` : ''}
+            <button class="btn btn-outline btn-xs btn-view-tx" data-tx="${r.transactionId || 'غير متوفر'}" data-method="${r.paymentMethod || 'غير محدد'}" style="width: 100%;">تفاصيل المعاملة</button>
           </div>
         `;
       } else if (r.status === 'paid') {
@@ -276,14 +284,38 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
       }
 
+      // إنشاء رابط واتساب ذكي للتواصل
+      let waLink = '';
+      if (r.studentPhone) {
+        let cleanPhone = r.studentPhone.replace(/\D/g, '');
+        if (cleanPhone.startsWith('0')) {
+          cleanPhone = '2' + cleanPhone;
+        }
+        const text = encodeURIComponent(`مرحباً يا ${r.studentName}، أنا مطور منصة AH CLUB بخصوص طلبك لـ "${r.title}"...`);
+        waLink = `https://wa.me/${cleanPhone}?text=${text}`;
+      }
+
       tr.innerHTML = `
         <td>
-          <div style="font-weight: 700;">${r.studentName}</div>
-          <div style="font-size: 0.75rem; color: var(--text-muted);">${r.college}</div>
+          <div style="font-weight: 700; display: flex; align-items: center; gap: 0.4rem;">
+            ${r.studentName}
+            ${waLink ? `
+              <a href="${waLink}" target="_blank" style="color: #25d366; font-size: 0.9rem;" title="تواصل واتساب مع الطالب">
+                <i class="fa-brands fa-whatsapp"></i>
+              </a>
+            ` : ''}
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">${r.college || 'غير محدد'} | ${r.university || 'غير محدد'}</div>
         </td>
         <td>
-          <div>${r.title}</div>
-          ${r.attachmentFile ? `<a href="${r.attachmentFile}" download style="font-size:0.75rem; color:var(--primary-cyan); text-decoration:none;"><i class="fa-solid fa-paperclip"></i> تحميل ملف الطالب</a>` : ''}
+          <div style="font-weight: 700;">${r.title}</div>
+          <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.2rem; line-height: 1.4;">
+            <span>صيغة التسليم: <strong>${r.deliveryFormat === 'word' ? 'Word' : r.deliveryFormat === 'ppt' ? 'PowerPoint (' + r.slideCount + ' شريحة)' : 'Poster'}</strong></span> | 
+            <span>حجم الفريق: <strong>${r.teamSize} طلاب</strong></span><br>
+            <span>الداتا: <strong>${r.hasData ? 'من الطالب (حلال ✅)' : 'من المطور (+75 EGP)'}</strong></span> | 
+            <span>الحاسبة التقديرية: <strong>${r.estimatedPrice || 0} EGP</strong></span>
+          </div>
+          ${r.attachmentFile ? `<a href="${r.attachmentFile}" download style="font-size:0.75rem; color:var(--primary-cyan); text-decoration:none; margin-top: 0.3rem; display: inline-block;"><i class="fa-solid fa-paperclip"></i> تحميل ملف المادة العلمية للطالب</a>` : ''}
         </td>
         <td>${formattedDate}</td>
         <td style="font-family: 'Orbitron', sans-serif;">${priceText}</td>
@@ -398,6 +430,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     priceModalOrderTitle.innerText = order.title;
     orderPriceInput.value = '';
+
+    if (priceModalDetailsBox) {
+      // إنشاء رابط واتساب ذكي للتواصل
+      let waLink = '';
+      if (order.studentPhone) {
+        let cleanPhone = order.studentPhone.replace(/\D/g, '');
+        if (cleanPhone.startsWith('0')) {
+          cleanPhone = '2' + cleanPhone;
+        }
+        const text = encodeURIComponent(`مرحباً يا ${order.studentName}، أنا مطور منصة AH CLUB بخصوص طلبك لـ "${order.title}"...`);
+        waLink = `https://wa.me/${cleanPhone}?text=${text}`;
+      }
+
+      priceModalDetailsBox.innerHTML = `
+        <div style="margin-bottom: 0.8rem; display: flex; justify-content: space-between; align-items: center;">
+          <span>الطالب: <strong>${order.studentName}</strong></span>
+          ${waLink ? `
+            <a href="${waLink}" target="_blank" class="btn btn-secondary btn-xs" style="background:#25d366; border-color:#25d366; color:#fff; font-family:'Cairo'; display:inline-flex; align-items:center; gap:0.3rem;">
+              واتساب الطالب <i class="fa-brands fa-whatsapp"></i>
+            </a>
+          ` : ''}
+        </div>
+        <div style="margin-bottom: 0.4rem;">الكلية والجامعة: <strong>${order.college || 'غير محدد'} | ${order.university || 'غير محدد'}</strong></div>
+        <div style="margin-bottom: 0.4rem;">صيغة التسليم: <strong>${order.deliveryFormat === 'word' ? 'Word' : order.deliveryFormat === 'ppt' ? 'PowerPoint (' + order.slideCount + ' شريحة)' : 'Poster'}</strong></div>
+        <div style="margin-bottom: 0.4rem;">حجم الفريق: <strong>${order.teamSize} طلاب</strong></div>
+        <div style="margin-bottom: 0.4rem;">حالة الداتا: <strong>${order.hasData ? 'من الطالب (أوفر ومطابق شرعياً ✅)' : 'من المطور (+75 EGP)'}</strong></div>
+        <div style="margin-bottom: 0.4rem; color: var(--primary-cyan);">التسعير المقدر بالحاسبة: <strong>${order.estimatedPrice || 0} EGP</strong></div>
+        <div style="margin-bottom: 0.6rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.6rem;">
+          <div style="font-weight:700; margin-bottom:0.2rem;">الوصف والمتطلبات:</div>
+          <div style="background:rgba(0,0,0,0.2); border-radius:6px; padding:0.6rem; max-height:100px; overflow-y:auto; color:var(--text-secondary); white-space:pre-wrap;">${order.description}</div>
+        </div>
+        ${order.attachmentFile ? `
+          <a href="${order.attachmentFile}" download class="btn btn-outline btn-xs" style="width:100%; text-align:center; display:block;">
+            <i class="fa-solid fa-download"></i> تحميل ملف المادة العلمية للطالب
+          </a>
+        ` : '<div style="color:var(--text-muted); font-size:0.8rem;">(لم يتم رفع ملف مادة علمية من الطالب)</div>'}
+      `;
+    }
+
     adminPriceModal.classList.add('active');
   }
 

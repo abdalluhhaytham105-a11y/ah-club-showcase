@@ -310,19 +310,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderCategorySelects() {
-    const reqCategorySelect = document.getElementById('req-category');
-    if (reqCategorySelect) {
-      reqCategorySelect.innerHTML = '';
+    const reqCollegeSelect = document.getElementById('req-college');
+    if (reqCollegeSelect) {
+      reqCollegeSelect.innerHTML = '';
       categories.forEach(c => {
         const opt = document.createElement('option');
-        opt.value = c.id;
+        opt.value = c.label; // Use label for college name directly
         opt.innerText = c.label;
-        reqCategorySelect.appendChild(opt);
+        reqCollegeSelect.appendChild(opt);
       });
       const optOther = document.createElement('option');
-      optOther.value = 'other';
-      optOther.innerText = 'تخصص آخر';
-      reqCategorySelect.appendChild(optOther);
+      optOther.value = 'أخرى';
+      optOther.innerText = 'كلية أخرى / تخصص آخر';
+      reqCollegeSelect.appendChild(optOther);
     }
   }
 
@@ -743,8 +743,11 @@ document.addEventListener('DOMContentLoaded', () => {
   newRequestForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const title = document.getElementById('req-title').value;
-    const category = document.getElementById('req-category').value;
     const college = document.getElementById('req-college').value;
+    const university = document.getElementById('req-university').value;
+    const deliveryFormat = document.getElementById('req-delivery-format').value;
+    const slideCount = document.getElementById('req-slide-count').value;
+    const hasData = document.getElementById('req-has-data').value;
     const description = document.getElementById('req-description').value;
     const techNeeded = document.getElementById('req-tech').value;
     const deadline = document.getElementById('req-deadline').value;
@@ -761,13 +764,24 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
     const combinedStudentNames = members.join(' - ');
+    const teamSize = members.length;
+
+    // استخراج السعر التقديري الفعلي من الشاشة
+    const estPriceText = document.getElementById('est-price-display').innerText;
+    const estimatedPrice = parseInt(estPriceText.replace(/\D/g, '')) || 0;
 
     const formData = new FormData();
     formData.append('studentId', currentUser.id);
     formData.append('studentName', combinedStudentNames);
+    formData.append('studentPhone', currentUser.phone || '');
     formData.append('title', title);
-    formData.append('category', category);
     formData.append('college', college);
+    formData.append('university', university);
+    formData.append('deliveryFormat', deliveryFormat);
+    formData.append('slideCount', slideCount);
+    formData.append('teamSize', teamSize);
+    formData.append('hasData', hasData);
+    formData.append('estimatedPrice', estimatedPrice);
     formData.append('description', description);
     formData.append('techNeeded', techNeeded);
     formData.append('deadline', deadline);
@@ -789,12 +803,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const notifyWhatsApp = confirm('تم تقديم طلب مشروعك الجديد بنجاح! 🎉\n\nهل ترغب في تأكيد الطلب فوراً مع المطور عبد الله هيثم عبر الواتساب لتسريع المراجعة والتسعير؟');
       newRequestForm.reset();
+      
+      // إخفاء حقل الشرائح وتصفية المدخلات الافتراضية
+      if (reqSlideCountGroup) reqSlideCountGroup.style.display = 'none';
+      if (reqFileLabel) reqFileLabel.innerHTML = 'تحميل ملف المادة العلمية أو الداتا الخاصة بك (PDF, Word, Zip) (مطلوب) 📸';
+      
       showPortalPanel('requests');
       fetchStudentRequests();
 
       if (notifyWhatsApp) {
         const orderId = data.id || '';
-        const whatsappMsg = `مرحباً باشمهندس عبد الله، لقد قدمت طلب مشروع جديد على الموقع:\n\n- عنوان المشروع: ${data.title}\n- القسم: ${data.category}\n- الكلية والجامعة: ${data.college}\n- كود الطلب: ${orderId}\n\nيرجى مراجعته وتحديد السعر. شكراً لك!`;
+        const whatsappMsg = `مرحباً باشمهندس عبد الله، لقد قدمت طلب مشروع جديد على الموقع:\n\n- عنوان المشروع: ${data.title}\n- الكلية: ${data.college}\n- الجامعة: ${data.university}\n- صيغة التسليم: ${data.deliveryFormat === 'word' ? 'Word' : data.deliveryFormat === 'ppt' ? 'PowerPoint' : 'Poster'}\n- كود الطلب: ${orderId}\n\nيرجى مراجعته وتحديد السعر. شكراً لك!`;
         const whatsappUrl = `https://wa.me/201014054673?text=${encodeURIComponent(whatsappMsg)}`;
         window.open(whatsappUrl, '_blank');
       }
@@ -843,30 +862,51 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
       }
 
+      const isFreeOrder = finalPrice === 0;
+      const freeConfirmSection = document.getElementById('free-confirm-section');
+
       if (order.status === 'pending') {
         orderPendingReviewInfo.classList.remove('hidden');
+        if (freeConfirmSection) freeConfirmSection.classList.add('hidden');
       } else if (order.status === 'accepted') {
         paymentPricingInfo.classList.remove('hidden');
         orderPriceDisplay.innerHTML = `${finalPrice} EGP ${discountMarkup}`;
+        
+        if (isFreeOrder) {
+          if (paymentInstructions) paymentInstructions.classList.add('hidden');
+          if (freeConfirmSection) freeConfirmSection.classList.remove('hidden');
+        } else {
+          if (paymentInstructions) paymentInstructions.classList.remove('hidden');
+          if (freeConfirmSection) freeConfirmSection.classList.add('hidden');
+        }
       } else if (order.status === 'in_progress' || order.status === 'paid') {
         paymentPricingInfo.classList.remove('hidden');
         orderPriceDisplay.innerHTML = `${finalPrice} EGP ${discountMarkup}`;
         paymentVerifyPending.classList.remove('hidden');
+        if (freeConfirmSection) freeConfirmSection.classList.add('hidden');
         paymentVerifyPending.innerHTML = `
           <i class="fa-solid fa-gears fa-spin" style="font-size: 1.8rem; margin-bottom: 0.8rem; color: var(--primary-cyan);"></i>
           <p style="font-weight: 700; color: var(--text-primary);">تم تأكيد الطلب وهو قيد التنفيذ والبرمجة حالياً بمتابعة مستمرة!</p>
         `;
       } else if (order.status === 'ready_payment') {
         paymentPricingInfo.classList.remove('hidden');
-        paymentInstructions.classList.remove('hidden');
         orderPriceDisplay.innerHTML = `${finalPrice} EGP ${discountMarkup}`;
+
+        if (isFreeOrder) {
+          if (paymentInstructions) paymentInstructions.classList.add('hidden');
+          if (freeConfirmSection) freeConfirmSection.classList.remove('hidden');
+        } else {
+          if (paymentInstructions) paymentInstructions.classList.remove('hidden');
+          if (freeConfirmSection) freeConfirmSection.classList.add('hidden');
+        }
       } else if (order.status === 'ready_payment_verify') {
         paymentPricingInfo.classList.remove('hidden');
         orderPriceDisplay.innerHTML = `${finalPrice} EGP ${discountMarkup}`;
         paymentVerifyPending.classList.remove('hidden');
+        if (freeConfirmSection) freeConfirmSection.classList.add('hidden');
         paymentVerifyPending.innerHTML = `
           <i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 1.8rem; margin-bottom: 0.8rem; color: var(--accent-gold);"></i>
-          <p style="font-weight: 700;">تم إرسال التحويل الافتراضي! في انتظار تأكيد الأدمن لتفعيل خيار التحميل للبروجيكت.</p>
+          <p style="font-weight: 700;">تم إرسال إثبات الدفع وسكرين التحويل! في انتظار تأكيد الأدمن لتفعيل خيار التحميل للبروجيكت.</p>
         `;
       } else if (order.status === 'cancelled') {
         if (orderCancelledInfo) orderCancelledInfo.classList.remove('hidden');
@@ -954,8 +994,27 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     const paymentMethod = document.getElementById('pay-method').value;
     const transactionId = document.getElementById('pay-transaction-id').value;
+    const screenshotInput = document.getElementById('pay-receipt-screenshot');
 
     try {
+      // 1. رفع ملف لقطة شاشة التحويل أولاً إذا تم تحديده
+      if (screenshotInput && screenshotInput.files.length > 0) {
+        const fileFormData = new FormData();
+        fileFormData.append('receipt', screenshotInput.files[0]);
+
+        const receiptResponse = await fetch(`/api/requests/${activeTrackedOrderId}/payment-receipt`, {
+          method: 'PUT',
+          body: fileFormData
+        });
+
+        if (!receiptResponse.ok) {
+          const receiptData = await receiptResponse.json();
+          alert(receiptData.error || 'فشل رفع لقطة شاشة إثبات الدفع');
+          return;
+        }
+      }
+
+      // 2. إرسال تفاصيل المعاملة النصية
       const response = await fetch(`/api/requests/${activeTrackedOrderId}/pay`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -964,11 +1023,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.error || 'حدث خطأ أثناء رفع الدفع');
+        alert(data.error || 'حدث خطأ أثناء إرسال تفاصيل الدفع');
         return;
       }
 
-      alert('تم إرسال إثبات الدفع بنجاح! سيقوم الأدمن بمراجعته الآن وسيتم فتح التحميل فوراً.');
+      alert('تم إرسال إثبات الدفع واللقطة بنجاح! سيقوم الأدمن بمراجعتها فوراً لبدء العمل.');
       paymentSubmissionForm.reset();
       orderStatusModal.classList.remove('active');
       fetchStudentRequests();
@@ -977,6 +1036,31 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('خطأ في الاتصال بالخادم');
     }
   });
+
+  // تأكيد الطلب المجاني (100% خصم)
+  const btnConfirmFreeOrder = document.getElementById('btn-confirm-free-order');
+  if (btnConfirmFreeOrder) {
+    btnConfirmFreeOrder.addEventListener('click', async () => {
+      try {
+        const response = await fetch(`/api/requests/${activeTrackedOrderId}/confirm-free`, {
+          method: 'PUT'
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          alert(data.error || 'فشل تأكيد الطلب المجاني');
+          return;
+        }
+
+        alert('تم تأكيد طلبك المجاني بنجاح! جاري العمل على مشروعك حالياً 🚀');
+        orderStatusModal.classList.remove('active');
+        fetchStudentRequests();
+      } catch (err) {
+        console.error(err);
+        alert('خطأ في الاتصال بالخادم');
+      }
+    });
+  }
 
   orderStatusClose.addEventListener('click', () => {
     orderStatusModal.classList.remove('active');
@@ -1513,55 +1597,130 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ----------------------------------------------------
-  // 6. الحاسبة التقديرية التفاعلية للمشاريع
+  // 6. الحاسبة التقديرية التفاعلية للمشاريع (المحدثة)
   // ----------------------------------------------------
-  const estComplexity = document.getElementById('est-complexity');
-  const estUrgency = document.getElementById('est-urgency');
+  const estDeliveryFormat = document.getElementById('est-delivery-format');
+  const estHasData = document.getElementById('est-has-data');
+  const estSlideCountGroup = document.getElementById('est-slide-count-group');
+  const estSlideCount = document.getElementById('est-slide-count');
+  const estUrgencyHours = document.getElementById('est-urgency-hours');
   const estMembers = document.getElementById('est-members');
   const estMembersVal = document.getElementById('est-members-val');
   const estPriceDisplay = document.getElementById('est-price-display');
 
+  // إظهار وإخفاء حقل عدد الشرائح بناءً على اختيار البوربوينت في الحاسبة
+  if (estDeliveryFormat) {
+    estDeliveryFormat.addEventListener('change', () => {
+      if (estDeliveryFormat.value === 'ppt') {
+        if (estSlideCountGroup) estSlideCountGroup.style.display = 'block';
+      } else {
+        if (estSlideCountGroup) estSlideCountGroup.style.display = 'none';
+      }
+      calculateEstimatedPrice();
+    });
+  }
+
   function calculateEstimatedPrice() {
-    if (!estComplexity || !estUrgency || !estMembers || !estPriceDisplay) return;
+    if (!estDeliveryFormat || !estHasData || !estMembers || !estPriceDisplay) return;
 
-    const complexity = estComplexity.value;
-    const urgency = estUrgency.value;
+    const format = estDeliveryFormat.value;
+    const hasData = estHasData.value === 'yes';
     const members = parseInt(estMembers.value);
+    const urgency = estUrgencyHours ? estUrgencyHours.value : 'relaxed';
 
-    // تحديث رقم الأعضاء المعروض
     if (estMembersVal) estMembersVal.innerText = members;
 
-    // احتساب السعر الأساسي بناءً على الحجم والتعقيد
-    let basePrice = 300;
-    if (complexity === 'medium') basePrice = 600;
-    if (complexity === 'complex') basePrice = 1500;
+    let basePrice = 0;
 
-    // معامل ضرب بناءً على سرعة التسليم (عاجل جداً يزيد السعر)
-    let urgencyMultiplier = 1.0;
-    if (urgency === 'relaxed') urgencyMultiplier = 0.85; // خصم للمرن
-    if (urgency === 'urgent') urgencyMultiplier = 1.35; // زيادة للعاجل
-
-    // حساب السعر الإجمالي
-    let totalPrice = Math.round(basePrice * urgencyMultiplier);
-
-    // خصم بسيط للمجموعات / الأعضاء المتعددين لتشجيعهم
-    if (members > 1) {
-      // خصم 5% لكل عضو إضافي بحد أقصى 15%
-      const groupDiscount = Math.min((members - 1) * 0.05, 0.15);
-      totalPrice = Math.round(totalPrice * (1 - groupDiscount));
+    if (format === 'word') {
+      basePrice = 100;
+      if (!hasData) {
+        basePrice += 75; // إضافة 75 للبحث عن الداتا
+      }
+    } else if (format === 'ppt') {
+      const slides = estSlideCount ? parseInt(estSlideCount.value) || 10 : 10;
+      const ratePerSlide = members > 1 ? 20 : 10; // 20 للتيمات، 10 للفردي
+      basePrice = slides * ratePerSlide;
+      if (!hasData) {
+        basePrice += 75; // إضافة 75 للبحث عن الداتا
+      }
+    } else if (format === 'poster') {
+      if (members > 3) {
+        basePrice = hasData ? 150 : 200;
+      } else {
+        basePrice = hasData ? 120 : 170;
+      }
     }
+
+    // معامل الاستعجال
+    let multiplier = 1.0;
+    if (urgency === 'urgent10') multiplier = 1.25;
+    if (urgency === 'urgent3') multiplier = 1.5;
+
+    let totalPrice = Math.round(basePrice * multiplier);
 
     estPriceDisplay.innerText = `${totalPrice} EGP`;
   }
 
-  if (estComplexity) estComplexity.addEventListener('change', calculateEstimatedPrice);
-  if (estUrgency) estUrgency.addEventListener('change', calculateEstimatedPrice);
+  if (estHasData) estHasData.addEventListener('change', calculateEstimatedPrice);
+  if (estSlideCount) estSlideCount.addEventListener('input', calculateEstimatedPrice);
+  if (estUrgencyHours) estUrgencyHours.addEventListener('change', calculateEstimatedPrice);
   if (estMembers) {
     estMembers.addEventListener('input', calculateEstimatedPrice);
     estMembers.addEventListener('change', calculateEstimatedPrice);
   }
+
   // تشغيل الحاسبة لأول مرة
   calculateEstimatedPrice();
+
+  // ----------------------------------------------------
+  // إخفاء وإظهار الحقول التفاعلية في استمارة الطلب الفعلية
+  // ----------------------------------------------------
+  const reqDeliveryFormat = document.getElementById('req-delivery-format');
+  const reqSlideCountGroup = document.getElementById('req-slide-count-group');
+  const reqSlideCount = document.getElementById('req-slide-count');
+  const reqHasData = document.getElementById('req-has-data');
+  const reqFileLabel = document.getElementById('req-file-label');
+  const reqFile = document.getElementById('req-file');
+
+  if (reqDeliveryFormat) {
+    reqDeliveryFormat.addEventListener('change', () => {
+      if (reqDeliveryFormat.value === 'ppt') {
+        if (reqSlideCountGroup) reqSlideCountGroup.style.display = 'block';
+        if (reqSlideCount) reqSlideCount.required = true;
+      } else {
+        if (reqSlideCountGroup) reqSlideCountGroup.style.display = 'none';
+        if (reqSlideCount) reqSlideCount.required = false;
+      }
+    });
+  }
+
+  if (reqHasData) {
+    reqHasData.addEventListener('change', () => {
+      if (reqHasData.value === 'yes') {
+        if (reqFileLabel) reqFileLabel.innerHTML = 'تحميل ملف المادة العلمية أو الداتا الخاصة بك (PDF, Word, Zip) (مطلوب) 📸';
+        if (reqFile) reqFile.required = true;
+      } else {
+        if (reqFileLabel) reqFileLabel.innerHTML = 'تحميل ملف الإرشادات أو الـ Guideline للمطور (اختياري) 📂';
+        if (reqFile) reqFile.required = false;
+      }
+    });
+  }
+
+  // منع اختيار ديدلاين قديم للطلب بالثانية والدقيقة
+  const reqDeadline = document.getElementById('req-deadline');
+  if (reqDeadline) {
+    // تحديث دائم للحد الأدنى المسموح به ليكون اللحظة الحالية
+    const updateMinDeadline = () => {
+      const now = new Date();
+      // تنسيق التوقيت المحلي ليتماشى مع datetime-local (YYYY-MM-DDTHH:MM)
+      const tzOffset = now.getTimezoneOffset() * 60000;
+      const localISOTime = (new Date(now - tzOffset)).toISOString().slice(0, 16);
+      reqDeadline.min = localISOTime;
+    };
+    updateMinDeadline();
+    reqDeadline.addEventListener('click', updateMinDeadline);
+  }
 
   // ----------------------------------------------------
   // 7. تطبيق كود الخصم بداخل بوابة الطلبات

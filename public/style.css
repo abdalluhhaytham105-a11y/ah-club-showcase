@@ -1441,9 +1441,9 @@ body.light-mode .circle-nav-btn {
     flex-direction: row-reverse !important;
     justify-content: space-between !important;
     align-items: center !important;
-    padding: 0.5rem 1rem !important;
+    padding: 0.3rem 0.8rem !important;
     gap: 0 !important;
-    height: 70px !important;
+    height: 58px !important;
     background: rgba(3, 7, 18, 0.9) !important;
     backdrop-filter: blur(15px) !important;
     -webkit-backdrop-filter: blur(15px) !important;
@@ -1452,6 +1452,14 @@ body.light-mode .circle-nav-btn {
   
   body.user-logged-in header .logo-container {
     margin-bottom: 0 !important;
+  }
+
+  body.user-logged-in header .logo-container img {
+    height: 28px !important;
+  }
+
+  body.user-logged-in header .logo-container h1 {
+    font-size: 0.95rem !important;
   }
   
   body.user-logged-in header .nav-links {
@@ -1470,7 +1478,13 @@ body.light-mode .circle-nav-btn {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    gap: 0.6rem !important;
+    gap: 0.5rem !important;
+  }
+
+  body.user-logged-in header .circle-nav-btn {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 1.05rem !important;
   }
 
   /* شبكة المشاريع ثنائية الأعمدة للمحمول */

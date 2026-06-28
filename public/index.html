@@ -282,46 +282,65 @@
           <div id="portal-new-request-panel" class="portal-panel hidden">
             <h3 style="margin-bottom: 1.5rem; font-weight: 700;">تقديم استمارة طلب مشروع جديد</h3>
 
-            <!-- الحاسبة التقديرية التفاعلية (Interactive Cost Estimator) -->
+            <!-- الحاسبة التقديرية التفاعلية المحدثة (Interactive Cost Estimator) -->
             <div style="background: linear-gradient(135deg, rgba(3, 7, 18, 0.8), rgba(15, 23, 42, 0.6)); border: 1px solid rgba(0, 240, 255, 0.15); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 8px 32px rgba(0, 240, 255, 0.05);">
               <h4 style="font-weight: 800; color: var(--primary-cyan); margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
                 <i class="fa-solid fa-calculator fa-spin-hover"></i> حاسبة التكلفة التقديرية للمشروع (استرشادية)
               </h4>
-              <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
-                اختر الخيارات المناسبة لمشروعك لتقدير السعر المتوقع للتنفيذ بشكل فوري قبل إرسال الطلب:
-              </p>
               
+              <!-- نصيحة البركة والحلال الأكاديمي -->
+              <div style="background: rgba(0, 240, 255, 0.04); border: 1px dashed rgba(0, 240, 255, 0.25); border-radius: 12px; padding: 0.8rem; font-size: 0.78rem; line-height: 1.5; color: var(--text-secondary); margin-bottom: 1.2rem;">
+                💡 <strong>نصيحة أخوية دافئة:</strong> نوصي بشدة بتوفير مادتك العلمية (الداتا) بنفسك. هذا الخيار ليس فقط <strong>أوفر مادياً لك</strong>، بل يضمن أيضاً أن يكون العمل نتاج مجهودك العلمي المشترك، لنقوم نحن بالصياغة والتنسيق والإخراج البرمجي، ونبقى في دائرة العمل الحلال والبركة! 🙏✨
+              </div>
+
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.2rem;">
                 <div class="form-group" style="margin-bottom: 0;">
-                  <label for="est-complexity" style="font-size: 0.75rem;">حجم وتعقيد المشروع</label>
-                  <select id="est-complexity" class="form-control" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
-                    <option value="simple">مشروع بسيط / واجهة واحدة (شغل سريع)</option>
-                    <option value="medium" selected>مشروع متوسط / كامل المميزات (قاعدة بيانات وواجهات)</option>
-                    <option value="complex">مشروع ضخم / تخرج (أنظمة متعددة ولوحة تحكم كاملة)</option>
+                  <label for="est-delivery-format" style="font-size: 0.75rem;">صيغة التسليم المطلوبة</label>
+                  <select id="est-delivery-format" class="form-control" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+                    <option value="word" selected>مستند وورد (Word)</option>
+                    <option value="ppt">عرض بوربوينت (PowerPoint)</option>
+                    <option value="poster">بوستر علمي (Poster)</option>
                   </select>
                 </div>
                 <div class="form-group" style="margin-bottom: 0;">
-                  <label for="est-urgency" style="font-size: 0.75rem;">سرعة ووقت التسليم المطلوبة</label>
-                  <select id="est-urgency" class="form-control" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
-                    <option value="relaxed">مرن (أكثر من أسبوعين)</option>
-                    <option value="normal" selected>عادي (من أسبوع لأسبوعين)</option>
-                    <option value="urgent">عاجل جداً (خلال 3 - 5 أيام) 🔥</option>
+                  <label for="est-has-data" style="font-size: 0.75rem;">المادة العلمية (الداتا)</label>
+                  <select id="est-has-data" class="form-control" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+                    <option value="yes" selected>أنا مجهز الداتا (أوفر سعراً 🏷️)</option>
+                    <option value="no">أريد من المطور البحث وتوفير الداتا (+75 EGP)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.2rem;">
+                <div class="form-group" id="est-slide-count-group" style="margin-bottom: 0; display: none;">
+                  <label for="est-slide-count" style="font-size: 0.75rem;">عدد الشرائح (Slides)</label>
+                  <input type="number" id="est-slide-count" min="1" max="100" value="10" class="form-control" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="est-urgency-hours" style="font-size: 0.75rem;">سرعة ووقت التسليم</label>
+                  <select id="est-urgency-hours" class="form-control" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+                    <option value="relaxed" selected>عادي (أكثر من 24 ساعة)</option>
+                    <option value="urgent10">عاجل (أقل من 10 ساعات) (ضرب 1.25)</option>
+                    <option value="urgent3">عاجل جداً (أقل من 3 ساعات) (ضرب 1.50) 🔥</option>
                   </select>
                 </div>
               </div>
               
-              <!-- عدد أعضاء المشروع (يؤثر على تقدير السعر قليلاً للتقارير) -->
+              <!-- عدد أعضاء المشروع -->
               <div class="form-group" style="margin-bottom: 1.5rem;">
                 <label for="est-members" style="font-size: 0.75rem; display: flex; justify-content: space-between;">
                   <span>عدد الطلاب المشاركين بالمشروع:</span>
                   <span id="est-members-val" style="color: var(--accent-gold); font-family: 'Orbitron', sans-serif; font-weight: 700;">1</span>
                 </label>
-                <input type="range" id="est-members" min="1" max="5" value="1" class="form-control" style="height: 6px; padding: 0; background: var(--border-light); accent-color: var(--primary-cyan);">
+                <input type="range" id="est-members" min="1" max="10" value="1" class="form-control" style="height: 6px; padding: 0; background: var(--border-light); accent-color: var(--primary-cyan);">
               </div>
 
               <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-light); border-radius: 12px; padding: 1rem; display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary);">التكلفة التقديرية المتوقعة:</span>
-                <span id="est-price-display" style="font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--primary-cyan); text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);">500 EGP</span>
+                <span id="est-price-display" style="font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--primary-cyan); text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);">100 EGP</span>
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.5rem; text-align: center;">
+                ⚠️ تنبيه: هذه الأسعار تقريبية واسترشادية لتسهيل الحساب، السعر النهائي يتم تحديده بواسطة الأدمن بعد مراجعة المتطلبات.
               </div>
             </div>
 
@@ -333,10 +352,10 @@
 
               <div class="form-group">
                 <label for="req-title">عنوان المشروع المقترح</label>
-                <input type="text" id="req-title" class="form-control" placeholder="مثال: تطبيق ويب لإدارة العيادات الطبية" required>
+                <input type="text" id="req-title" class="form-control" placeholder="مثال: بحث طبي عن أثر الفيتامينات" required>
               </div>
 
-              <!-- قسم أعضاء المشروع - الأسماء والأرقام الجامعية (يمكن إضافة المزيد) -->
+              <!-- قسم أعضاء المشروع -->
               <div class="form-group" style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-light); padding: 1.2rem; border-radius: 12px; margin-bottom: 1.5rem;">
                 <label style="font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; color: var(--text-primary);">
                   <span>أعضاء المشروع (الأسماء والأرقام الجامعية)</span>
@@ -347,51 +366,67 @@
                 <div id="members-list-wrapper">
                   <div class="member-row" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.8rem; margin-bottom: 0.6rem; align-items: center;">
                     <input type="text" class="form-control member-name" placeholder="اسم الطالب الأول" required style="margin-bottom: 0;">
-                    <input type="text" class="form-control member-id" placeholder="الرقم الجامعي (ID)" required style="margin-bottom: 0;">
-                    <span style="width: 32px; display: inline-block;"></span> <!-- مساحة فارغة لأول صف لمنع الحذف -->
+                    <input type="number" class="form-control member-id" placeholder="الرقم الجامعي (ID أرقام فقط)" required style="margin-bottom: 0;">
+                    <span style="width: 32px; display: inline-block;"></span>
                   </div>
                 </div>
               </div>
               
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
-                  <label for="req-category">التصنيف الأساسي</label>
-                  <select id="req-category" class="form-control" required>
-                    <!-- سيتم تعبئة الأقسام ديناميكياً عبر JS -->
+                  <label for="req-college">الكلية</label>
+                  <select id="req-college" class="form-control" required>
+                    <!-- سيتم تعبئة الكليات ديناميكياً عبر JS -->
                   </select>
                 </div>
                 <div class="form-group">
-                  <label for="req-college">الكلية والجامعة</label>
-                  <input type="text" id="req-college" class="form-control" placeholder="مثال: هندسة عين شمس" required>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="req-description">وصف تفصيلي لمتطلبات المشروع</label>
-                <textarea id="req-description" class="form-control" rows="5" placeholder="اشرح بالتفصيل فكرة المشروع، وما هي الميزات المطلوبة بالضبط ليسهل على المطور فهمها وتسعيرها بدقة..." required></textarea>
-              </div>
-
-              <div class="form-group">
-                <label for="req-tech">التقنيات المطلوب استخدامها / صيغة التسليم</label>
-                <input type="text" id="req-tech" class="form-control" placeholder="مثال: بوربوينت, ملف وورد, PDF (اختياري)">
-                
-                <!-- أزرار الإضافة السريعة للتقنيات والمخرجات المطلوبة -->
-                <div class="tech-suggestions" style="margin-top: 0.6rem; display: flex; gap: 0.4rem; flex-wrap: wrap;">
-                  <button type="button" class="btn-tech-suggest" data-tech="بوربوينت (PowerPoint)" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ بوربوينت (PPTX)</button>
-                  <button type="button" class="btn-tech-suggest" data-tech="ملف وورد (Word)" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ ملف وورد (Word)</button>
-                  <button type="button" class="btn-tech-suggest" data-tech="ملف PDF" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ ملف PDF</button>
-                  <button type="button" class="btn-tech-suggest" data-tech="بوسترات (Posters)" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: var(--transition-smooth); font-family: 'Cairo', sans-serif;">+ بوسترات (Posters)</button>
+                  <label for="req-university">الجامعة</label>
+                  <input type="text" id="req-university" class="form-control" placeholder="مثال: جامعة عين شمس" required>
                 </div>
               </div>
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
-                  <label for="req-deadline">تاريخ التسليم المطلوب النهائي</label>
-                  <input type="date" id="req-deadline" class="form-control" required>
+                  <label for="req-delivery-format">صيغة التسليم</label>
+                  <select id="req-delivery-format" class="form-control" required>
+                    <option value="word" selected>مستند وورد (Word)</option>
+                    <option value="ppt">عرض بوربوينت (PowerPoint)</option>
+                    <option value="poster">بوستر علمي (Poster)</option>
+                  </select>
                 </div>
                 <div class="form-group">
-                  <label for="req-file">ملف الإرشادات أو الـ Guideline (PDF, Zip)</label>
-                  <input type="file" id="req-file" class="form-control" accept=".pdf,.zip,.rar,.doc,.docx">
+                  <label for="req-has-data">المادة العلمية (الداتا)</label>
+                  <select id="req-has-data" class="form-control" required>
+                    <option value="yes" selected>أنا جاهز بالداتا (أوفر سعراً 📂)</option>
+                    <option value="no">أريد من المطور البحث وتوفير الداتا (+75 EGP)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- عدد الشرائح الفعلي للطلب -->
+              <div class="form-group" id="req-slide-count-group" style="display: none;">
+                <label for="req-slide-count">عدد الشرائح المطلوبة لعرض البوربوينت</label>
+                <input type="number" id="req-slide-count" class="form-control" min="1" max="100" value="10">
+              </div>
+
+              <div class="form-group">
+                <label for="req-description">وصف تفصيلي لمتطلبات المشروع</label>
+                <textarea id="req-description" class="form-control" rows="5" placeholder="اشرح بالتفصيل فكرة المشروع، ومحاور البحث المطلوبة ليعرف المطور حجم العمل بدقة..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="req-tech">التقنيات المطلوب استخدامها</label>
+                <input type="text" id="req-tech" class="form-control" placeholder="مثال: Excel, SPSSS, تصميم إنفوجرافيك (اختياري)">
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                  <label for="req-deadline">تاريخ ووقت التسليم النهائي المطلوب</label>
+                  <input type="datetime-local" id="req-deadline" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label for="req-file" id="req-file-label">ملف المادة العلمية أو الداتا الخاصة بك (PDF, Word, Zip)</label>
+                  <input type="file" id="req-file" class="form-control" accept=".pdf,.zip,.rar,.doc,.docx,.png,.jpg,.jpeg">
                 </div>
               </div>
 
@@ -614,7 +649,7 @@
                   </div>
                 </div>
               </div>
-              <form id="payment-submission-form">
+              <form id="payment-submission-form" enctype="multipart/form-data">
                 <div class="form-group">
                   <label for="pay-method">وسيلة التحويل المستخدمة</label>
                   <select id="pay-method" class="form-control" required>
@@ -624,11 +659,21 @@
                   </select>
                 </div>
                 <div class="form-group">
-                  <label for="pay-transaction-id">رقم المعاملة / العملية (Transaction ID)</label>
-                  <input type="text" id="pay-transaction-id" class="form-control" placeholder="ادخل الرقم المرجعي للتحويل" required>
+                  <label for="pay-transaction-id">رقم المعاملة / العملية (Transaction ID) (اختياري)</label>
+                  <input type="text" id="pay-transaction-id" class="form-control" placeholder="ادخل الرقم المرجعي للتحويل">
                 </div>
-                <button type="submit" class="btn btn-secondary" style="width: 100%; justify-content: center;">إرسال بيانات الدفع للأدمن</button>
+                <div class="form-group">
+                  <label for="pay-receipt-screenshot">تحميل لقطة شاشة إثبات الدفع / سكرين التحويل (مطلوب) 📸</label>
+                  <input type="file" id="pay-receipt-screenshot" class="form-control" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn btn-secondary" style="width: 100%; justify-content: center; margin-top: 1rem;">إرسال إثبات الدفع للأدمن ⚡</button>
               </form>
+
+              <!-- تأكيد الطلب المجاني أصحاب خصم 100% -->
+              <div id="free-confirm-section" class="hidden" style="text-align: center; padding: 1.5rem; background: rgba(0, 240, 255, 0.05); border: 1px dashed var(--primary-cyan); border-radius: 12px; margin-top: 1.5rem;">
+                <p style="font-weight: 700; color: var(--primary-cyan); margin-bottom: 1rem;"><i class="fa-solid fa-gift"></i> هذا الطلب مغطى بالكامل بخصم 100% (السعر الحالي: 0 EGP).</p>
+                <button type="button" id="btn-confirm-free-order" class="btn btn-primary" style="width: 100%; justify-content: center;">تأكيد البدء الفوري للمشروع 🚀</button>
+              </div>
             </div>
             <div id="payment-verify-pending" class="hidden" style="text-align: center; color: var(--accent-gold);">
               <i class="fa-solid fa-hourglass-half fa-spin" style="font-size: 1.8rem; margin-bottom: 0.8rem;"></i>

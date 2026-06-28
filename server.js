@@ -327,9 +327,24 @@ app.get('/api/requests', verifyStudent, async (req, res) => {
 });
 
 app.post('/api/requests', verifyStudent, upload.single('attachment'), async (req, res) => {
-  const { studentId, studentName, title, category, college, description, techNeeded, deadline } = req.body;
+  const { 
+    studentId, 
+    studentName, 
+    studentPhone,
+    title, 
+    college, 
+    university, 
+    description, 
+    techNeeded, 
+    deadline,
+    deliveryFormat,
+    slideCount,
+    teamSize,
+    hasData,
+    estimatedPrice
+  } = req.body;
   
-  if (!studentId || !studentName || !title || !category || !college || !description || !deadline) {
+  if (!studentId || !studentName || !title || !college || !university || !description || !deadline) {
     return res.status(400).json({ error: 'من فضلك املأ جميع بيانات الاستمارة الأساسية' });
   }
 
@@ -343,17 +358,24 @@ app.post('/api/requests', verifyStudent, upload.single('attachment'), async (req
       id: 'req-' + Date.now(),
       studentId,
       studentName,
+      studentPhone: studentPhone || req.user.phone || '',
       title,
-      category,
       college,
+      university,
       description,
-      techNeeded: techNeeded || 'غير مححدد',
+      techNeeded: techNeeded || 'غير محدد',
       deadline,
+      deliveryFormat: deliveryFormat || 'word',
+      slideCount: slideCount ? parseInt(slideCount) : 0,
+      teamSize: teamSize ? parseInt(teamSize) : 1,
+      hasData: hasData === 'yes' || hasData === 'true' || hasData === true,
+      estimatedPrice: estimatedPrice ? parseFloat(estimatedPrice) : 0,
       status: 'pending',
       price: 0,
       paymentMethod: '',
       transactionId: '',
       attachmentFile: req.file ? '/uploads/' + req.file.filename : '',
+      paymentReceipt: '',
       deliveryFile: '',
       createdAt: new Date().toISOString()
     };
@@ -457,6 +479,63 @@ app.put('/api/requests/:id/cancel', verifyAdmin, async (req, res) => {
     res.json(data.requests[requestIndex]);
   } catch (err) {
     res.status(500).json({ error: 'فشل إلغاء الطلب' });
+  }
+});
+
+// رفع لقطة شاشة إثبات الدفع من الطالب
+app.put('/api/requests/:id/payment-receipt', verifyStudent, upload.single('receipt'), async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const data = await db.readDb();
+    const requestIndex = data.requests.findIndex(r => r.id === id);
+    if (requestIndex === -1) {
+      return res.status(404).json({ error: 'الطلب غير موجود' });
+    }
+
+    if (data.requests[requestIndex].studentId !== req.user.id) {
+      return res.status(403).json({ error: 'غير مصرح لك بتعديل هذا الطلب' });
+    }
+
+    if (req.file) {
+      data.requests[requestIndex].paymentReceipt = '/uploads/' + req.file.filename;
+    }
+    
+    // تحويل الحالة إلى انتظار التحقق من الدفع من قبل الأدمن
+    data.requests[requestIndex].status = 'ready_payment_verify';
+
+    await db.writeDb(data);
+    res.json(data.requests[requestIndex]);
+  } catch (err) {
+    res.status(500).json({ error: 'فشل رفع إثبات الدفع' });
+  }
+});
+
+// تأكيد البدء الفوري للطلاب أصحاب الخصم الكلي 100% (السعر 0)
+app.put('/api/requests/:id/confirm-free', verifyStudent, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const data = await db.readDb();
+    const requestIndex = data.requests.findIndex(r => r.id === id);
+    if (requestIndex === -1) {
+      return res.status(404).json({ error: 'الطلب غير موجود' });
+    }
+
+    if (data.requests[requestIndex].studentId !== req.user.id) {
+      return res.status(403).json({ error: 'غير مصرح لك بتعديل هذا الطلب' });
+    }
+
+    if (data.requests[requestIndex].price > 0) {
+      return res.status(400).json({ error: 'هذا الطلب يتطلب دفع مالي ولا يمكن تأكيده مجاناً' });
+    }
+
+    data.requests[requestIndex].status = 'paid';
+
+    await db.writeDb(data);
+    res.json(data.requests[requestIndex]);
+  } catch (err) {
+    res.status(500).json({ error: 'فشل تأكيد الطلب المجاني' });
   }
 });
 
