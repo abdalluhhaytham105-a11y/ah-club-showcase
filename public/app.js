@@ -60,14 +60,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // تابات البوابة للطلاب
   const menuMyDashboard = document.getElementById('menu-my-dashboard');
   const menuMyRequests = document.getElementById('menu-my-requests');
-  const menuProjectsRegistry = document.getElementById('menu-projects-registry');
   const menuNewRequest = document.getElementById('menu-new-request');
   const portalDashboardPanel = document.getElementById('portal-dashboard-panel');
   const portalRequestsPanel = document.getElementById('portal-requests-panel');
-  const portalRegistryPanel = document.getElementById('portal-registry-panel');
   const portalNewRequestPanel = document.getElementById('portal-new-request-panel');
   const studentRequestsTableBody = document.getElementById('student-requests-table-body');
-  const studentRegistryTableBody = document.getElementById('student-registry-table-body');
   const newRequestForm = document.getElementById('new-request-form');
 
   // مودال تتبع الطلب والدفع
@@ -491,13 +488,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // إزالة التنشيط عن التبويبات
     menuMyDashboard.classList.remove('active');
     menuMyRequests.classList.remove('active');
-    if (menuProjectsRegistry) menuProjectsRegistry.classList.remove('active');
     menuNewRequest.classList.remove('active');
 
     // إخفاء جميع اللوحات
     portalDashboardPanel.classList.add('hidden');
     portalRequestsPanel.classList.add('hidden');
-    if (portalRegistryPanel) portalRegistryPanel.classList.add('hidden');
     portalNewRequestPanel.classList.add('hidden');
 
     if (panel === 'dashboard') {
@@ -507,10 +502,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (panel === 'requests') {
       menuMyRequests.classList.add('active');
       portalRequestsPanel.classList.remove('hidden');
-    } else if (panel === 'registry') {
-      if (menuProjectsRegistry) menuProjectsRegistry.classList.add('active');
-      if (portalRegistryPanel) portalRegistryPanel.classList.remove('hidden');
-      loadRegistryData();
     } else {
       menuNewRequest.classList.add('active');
       portalNewRequestPanel.classList.remove('hidden');
@@ -529,9 +520,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   menuMyDashboard.addEventListener('click', () => showPortalPanel('dashboard'));
   menuMyRequests.addEventListener('click', () => showPortalPanel('requests'));
-  if (menuProjectsRegistry) {
-    menuProjectsRegistry.addEventListener('click', () => showPortalPanel('registry'));
-  }
   menuNewRequest.addEventListener('click', () => showPortalPanel('new-request'));
 
   async function loadPortalData() {
@@ -649,108 +637,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ----------------------------------------------------
-  // سجل المشاريع والطلبات المنظم للطالب
-  // ----------------------------------------------------
-  let allStudentRegistryRequests = [];
 
-  async function loadRegistryData() {
-    try {
-      const response = await fetch(`/api/requests?studentId=${currentUser.id}`);
-      allStudentRegistryRequests = await response.json();
-      filterStudentRegistry();
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  window.loadRegistryData = loadRegistryData; // جعلها عالمية للوصول إليها من التبويبات
-
-  function filterStudentRegistry() {
-    const filterTabsContainer = document.getElementById('student-registry-filters');
-    if (!filterTabsContainer) {
-      renderStudentRegistry(allStudentRegistryRequests);
-      return;
-    }
-    const activeTab = filterTabsContainer.querySelector('.filter-tab.active');
-    const statusFilter = activeTab ? activeTab.getAttribute('data-status') : 'all';
-
-    let filtered = allStudentRegistryRequests;
-    if (statusFilter === 'completed') {
-      filtered = allStudentRegistryRequests.filter(r => r.status === 'completed');
-    } else if (statusFilter === 'active') {
-      filtered = allStudentRegistryRequests.filter(r => r.status !== 'completed' && r.status !== 'cancelled');
-    } else if (statusFilter === 'cancelled') {
-      filtered = allStudentRegistryRequests.filter(r => r.status === 'cancelled');
-    }
-
-    renderStudentRegistry(filtered);
-  }
-
-  // ربط مستمعات تصفية السجل المطور للطلاب
-  setTimeout(() => {
-    const filterTabsContainer = document.getElementById('student-registry-filters');
-    if (filterTabsContainer) {
-      const tabs = filterTabsContainer.querySelectorAll('.filter-tab');
-      tabs.forEach(tab => {
-        tab.addEventListener('click', (e) => {
-          tabs.forEach(t => t.classList.remove('active'));
-          e.currentTarget.classList.add('active');
-          filterStudentRegistry();
-        });
-      });
-    }
-  }, 100);
-
-  function renderStudentRegistry(requests) {
-    if (!studentRegistryTableBody) return;
-    studentRegistryTableBody.innerHTML = '';
-
-    if (requests.length === 0) {
-      studentRegistryTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 2rem;">لا توجد مشاريع مسجلة مطابقة في هذا الفلتر حالياً.</td></tr>`;
-      return;
-    }
-
-    requests.slice().reverse().forEach(r => {
-      const tr = document.createElement('tr');
-      const formattedDate = new Date(r.createdAt).toLocaleDateString('ar-EG');
-      const priceText = r.price > 0 ? `${r.price} EGP` : 'يحدد لاحقاً';
-      
-      let actionColumn = '';
-      if (r.status === 'completed') {
-        actionColumn = `
-          <a href="${r.deliveryFile}" class="btn btn-secondary btn-xs btn-dl-proj" download style="display:inline-flex; align-items:center; gap:0.3rem;">
-            تحميل المشروع <i class="fa-solid fa-cloud-arrow-down"></i>
-          </a>
-        `;
-      } else {
-        actionColumn = `
-          <button class="btn btn-outline btn-xs btn-track-order" data-id="${r.id}" style="display:inline-flex; align-items:center; gap:0.3rem;">
-            تتبع التفاصيل <i class="fa-solid fa-magnifying-glass"></i>
-          </button>
-        `;
-      }
-
-      tr.innerHTML = `
-        <td style="font-weight: 700;">
-          <div>${r.title}</div>
-          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">رقم الطلب: ${r.id}</div>
-        </td>
-        <td>${formattedDate}</td>
-        <td style="font-family: 'Orbitron', sans-serif;">${priceText}</td>
-        <td><span class="badge ${getBadgeClass(r.status)}">${getStatusLabel(r.status)}</span></td>
-        <td>${actionColumn}</td>
-      `;
-      studentRegistryTableBody.appendChild(tr);
-    });
-
-    // ربط الأحداث بالأزرار
-    document.querySelectorAll('#student-registry-table-body .btn-track-order').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const id = e.currentTarget.getAttribute('data-id');
-        openOrderStatusModal(id);
-      });
-    });
-  }
 
   function renderStudentRequests(requests) {
     studentRequestsTableBody.innerHTML = '';
@@ -1336,48 +1223,68 @@ document.addEventListener('DOMContentLoaded', () => {
         alertBannerContainer.innerHTML = '';
         let hasAlerts = false;
 
+        // استرجاع الإشعارات المغلقة يدوياً من الطالب
+        const dismissedAlerts = JSON.parse(localStorage.getItem('dismissedAlerts') || '[]');
+
         requests.forEach(r => {
+          // تخطي إذا تم إغلاق التنبيه يدوياً أو إذا كان مكتملاً أو ما زال معلقاً تحت المراجعة
+          if (dismissedAlerts.includes(r.id)) return;
+          if (r.status === 'completed' || r.status === 'pending') return;
+
           let cardClass = '';
           let icon = '';
           let text = '';
           let actionBtn = '';
 
-          if (r.status === 'pending') {
-            cardClass = 'alert-blue';
-            icon = '<i class="fa-solid fa-hourglass-half" style="color: var(--primary-cyan);"></i>';
-            text = `طلبك لـ <strong>"${r.title}"</strong> قيد المراجعة حالياً من قبل المسؤول لتحديد التكلفة ووقت التنفيذ.`;
-            hasAlerts = true;
-          } else if (r.status === 'accepted') {
+          if (r.status === 'accepted' || r.status === 'ready_payment') {
             cardClass = 'alert-gold';
             icon = '<i class="fa-solid fa-circle-check" style="color: var(--accent-gold);"></i>';
-            text = `تمت الموافقة على طلبك لـ <strong>"${r.title}"</strong> وتحديد التكلفة بقيمة <strong style="font-family: 'Orbitron';">${r.price} EGP</strong>. يرجى تأكيد الدفع لبدء العمل.`;
+            text = `تمت الموافقة والتسعير لطلبك <strong>"${r.title}"</strong> بقيمة <strong style="font-family: 'Orbitron';">${r.price} EGP</strong>.`;
             actionBtn = `<button class="btn btn-primary btn-xs" onclick="document.getElementById('menu-my-requests').click();" style="font-size:0.75rem; padding:0.3rem 0.6rem; font-family:'Cairo';">الذهاب للدفع ⚡</button>`;
+            hasAlerts = true;
+          } else if (r.status === 'in_progress' || r.status === 'ready_payment_verify' || r.status === 'paid') {
+            cardClass = 'alert-blue';
+            icon = '<i class="fa-solid fa-gears" style="color: var(--primary-cyan);"></i>';
+            text = `طلبك لـ <strong>"${r.title}"</strong> مقبول وهو حالياً قيد العمل والبرمجة المستمرة ⚙️`;
+            actionBtn = `<button class="btn btn-outline btn-xs" onclick="document.getElementById('menu-my-requests').click();" style="font-size:0.75rem; padding:0.3rem 0.6rem; font-family:'Cairo';">تتبع الخطوات 🔍</button>`;
             hasAlerts = true;
           } else if (r.status === 'cancelled') {
             cardClass = 'alert-red';
             icon = '<i class="fa-solid fa-circle-xmark" style="color: #ff5555;"></i>';
-            text = `تم إلغاء طلبك لـ <strong>"${r.title}"</strong>. السبب: <span style="font-weight:700; text-decoration:underline;">"${r.cancellationReason || 'لا يوجد سبب محدد'}"</span>`;
-            hasAlerts = true;
-          } else if (r.status === 'completed') {
-            cardClass = 'alert-green';
-            icon = '<i class="fa-solid fa-champagne-glasses" style="color: #10b981;"></i>';
-            text = `مبروك! تم الانتهاء من تنفيذ مشروعك <strong>"${r.title}"</strong> بنجاح وجاهز للتحميل الآن!`;
-            actionBtn = `<button class="btn btn-secondary btn-xs" onclick="document.getElementById('menu-my-requests').click();" style="font-size:0.75rem; padding:0.3rem 0.6rem; font-family:'Cairo';">تحميل الملفات 📂</button>`;
+            text = `تم رفض وإلغاء طلبك لـ <strong>"${r.title}"</strong>. السبب: <span style="font-weight:700;">"${r.cancellationReason || 'لا يوجد سبب محدد'}"</span>`;
             hasAlerts = true;
           }
 
           if (cardClass) {
             const card = document.createElement('div');
             card.className = `portal-alert-card ${cardClass}`;
+            card.style.position = 'relative';
             card.innerHTML = `
-              <div class="portal-alert-info">
+              <div class="portal-alert-info" style="padding-left: 1.5rem;">
                 ${icon}
                 <span style="margin-right: 0.5rem;">${text}</span>
               </div>
-              ${actionBtn ? `<div style="margin-right: auto; padding-right: 1rem;">${actionBtn}</div>` : ''}
+              <div style="display: flex; align-items: center; gap: 0.8rem; margin-right: auto; padding-right: 1.5rem;">
+                ${actionBtn}
+                <button class="btn-close-alert" data-id="${r.id}" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.2rem; line-height:1;" title="إغلاق التنبيه">&times;</button>
+              </div>
             `;
             alertBannerContainer.appendChild(card);
           }
+        });
+
+        // ربط أحداث الإغلاق اليدوي للتنبيهات
+        document.querySelectorAll('.btn-close-alert').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = e.currentTarget.getAttribute('data-id');
+            const dismissed = JSON.parse(localStorage.getItem('dismissedAlerts') || '[]');
+            if (!dismissed.includes(id)) {
+              dismissed.push(id);
+              localStorage.setItem('dismissedAlerts', JSON.stringify(dismissed));
+            }
+            // إعادة تحميل وتحديث الإحصائيات لإخفاء التنبيه فوراً
+            updateDashboardStats();
+          });
         });
 
         if (hasAlerts) {

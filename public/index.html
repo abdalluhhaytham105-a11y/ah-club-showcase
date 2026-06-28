@@ -151,9 +151,6 @@
             <li class="portal-menu-item" id="menu-my-requests" data-target="portal-requests-panel">
               <i class="fa-solid fa-list-check"></i> طلباتي الجارية
             </li>
-            <li class="portal-menu-item" id="menu-projects-registry" data-target="portal-registry-panel">
-              <i class="fa-solid fa-folder-open"></i> سجل المشاريع والطلبات
-            </li>
             <li class="portal-menu-item" id="menu-new-request" data-target="portal-new-request-panel">
               <i class="fa-solid fa-circle-plus"></i> طلب مشروع جديد
             </li>
@@ -251,42 +248,6 @@
                   </tr>
                 </thead>
                 <tbody id="student-requests-table-body">
-                  <!-- سيتم تعبئتها ديناميكياً -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- سجل المشاريع والطلبات المنظم (Projects Registry Panel) -->
-          <div id="portal-registry-panel" class="portal-panel hidden">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-              <h3 style="margin: 0; font-weight: 700;">سجل المشاريع والطلبات 📂</h3>
-              
-              <!-- تصفية الأرشيف -->
-              <div class="filter-tabs" id="student-registry-filters" style="margin: 0;">
-                <div class="filter-tab active" data-status="all">الكل</div>
-                <div class="filter-tab" data-status="completed">مسلمة ومحفوظة 🎉</div>
-                <div class="filter-tab" data-status="active">جاري العمل عليها ⚙️</div>
-                <div class="filter-tab" data-status="cancelled">ملغية/مرفوضة 🚫</div>
-              </div>
-            </div>
-
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.5;">
-              هذا السجل يمثل قاعدة البيانات الشخصية المنظمة لجميع تعاملاتك معنا. يمكنك تتبع المشاريع النشطة، معرفة أسباب الطلبات المرفوضة، أو تنزيل ملفات المشاريع المكتملة في أي وقت وبشكل دائم.
-            </p>
-
-            <div class="table-responsive">
-              <table class="custom-table">
-                <thead>
-                  <tr>
-                    <th>اسم المشروع</th>
-                    <th>تاريخ الطلب</th>
-                    <th>السعر النهائي</th>
-                    <th>حالة التنفيذ</th>
-                    <th>الملف / الإجراء</th>
-                  </tr>
-                </thead>
-                <tbody id="student-registry-table-body">
                   <!-- سيتم تعبئتها ديناميكياً -->
                 </tbody>
               </table>
