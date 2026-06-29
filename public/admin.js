@@ -711,6 +711,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('edit-proj-college').value = project.college;
     document.getElementById('edit-proj-desc').value = project.description;
     document.getElementById('edit-proj-tech').value = project.techUsed;
+    document.getElementById('edit-proj-link').value = (project.link && project.link.startsWith('http')) ? project.link : '';
     document.getElementById('edit-proj-image').value = '';
     document.getElementById('edit-proj-file').value = '';
 
@@ -723,17 +724,87 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function uploadFileWithProgress(url, method, formData, progressContainer, progressBar, progressPercent, submitBtn, originalBtnHtml, successCallback, errorCallback) {
+    const xhr = new XMLHttpRequest();
+
+    if (progressContainer) {
+      progressContainer.classList.remove('hidden');
+      if (progressBar) progressBar.style.width = '0%';
+      if (progressPercent) progressPercent.innerText = '0%';
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'جاري الرفع... <i class="fa-solid fa-spinner fa-spin"></i>';
+    }
+
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable) {
+        const pct = Math.round((e.loaded / e.total) * 100);
+        if (progressBar) progressBar.style.width = pct + '%';
+        if (progressPercent) progressPercent.innerText = pct + '%';
+        if (submitBtn) {
+          submitBtn.innerHTML = `جاري الرفع ${pct}%... <i class="fa-solid fa-spinner fa-spin"></i>`;
+        }
+      }
+    });
+
+    xhr.addEventListener('load', () => {
+      if (progressContainer) progressContainer.classList.add('hidden');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
+      }
+
+      let data = {};
+      try {
+        data = JSON.parse(xhr.responseText);
+      } catch (jsonErr) {
+        if (xhr.status === 413) {
+          data = { error: 'الملف كبير جداً! الحد الأقصى لحجم الطلب على Vercel هو 4.5 ميجابايت.' };
+        } else {
+          data = { error: 'حدث خطأ في استجابة السيرفر، يرجى التحقق من حجم الملفات' };
+        }
+      }
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        successCallback(data);
+      } else {
+        errorCallback(data.error || 'حدث خطأ غير متوقع أثناء الرفع');
+      }
+    });
+
+    xhr.addEventListener('error', () => {
+      if (progressContainer) progressContainer.classList.add('hidden');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
+      }
+      errorCallback('فشل الاتصال بالخادم، يرجى التحقق من حجم الملفات أو جودة الاتصال بالإنترنت');
+    });
+
+    xhr.open(method, url);
+    
+    let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+    if (currentUser && currentUser.id) {
+      xhr.setRequestHeader('x-user-id', currentUser.id);
+    }
+    
+    xhr.send(formData);
+  }
+
   if (adminEditProjectForm) {
     adminEditProjectForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const submitBtn = adminEditProjectForm.querySelector('button[type="submit"]');
-      const originalBtnHtml = submitBtn ? submitBtn.innerHTML : 'حفظ التحديثات';
+      const originalBtnHtml = submitBtn ? submitBtn.innerHTML : 'حفظ التعديلات وتحديث المشروع';
 
       const title = document.getElementById('edit-proj-title').value;
       const category = document.getElementById('edit-proj-category').value;
       const college = document.getElementById('edit-proj-college').value;
       const description = document.getElementById('edit-proj-desc').value;
       const techUsed = document.getElementById('edit-proj-tech').value;
+      const linkVal = document.getElementById('edit-proj-link').value;
       const imageInput = document.getElementById('edit-proj-image');
       const fileInput = document.getElementById('edit-proj-file');
 
@@ -743,48 +814,67 @@ document.addEventListener('DOMContentLoaded', () => {
       formData.append('college', college);
       formData.append('description', description);
       formData.append('techUsed', techUsed);
+      formData.append('link', linkVal);
 
+      // التحقق من حجم صورة الغلاف (بحد أقصى 1.5 ميجا) وتحويلها لـ Base64 لضمان الحفظ على Vercel
       if (imageInput && imageInput.files.length > 0) {
-        formData.append('projectImage', imageInput.files[0]);
-      }
-      if (fileInput && fileInput.files.length > 0) {
-        formData.append('projectFile', fileInput.files[0]);
-      }
-
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = 'جاري تعديل وحفظ المشروع... <i class="fa-solid fa-spinner fa-spin"></i>';
-      }
-
-      try {
-        const response = await fetch(`/api/projects/${activeEditProjectId}`, {
-          method: 'PUT',
-          body: formData
-        });
-        
-        let data = {};
-        try {
-          data = await response.json();
-        } catch (jsonErr) {
-          data = { error: 'فشل تحليل استجابة السيرفر، قد يكون حجم الملف كبيراً جداً' };
-        }
-
-        if (!response.ok) {
-          alert(data.error || 'حدث خطأ أثناء تعديل المشروع');
+        const file = imageInput.files[0];
+        if (file.size > 1.5 * 1024 * 1024) {
+          window.showNotificationToast('خطأ في الحجم', 'حجم صورة الغلاف يتجاوز 1.5 ميجابايت. يرجى اختيار صورة أصغر لضمان استقرار الخادم.', 'error');
           return;
         }
+        const reader = new FileReader();
+        reader.onload = () => {
+          formData.append('projectImageBase64', reader.result);
+          proceedUpload();
+        };
+        reader.readAsDataURL(file);
+      } else {
+        proceedUpload();
+      }
 
-        alert('تم تعديل بيانات المشروع وحفظ التحديثات بنجاح!');
-        adminEditProjectModal.classList.remove('active');
-        loadArchiveData();
-      } catch (err) {
-        console.error(err);
-        alert('خطأ في الاتصال بالخادم، يرجى التحقق من حجم الملفات');
-      } finally {
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalBtnHtml;
+      async function proceedUpload() {
+        // التحقق من حجم ملف المشروع (بحد أقصى 2 ميجا للرفع المباشر) وتحويله لـ Base64 لضمان الحفظ الدائم على Vercel
+        if (fileInput && fileInput.files.length > 0) {
+          const file = fileInput.files[0];
+          if (file.size > 2 * 1024 * 1024) {
+            window.showNotificationToast('تنبيه الحجم', 'حجم الملف يتجاوز 2 ميجابايت. للملفات الكبيرة يرجى وضع رابط تحميل خارجي (مثل Google Drive) في خانة الرابط البديل.', 'error');
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = () => {
+            formData.append('projectFileBase64', reader.result);
+            executeXhr();
+          };
+          reader.readAsDataURL(file);
+        } else {
+          executeXhr();
         }
+      }
+
+      function executeXhr() {
+        const progressContainer = document.getElementById('edit-project-progress-container');
+        const progressBar = document.getElementById('edit-project-progress-bar');
+        const progressPercent = document.getElementById('edit-project-progress-percent');
+
+        uploadFileWithProgress(
+          `/api/projects/${activeEditProjectId}`,
+          'PUT',
+          formData,
+          progressContainer,
+          progressBar,
+          progressPercent,
+          submitBtn,
+          originalBtnHtml,
+          (data) => {
+            window.showNotificationToast('تم النجاح', 'تم تعديل بيانات المشروع وحفظ التحديثات بنجاح!', 'success');
+            adminEditProjectModal.classList.remove('active');
+            loadArchiveData();
+          },
+          (errorMsg) => {
+            window.showNotificationToast('فشل تعديل المشروع', errorMsg, 'error');
+          }
+        );
       }
     });
   }
@@ -800,6 +890,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const college = document.getElementById('new-proj-college').value;
     const description = document.getElementById('new-proj-desc').value;
     const techUsed = document.getElementById('new-proj-tech').value;
+    const linkVal = document.getElementById('new-proj-link').value;
     const imageInput = document.getElementById('new-proj-image');
     const fileInput = document.getElementById('new-proj-file');
 
@@ -809,49 +900,67 @@ document.addEventListener('DOMContentLoaded', () => {
     formData.append('college', college);
     formData.append('description', description);
     formData.append('techUsed', techUsed);
+    formData.append('link', linkVal);
 
+    // التحقق من حجم صورة الغلاف (بحد أقصى 1.5 ميجا) وتحويلها لـ Base64 لضمان الحفظ على Vercel
     if (imageInput && imageInput.files.length > 0) {
-      formData.append('projectImage', imageInput.files[0]);
-    }
-    if (fileInput && fileInput.files.length > 0) {
-      formData.append('projectFile', fileInput.files[0]);
-    }
-
-    // إظهار حالة التحميل والرفع
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = 'جاري رفع الملفات والمشروع... <i class="fa-solid fa-spinner fa-spin"></i>';
-    }
-
-    try {
-      const response = await fetch('/api/projects', {
-        method: 'POST',
-        body: formData
-      });
-      
-      let data = {};
-      try {
-        data = await response.json();
-      } catch (jsonErr) {
-        data = { error: 'فشل تحليل استجابة السيرفر، قد يكون حجم الملف كبيراً جداً' };
-      }
-
-      if (!response.ok) {
-        alert(data.error || 'حدث خطأ أثناء إضافة المشروع');
+      const file = imageInput.files[0];
+      if (file.size > 1.5 * 1024 * 1024) {
+        window.showNotificationToast('خطأ في الحجم', 'حجم صورة الغلاف يتجاوز 1.5 ميجابايت. يرجى اختيار صورة أصغر لضمان استقرار الخادم.', 'error');
         return;
       }
+      const reader = new FileReader();
+      reader.onload = () => {
+        formData.append('projectImageBase64', reader.result);
+        proceedUpload();
+      };
+      reader.readAsDataURL(file);
+    } else {
+      proceedUpload();
+    }
 
-      alert('تم رفع وإضافة المشروع الجديد للأرشيف العام بنجاح!');
-      adminAddProjectForm.reset();
-      loadArchiveData();
-    } catch (err) {
-      console.error(err);
-      alert('خطأ في الاتصال بالخادم، يرجى التحقق من حجم الملفات');
-    } finally {
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalBtnHtml;
+    async function proceedUpload() {
+      // التحقق من حجم ملف المشروع (بحد أقصى 2 ميجا للرفع المباشر) وتحويله لـ Base64 لضمان الحفظ الدائم على Vercel
+      if (fileInput && fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        if (file.size > 2 * 1024 * 1024) {
+          window.showNotificationToast('تنبيه الحجم', 'حجم الملف يتجاوز 2 ميجابايت. للملفات الكبيرة يرجى وضع رابط تحميل خارجي (مثل Google Drive) في خانة الرابط البديل.', 'error');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+          formData.append('projectFileBase64', reader.result);
+          executeXhr();
+        };
+        reader.readAsDataURL(file);
+      } else {
+        executeXhr();
       }
+    }
+
+    function executeXhr() {
+      const progressContainer = document.getElementById('add-project-progress-container');
+      const progressBar = document.getElementById('add-project-progress-bar');
+      const progressPercent = document.getElementById('add-project-progress-percent');
+
+      uploadFileWithProgress(
+        '/api/projects',
+        'POST',
+        formData,
+        progressContainer,
+        progressBar,
+        progressPercent,
+        submitBtn,
+        originalBtnHtml,
+        (data) => {
+          window.showNotificationToast('تم النجاح', 'تم رفع وإضافة المشروع الجديد للأرشيف العام بنجاح!', 'success');
+          adminAddProjectForm.reset();
+          loadArchiveData();
+        },
+        (errorMsg) => {
+          window.showNotificationToast('فشل إضافة المشروع', errorMsg, 'error');
+        }
+      );
     }
   });
 

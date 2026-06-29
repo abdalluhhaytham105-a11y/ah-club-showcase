@@ -170,12 +170,16 @@ app.post('/api/projects', verifyAdmin, archiveUpload, async (req, res) => {
   }
 
   let imageUrl = '/logo.png';
-  if (req.files && req.files['projectImage'] && req.files['projectImage'][0]) {
+  if (req.body.projectImageBase64) {
+    imageUrl = req.body.projectImageBase64;
+  } else if (req.files && req.files['projectImage'] && req.files['projectImage'][0]) {
     imageUrl = '/uploads/' + req.files['projectImage'][0].filename;
   }
 
   let fileUrl = link || '#';
-  if (req.files && req.files['projectFile'] && req.files['projectFile'][0]) {
+  if (req.body.projectFileBase64) {
+    fileUrl = req.body.projectFileBase64;
+  } else if (req.files && req.files['projectFile'] && req.files['projectFile'][0]) {
     fileUrl = '/uploads/' + req.files['projectFile'][0].filename;
   }
 
@@ -235,11 +239,15 @@ app.put('/api/projects/:id', verifyAdmin, archiveUpload, async (req, res) => {
     if (description) project.description = description;
     if (techUsed) project.techUsed = techUsed;
 
-    if (req.files && req.files['projectImage'] && req.files['projectImage'][0]) {
+    if (req.body.projectImageBase64) {
+      project.image = req.body.projectImageBase64;
+    } else if (req.files && req.files['projectImage'] && req.files['projectImage'][0]) {
       project.image = '/uploads/' + req.files['projectImage'][0].filename;
     }
 
-    if (req.files && req.files['projectFile'] && req.files['projectFile'][0]) {
+    if (req.body.projectFileBase64) {
+      project.link = req.body.projectFileBase64;
+    } else if (req.files && req.files['projectFile'] && req.files['projectFile'][0]) {
       project.link = '/uploads/' + req.files['projectFile'][0].filename;
     } else if (link !== undefined) {
       project.link = link;

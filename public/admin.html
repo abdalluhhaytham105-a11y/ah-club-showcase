@@ -223,6 +223,22 @@
               </div>
             </div>
 
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label for="new-proj-link">أو رابط تحميل خارجي للمشروع (مثل: Google Drive / Dropbox) (اختياري)</label>
+              <input type="url" id="new-proj-link" class="form-control" placeholder="https://drive.google.com/..." style="font-family: 'Orbitron', sans-serif;">
+            </div>
+
+            <!-- شريط نسبة رفع المشروع الجديد -->
+            <div id="add-project-progress-container" class="hidden" style="margin-bottom: 1.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-light); padding: 0.8rem; border-radius: 10px;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.4rem;">
+                <span>جاري رفع ملفات المشروع...</span>
+                <span id="add-project-progress-percent" style="font-weight: bold; color: var(--primary-cyan);">0%</span>
+              </div>
+              <div style="width: 100%; height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; overflow: hidden; position: relative;">
+                <div id="add-project-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--primary-cyan), var(--secondary-magenta)); border-radius: 4px; transition: width 0.1s ease;"></div>
+              </div>
+            </div>
+
             <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
               رفع وإضافة المشروع للأرشيف العام للطلاب <i class="fa-solid fa-cloud-arrow-up"></i>
             </button>
@@ -543,6 +559,22 @@
             <div class="form-group">
               <label for="edit-proj-file">تغيير ملف المشروع/الكود (اختياري)</label>
               <input type="file" id="edit-proj-file" class="form-control" accept=".zip,.rar,.pdf,.doc,.docx,.ppt,.pptx">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="edit-proj-link">أو رابط تحميل خارجي للمشروع (مثل: Google Drive / Dropbox) (اختياري)</label>
+            <input type="url" id="edit-proj-link" class="form-control" placeholder="https://drive.google.com/..." style="font-family: 'Orbitron', sans-serif;">
+          </div>
+
+          <!-- شريط نسبة رفع تعديل المشروع -->
+          <div id="edit-project-progress-container" class="hidden" style="margin-bottom: 1.5rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-light); padding: 0.8rem; border-radius: 10px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.4rem;">
+              <span>جاري رفع وتعديل ملفات المشروع...</span>
+              <span id="edit-project-progress-percent" style="font-weight: bold; color: var(--primary-cyan);">0%</span>
+            </div>
+            <div style="width: 100%; height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; overflow: hidden; position: relative;">
+              <div id="edit-project-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--primary-cyan), var(--secondary-magenta)); border-radius: 4px; transition: width 0.1s ease;"></div>
             </div>
           </div>
 
