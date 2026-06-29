@@ -724,6 +724,64 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function addWatermarkToImage(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          
+          // رسم الصورة الأصلية
+          ctx.drawImage(img, 0, 0);
+          
+          ctx.save();
+          
+          // تحديد حجم الخط بناء على أبعاد الصورة
+          const fontSize = Math.max(Math.round(img.width / 15), 18);
+          ctx.font = `bold ${fontSize}px 'Orbitron', 'Cairo', sans-serif`;
+          
+          // تنسيق الخط واللون والشفافية للعلامة المائية
+          ctx.fillStyle = 'rgba(0, 240, 255, 0.15)'; // Cyan شفاف
+          ctx.strokeStyle = 'rgba(255, 0, 127, 0.1)'; // Magenta شفاف
+          ctx.lineWidth = Math.max(Math.round(fontSize / 30), 1);
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          
+          // تدوير العلامة المائية
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+          ctx.rotate(-25 * Math.PI / 180);
+          
+          // رسم النص الرئيسي في المركز
+          const text = 'AH CLUB';
+          ctx.fillText(text, 0, 0);
+          ctx.strokeText(text, 0, 0);
+          
+          // تكرار العلامة المائية بشكل شبكي خفيف لتصعيب السرقة
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.05)'; // أبيض خفيف جداً
+          const stepX = img.width / 3.5;
+          const stepY = img.height / 3.5;
+          for (let x = -img.width; x < img.width; x += stepX) {
+            for (let y = -img.height; y < img.height; y += stepY) {
+              if (Math.abs(x) < 50 && Math.abs(y) < 50) continue; // تم رسم المركز بالفعل
+              ctx.fillText('AH CLUB', x, y);
+            }
+          }
+          
+          ctx.restore();
+          
+          // استخراج الصورة بصيغة JPEG ذات جودة مناسبة وحجم ملف مضغوط
+          resolve(canvas.toDataURL('image/jpeg', 0.85));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   function uploadFileWithProgress(url, method, formData, progressContainer, progressBar, progressPercent, submitBtn, originalBtnHtml, successCallback, errorCallback) {
     const xhr = new XMLHttpRequest();
 
@@ -816,19 +874,17 @@ document.addEventListener('DOMContentLoaded', () => {
       formData.append('techUsed', techUsed);
       formData.append('link', linkVal);
 
-      // التحقق من حجم صورة الغلاف (بحد أقصى 1.5 ميجا) وتحويلها لـ Base64 لضمان الحفظ على Vercel
+      // التحقق من حجم صورة الغلاف (بحد أقصى 1.5 ميجا) ودمج العلامة المائية وتحويلها لـ Base64 لضمان الحفظ على Vercel
       if (imageInput && imageInput.files.length > 0) {
         const file = imageInput.files[0];
         if (file.size > 1.5 * 1024 * 1024) {
           window.showNotificationToast('خطأ في الحجم', 'حجم صورة الغلاف يتجاوز 1.5 ميجابايت. يرجى اختيار صورة أصغر لضمان استقرار الخادم.', 'error');
           return;
         }
-        const reader = new FileReader();
-        reader.onload = () => {
-          formData.append('projectImageBase64', reader.result);
+        addWatermarkToImage(file).then((watermarkedBase64) => {
+          formData.append('projectImageBase64', watermarkedBase64);
           proceedUpload();
-        };
-        reader.readAsDataURL(file);
+        });
       } else {
         proceedUpload();
       }
@@ -902,19 +958,17 @@ document.addEventListener('DOMContentLoaded', () => {
     formData.append('techUsed', techUsed);
     formData.append('link', linkVal);
 
-    // التحقق من حجم صورة الغلاف (بحد أقصى 1.5 ميجا) وتحويلها لـ Base64 لضمان الحفظ على Vercel
+    // التحقق من حجم صورة الغلاف (بحد أقصى 1.5 ميجا) ودمج العلامة المائية وتحويلها لـ Base64 لضمان الحفظ على Vercel
     if (imageInput && imageInput.files.length > 0) {
       const file = imageInput.files[0];
       if (file.size > 1.5 * 1024 * 1024) {
         window.showNotificationToast('خطأ في الحجم', 'حجم صورة الغلاف يتجاوز 1.5 ميجابايت. يرجى اختيار صورة أصغر لضمان استقرار الخادم.', 'error');
         return;
       }
-      const reader = new FileReader();
-      reader.onload = () => {
-        formData.append('projectImageBase64', reader.result);
+      addWatermarkToImage(file).then((watermarkedBase64) => {
+        formData.append('projectImageBase64', watermarkedBase64);
         proceedUpload();
-      };
-      reader.readAsDataURL(file);
+      });
     } else {
       proceedUpload();
     }
