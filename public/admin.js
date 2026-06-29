@@ -726,6 +726,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (adminEditProjectForm) {
     adminEditProjectForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const submitBtn = adminEditProjectForm.querySelector('button[type="submit"]');
+      const originalBtnHtml = submitBtn ? submitBtn.innerHTML : 'حفظ التحديثات';
 
       const title = document.getElementById('edit-proj-title').value;
       const category = document.getElementById('edit-proj-category').value;
@@ -749,12 +751,23 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('projectFile', fileInput.files[0]);
       }
 
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'جاري تعديل وحفظ المشروع... <i class="fa-solid fa-spinner fa-spin"></i>';
+      }
+
       try {
         const response = await fetch(`/api/projects/${activeEditProjectId}`, {
           method: 'PUT',
           body: formData
         });
-        const data = await response.json();
+        
+        let data = {};
+        try {
+          data = await response.json();
+        } catch (jsonErr) {
+          data = { error: 'فشل تحليل استجابة السيرفر، قد يكون حجم الملف كبيراً جداً' };
+        }
 
         if (!response.ok) {
           alert(data.error || 'حدث خطأ أثناء تعديل المشروع');
@@ -766,7 +779,12 @@ document.addEventListener('DOMContentLoaded', () => {
         loadArchiveData();
       } catch (err) {
         console.error(err);
-        alert('خطأ في الاتصال بالخادم');
+        alert('خطأ في الاتصال بالخادم، يرجى التحقق من حجم الملفات');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
       }
     });
   }
@@ -774,6 +792,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // إضافة مشروع جديد للأرشيف
   adminAddProjectForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const submitBtn = adminAddProjectForm.querySelector('button[type="submit"]');
+    const originalBtnHtml = submitBtn ? submitBtn.innerHTML : 'رفع وإضافة المشروع للأرشيف العام للطلاب';
+
     const title = document.getElementById('new-proj-title').value;
     const category = document.getElementById('new-proj-category').value;
     const college = document.getElementById('new-proj-college').value;
@@ -796,12 +817,24 @@ document.addEventListener('DOMContentLoaded', () => {
       formData.append('projectFile', fileInput.files[0]);
     }
 
+    // إظهار حالة التحميل والرفع
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'جاري رفع الملفات والمشروع... <i class="fa-solid fa-spinner fa-spin"></i>';
+    }
+
     try {
       const response = await fetch('/api/projects', {
         method: 'POST',
         body: formData
       });
-      const data = await response.json();
+      
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (jsonErr) {
+        data = { error: 'فشل تحليل استجابة السيرفر، قد يكون حجم الملف كبيراً جداً' };
+      }
 
       if (!response.ok) {
         alert(data.error || 'حدث خطأ أثناء إضافة المشروع');
@@ -813,7 +846,12 @@ document.addEventListener('DOMContentLoaded', () => {
       loadArchiveData();
     } catch (err) {
       console.error(err);
-      alert('خطأ في الاتصال بالخادم');
+      alert('خطأ في الاتصال بالخادم، يرجى التحقق من حجم الملفات');
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
+      }
     }
   });
 

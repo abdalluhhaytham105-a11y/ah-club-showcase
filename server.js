@@ -965,6 +965,19 @@ app.delete('/api/admin/announcements/:id', verifyAdmin, async (req, res) => {
   }
 });
 
+// معالج الأخطاء العام للملتر (Multer Error Handler) والرفع
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    console.error('Multer upload error:', err);
+    return res.status(400).json({ error: 'خطأ أثناء رفع الملف: ' + err.message });
+  }
+  if (err) {
+    console.error('Unhandled server error:', err);
+    return res.status(500).json({ error: err.message || 'حدث خطأ داخلي في الخادم' });
+  }
+  next();
+});
+
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
