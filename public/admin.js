@@ -368,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', (e) => {
         const tx = e.currentTarget.getAttribute('data-tx');
         const method = e.currentTarget.getAttribute('data-method');
-        alert(`طريقة الدفع: ${method}\nرقم العملية المرفق: ${tx}`);
+        window.showNotificationToast('تفاصيل الدفع ورقم التحويل', `طريقة الدفع: ${method} | رقم العملية المرفق: ${tx}`, 'info');
       });
     });
 
@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (response.ok) {
         loadRequestsData();
       } else {
-        alert('فشل تحديث حالة الطلب');
+        window.showNotificationToast('فشل العملية', 'فشل تحديث حالة الطلب.', 'error');
       }
     } catch (err) {
       console.error(err);
@@ -412,10 +412,10 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'PUT'
       });
       if (response.ok) {
-        alert('تم تأكيد الدفع بنجاح! يمكن الآن الانتقال لتسليم الملفات.');
+        window.showNotificationToast('تم تأكيد الدفع', 'تم تأكيد الدفع بنجاح! يمكن الآن الانتقال لتسليم الملفات.', 'success');
         loadRequestsData();
       } else {
-        alert('فشل تأكيد الدفع');
+        window.showNotificationToast('فشل تأكيد الدفع', 'حدث خطأ أثناء محاولة تأكيد الدفع.', 'error');
       }
     } catch (err) {
       console.error(err);
@@ -517,16 +517,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (response.ok) {
-          alert('تم إلغاء الطلب بنجاح وإرسال السبب للطالب!');
+          window.showNotificationToast('تم إلغاء الطلب', 'تم إلغاء الطلب بنجاح وإرسال السبب للطالب!', 'success');
           if (adminCancelModal) adminCancelModal.classList.remove('active');
           loadRequestsData();
         } else {
           const errData = await response.json();
-          alert(errData.error || 'فشل إلغاء الطلب');
+          window.showNotificationToast('فشل الإلغاء', errData.error || 'فشل إلغاء الطلب.', 'error');
         }
       } catch (err) {
         console.error(err);
-        alert('خطأ في الاتصال بالخادم');
+        window.showNotificationToast('خطأ في الاتصال', 'خطأ في الاتصال بالخادم.', 'error');
       }
     });
   }
@@ -581,14 +581,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (activeDeliverType === 'file') {
       if (deliverFileInput.files.length === 0) {
-        alert('من فضلك اختر ملف التسليم');
+        window.showNotificationToast('تنبيه', 'من فضلك اختر ملف التسليم أولاً.', 'warning');
         return;
       }
       formData.append('delivery', deliverFileInput.files[0]);
     } else {
       const linkVal = deliverLinkInput.value.trim();
       if (!linkVal) {
-        alert('من فضلك أدخل رابط التسليم');
+        window.showNotificationToast('تنبيه', 'من فضلك أدخل رابط التسليم أولاً.', 'warning');
         return;
       }
       formData.append('deliveryLink', linkVal);
@@ -601,16 +601,16 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (response.ok) {
-        alert('تم تسليم المشروع وإرسال ملفات/رابط التسليم إلى بوابة الطالب بنجاح!');
+        window.showNotificationToast('تم التسليم بنجاح', 'تم تسليم المشروع وإرسال ملفات/رابط التسليم إلى بوابة الطالب بنجاح!', 'success');
         adminDeliverModal.classList.remove('active');
         loadRequestsData();
       } else {
         const errorData = await response.json();
-        alert(errorData.error || 'فشل عملية الرفع والملفات الموصولة');
+        window.showNotificationToast('فشل التسليم', errorData.error || 'فشل عملية الرفع والملفات الموصولة.', 'error');
       }
     } catch (err) {
       console.error(err);
-      alert('خطأ في الاتصال بالخادم');
+      window.showNotificationToast('خطأ في الاتصال', 'خطأ في الاتصال بالخادم.', 'error');
     }
   });
 
@@ -685,10 +685,10 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'DELETE'
       });
       if (response.ok) {
-        alert('تم حذف المشروع بنجاح من الأرشيف.');
+        window.showNotificationToast('تم الحذف بنجاح', 'تم حذف المشروع بنجاح من الأرشيف.', 'success');
         loadArchiveData();
       } else {
-        alert('فشل عملية الحذف.');
+        window.showNotificationToast('فشل الحذف', 'فشل عملية الحذف من الأرشيف.', 'error');
       }
     } catch (err) {
       console.error(err);
@@ -1064,16 +1064,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
 
         if (!response.ok) {
-          alert(data.error || 'حدث خطأ أثناء تعديل الامتيازات');
+          window.showNotificationToast('خطأ', data.error || 'حدث خطأ أثناء تعديل الامتيازات.', 'error');
           return;
         }
 
-        alert('تم تعديل وحفظ امتيازات الطالب بنجاح! ستظهر له في حسابه فوراً.');
+        window.showNotificationToast('تم النجاح', 'تم تعديل وحفظ امتيازات الطالب بنجاح! ستظهر له في حسابه فوراً.', 'success');
         adminStudentPrivilegesModal.classList.remove('active');
         loadStudentsData(); // إعادة تحميل الجدول
       } catch (err) {
         console.error(err);
-        alert('خطأ في الاتصال بالخادم');
+        window.showNotificationToast('خطأ في الاتصال', 'خطأ في الاتصال بالخادم.', 'error');
       }
     });
   }
@@ -1163,10 +1163,10 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'DELETE'
       });
       if (response.ok) {
-        alert('تم حذف القسم بنجاح.');
+        window.showNotificationToast('تم الحذف بنجاح', 'تم حذف القسم بنجاح.', 'success');
         await loadCategoriesPanel();
       } else {
-        alert('فشل عملية الحذف.');
+        window.showNotificationToast('فشل الحذف', 'فشل عملية حذف القسم.', 'error');
       }
     } catch (err) {
       console.error(err);
@@ -1188,15 +1188,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
 
         if (response.ok) {
-          alert('تم إضافة القسم الجديد بنجاح!');
+          window.showNotificationToast('تم النجاح', 'تم إضافة القسم الجديد بنجاح!', 'success');
           document.getElementById('new-cat-label').value = '';
           await loadCategoriesPanel();
         } else {
-          alert(data.error || 'حدث خطأ أثناء إضافة القسم');
+          window.showNotificationToast('خطأ', data.error || 'حدث خطأ أثناء إضافة القسم.', 'error');
         }
       } catch (err) {
         console.error(err);
-        alert('خطأ في الاتصال بالخادم');
+        window.showNotificationToast('خطأ في الاتصال', 'خطأ في الاتصال بالخادم.', 'error');
       }
     });
   }
@@ -1366,15 +1366,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
 
         if (response.ok) {
-          alert(id ? 'تم تعديل الإعلان بنجاح!' : 'تم إضافة الإعلان بنجاح!');
+          window.showNotificationToast('تم النجاح', id ? 'تم تعديل الإعلان بنجاح!' : 'تم إضافة الإعلان بنجاح!', 'success');
           resetAnnouncementForm();
           await fetchAnnouncements();
         } else {
-          alert(data.error || 'فشل حفظ الإعلان');
+          window.showNotificationToast('خطأ', data.error || 'فشل حفظ الإعلان.', 'error');
         }
       } catch (err) {
         console.error(err);
-        alert('خطأ في الاتصال بالخادم');
+        window.showNotificationToast('خطأ في الاتصال', 'خطأ في الاتصال بالخادم.', 'error');
       }
     });
   }
@@ -1383,10 +1383,11 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const response = await fetch(`/api/admin/announcements/${id}`, { method: 'DELETE' });
       if (response.ok) {
+        window.showNotificationToast('تم الحذف', 'تم حذف الإعلان بنجاح.', 'success');
         await fetchAnnouncements();
       } else {
         const data = await response.json();
-        alert(data.error || 'فشل حذف الإعلان');
+        window.showNotificationToast('خطأ', data.error || 'فشل حذف الإعلان.', 'error');
       }
     } catch (err) {
       console.error(err);
@@ -1430,7 +1431,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await fetch('/api/admin/project-ratings');
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
-          alert('غير مصرح لك بمشاهدة هذه التقييمات!');
+          window.showNotificationToast('غير مصرح', 'غير مصرح لك بمشاهدة هذه التقييمات!', 'error');
         }
         return;
       }

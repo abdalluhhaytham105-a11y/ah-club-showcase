@@ -31,7 +31,13 @@ const storage = multer.diskStorage({
     cb(null, uniqueSuffix + '-' + file.originalname);
   }
 });
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage: storage,
+  limits: {
+    fieldSize: 10 * 1024 * 1024, // زيادة الحد الأقصى للنصوص إلى 10 ميجا لدعم ترميز Base64 للصور والملفات
+    fileSize: 10 * 1024 * 1024
+  }
+});
 const archiveUpload = upload.fields([
   { name: 'projectImage', maxCount: 1 },
   { name: 'projectFile', maxCount: 1 }
