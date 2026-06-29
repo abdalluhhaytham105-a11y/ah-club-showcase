@@ -837,7 +837,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const notifyWhatsApp = confirm('تم تقديم طلب مشروعك الجديد بنجاح! 🎉\n\nهل ترغب في تأكيد الطلب فوراً مع المطور عبد الله هيثم عبر الواتساب لتسريع المراجعة والتسعير؟');
+      const notifyWhatsApp = confirm('تم تقديم طلب مشروعك الجديد بنجاح! 🎉\n\nهل ترغب في تأكيد الطلب فوراً مع إدارة المنصة عبر الواتساب لتسريع المراجعة والتسعير؟');
       newRequestForm.reset();
       
       // إخفاء حقل الشرائح وتصفية المدخلات الافتراضية
@@ -849,7 +849,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (notifyWhatsApp) {
         const orderId = data.id || '';
-        const whatsappMsg = `مرحباً باشمهندس عبد الله، لقد قدمت طلب مشروع جديد على الموقع:\n\n- عنوان المشروع: ${data.title}\n- الكلية: ${data.college}\n- الجامعة: ${data.university}\n- صيغة التسليم: ${data.deliveryFormat === 'word' ? 'Word' : data.deliveryFormat === 'ppt' ? 'PowerPoint' : 'Poster'}\n- كود الطلب: ${orderId}\n\nيرجى مراجعته وتحديد السعر. شكراً لك!`;
+        const whatsappMsg = `مرحباً إدارة المنصة، لقد قدمت طلب مشروع جديد على الموقع:\n\n- عنوان المشروع: ${data.title}\n- الكلية: ${data.college}\n- الجامعة: ${data.university}\n- صيغة التسليم: ${data.deliveryFormat === 'word' ? 'Word' : data.deliveryFormat === 'ppt' ? 'PowerPoint' : 'Poster'}\n- كود الطلب: ${orderId}\n\nيرجى مراجعته وتحديد السعر. شكراً لكم!`;
         const whatsappUrl = `https://wa.me/201014054673?text=${encodeURIComponent(whatsappMsg)}`;
         window.open(whatsappUrl, '_blank');
       }
