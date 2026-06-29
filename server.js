@@ -196,6 +196,7 @@ app.post('/api/projects', verifyAdmin, archiveUpload, async (req, res) => {
     await db.writeDb(data);
     res.status(201).json(newProject);
   } catch (err) {
+    console.error('Error adding project to archive:', err);
     res.status(500).json({ error: 'فشل إضافة المشروع للأرشيف' });
   }
 });

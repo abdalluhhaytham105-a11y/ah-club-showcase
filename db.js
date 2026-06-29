@@ -105,22 +105,58 @@ async function readDb() {
         await writeDb(initialDb);
       }
       
-      // تأكيد وجود حساب الأدمن دائماً
+      // تأكيد وجود حساب الأدمن وتهيئة كافة القوائم دائماً
+      let dbUpdated = false;
+
+      if (!parsed.users) {
+        parsed.users = [];
+        dbUpdated = true;
+      }
+      if (!parsed.projects) {
+        parsed.projects = [];
+        dbUpdated = true;
+      }
+      if (!parsed.requests) {
+        parsed.requests = [];
+        dbUpdated = true;
+      }
+      if (!parsed.categories) {
+        parsed.categories = [];
+        dbUpdated = true;
+      }
+      if (!parsed.announcements) {
+        parsed.announcements = [];
+        dbUpdated = true;
+      }
+      if (!parsed.projectRatings) {
+        parsed.projectRatings = [];
+        dbUpdated = true;
+      }
+
       let admin = parsed.users.find(u => u.role === 'admin' || u.id === 'admin-id-123');
-      if (admin) {
+      if (!admin) {
+        admin = {
+          id: 'admin-id-123',
+          name: 'Abdalluh haytham',
+          email: 'Abdalluh',
+          phone: '01000000000',
+          university: 'AH CLUB University',
+          major: 'Computer Science',
+          password: '123',
+          role: 'admin'
+        };
+        parsed.users.push(admin);
+        dbUpdated = true;
+      } else {
         if (admin.name !== 'Abdalluh haytham' || admin.email !== 'Abdalluh' || admin.password !== '123') {
           admin.name = 'Abdalluh haytham';
           admin.email = 'Abdalluh';
           admin.password = '123';
-          await writeDb(parsed);
+          dbUpdated = true;
         }
       }
-      if (!parsed.announcements) {
-        parsed.announcements = [];
-        await writeDb(parsed);
-      }
-      if (!parsed.projectRatings) {
-        parsed.projectRatings = [];
+
+      if (dbUpdated) {
         await writeDb(parsed);
       }
 
@@ -141,21 +177,57 @@ async function readDb() {
       const data = fs.readFileSync(DB_PATH, 'utf8');
       let parsed = JSON.parse(data);
       
+      let dbUpdated = false;
+
+      if (!parsed.users) {
+        parsed.users = [];
+        dbUpdated = true;
+      }
+      if (!parsed.projects) {
+        parsed.projects = [];
+        dbUpdated = true;
+      }
+      if (!parsed.requests) {
+        parsed.requests = [];
+        dbUpdated = true;
+      }
+      if (!parsed.categories) {
+        parsed.categories = [];
+        dbUpdated = true;
+      }
+      if (!parsed.announcements) {
+        parsed.announcements = [];
+        dbUpdated = true;
+      }
+      if (!parsed.projectRatings) {
+        parsed.projectRatings = [];
+        dbUpdated = true;
+      }
+
       let admin = parsed.users.find(u => u.role === 'admin' || u.id === 'admin-id-123');
-      if (admin) {
+      if (!admin) {
+        admin = {
+          id: 'admin-id-123',
+          name: 'Abdalluh haytham',
+          email: 'Abdalluh',
+          phone: '01000000000',
+          university: 'AH CLUB University',
+          major: 'Computer Science',
+          password: '123',
+          role: 'admin'
+        };
+        parsed.users.push(admin);
+        dbUpdated = true;
+      } else {
         if (admin.name !== 'Abdalluh haytham' || admin.email !== 'Abdalluh' || admin.password !== '123') {
           admin.name = 'Abdalluh haytham';
           admin.email = 'Abdalluh';
           admin.password = '123';
-          writeDbSync(parsed);
+          dbUpdated = true;
         }
       }
-      if (!parsed.announcements) {
-        parsed.announcements = [];
-        writeDbSync(parsed);
-      }
-      if (!parsed.projectRatings) {
-        parsed.projectRatings = [];
+
+      if (dbUpdated) {
         writeDbSync(parsed);
       }
       return parsed;
