@@ -1057,9 +1057,12 @@ document.addEventListener('DOMContentLoaded', () => {
         </td>
         <td style="font-family: 'Orbitron', sans-serif; text-align: center; font-weight:700;">${s.ordersCount}</td>
         <td style="font-family: 'Orbitron', sans-serif; color: var(--primary-cyan); font-weight: 700;">${s.totalSpent} EGP</td>
-        <td style="text-align: center; vertical-align: middle;">
-          <button class="btn btn-outline btn-xs btn-admin-student-privileges" data-id="${s.id}" style="color: var(--accent-gold); border-color: rgba(255, 215, 0, 0.25); display: inline-flex; justify-content: center; align-items: center; gap: 0.3rem;">
+        <td style="text-align: center; vertical-align: middle; display: flex; gap: 0.3rem; justify-content: center;">
+          <button class="btn btn-outline btn-xs btn-admin-student-privileges" data-id="${s.id}" style="color: var(--accent-gold); border-color: rgba(255, 215, 0, 0.25); display: inline-flex; justify-content: center; align-items: center; gap: 0.2rem;">
             <i class="fa-solid fa-gift"></i> الامتيازات
+          </button>
+          <button class="btn btn-outline btn-xs btn-admin-delete-student" data-id="${s.id}" style="color: var(--secondary-magenta); border-color: rgba(255, 0, 127, 0.25); display: inline-flex; justify-content: center; align-items: center; gap: 0.2rem;">
+            <i class="fa-solid fa-trash"></i> حذف
           </button>
         </td>
       `;
@@ -1071,6 +1074,33 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', (e) => {
         const id = e.currentTarget.getAttribute('data-id');
         openStudentPrivilegesModal(id);
+      });
+    });
+
+    // ربط أزرار حذف الطلاب
+    document.querySelectorAll('.btn-admin-delete-student').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        const student = allStudents.find(s => s.id === id);
+        if (!student) return;
+
+        if (confirm(`هل أنت متأكد من حذف الطالب "${student.name}" نهائياً من النظام؟\nتنبيه: سيتم حذف حسابه وجميع طلباته المرتبطة به ولا يمكن التراجع عن هذا الإجراء.`)) {
+          try {
+            const response = await fetch(`/api/students/${id}`, {
+              method: 'DELETE'
+            });
+            const data = await response.json();
+            if (response.ok) {
+              window.showNotificationToast('تم الحذف', 'تم حذف حساب الطالب وطلباته بنجاح.', 'success');
+              await loadStudentsData();
+            } else {
+              window.showNotificationToast('خطأ', data.error || 'فشل حذف الطالب.', 'error');
+            }
+          } catch (err) {
+            console.error(err);
+            window.showNotificationToast('خطأ في الاتصال', 'خطأ في الاتصال بالخادم.', 'error');
+          }
+        }
       });
     });
   }

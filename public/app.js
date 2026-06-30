@@ -91,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileHeaderControls = document.getElementById('mobile-header-controls');
     const mobileAuthBtn = document.getElementById('mobile-auth-btn');
     const mobileProfileAvatarBtn = document.getElementById('mobile-profile-avatar-btn');
+    const mobileAdminBtn = document.getElementById('mobile-admin-btn');
 
 
     if (currentUser) {
@@ -121,8 +122,10 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (currentUser.role === 'admin') {
         navAdmin.classList.remove('hidden');
+        if (mobileAdminBtn) mobileAdminBtn.classList.remove('hidden');
       } else {
         navAdmin.classList.add('hidden');
+        if (mobileAdminBtn) mobileAdminBtn.classList.add('hidden');
       }
 
       // تفعيل الثيم الذهبي العام في حال كان الخصم 100%
@@ -136,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
       userProfileContainer.classList.add('hidden');
       navPortal.classList.add('hidden');
       navAdmin.classList.add('hidden');
+      if (mobileAdminBtn) mobileAdminBtn.classList.add('hidden');
       document.body.classList.remove('user-logged-in');
       
       // تحديث زر الدخول/الخروج في الهيدر للزوار (سماوي)

@@ -2,12 +2,12 @@
   "users": [
     {
       "id": "admin-id-123",
-      "name": "Abdalluh haytham",
-      "email": "Abdalluh haytham",
+      "name": "Boda",
+      "email": "Boda",
       "phone": "01000000000",
       "university": "AH CLUB University",
       "major": "Computer Science",
-      "password": "Admin",
+      "password": "Boda",
       "role": "admin"
     },
     {

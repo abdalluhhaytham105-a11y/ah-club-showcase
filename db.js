@@ -12,12 +12,12 @@ const initialDb = {
   users: [
     {
       id: 'admin-id-123',
-      name: 'Abdalluh haytham',
-      email: 'Abdalluh',
+      name: 'Boda',
+      email: 'Boda',
       phone: '01000000000',
       university: 'AH CLUB University',
       major: 'Computer Science',
-      password: '123',
+      password: 'Boda',
       role: 'admin'
     },
     {
@@ -137,21 +137,21 @@ async function readDb() {
       if (!admin) {
         admin = {
           id: 'admin-id-123',
-          name: 'Abdalluh haytham',
-          email: 'Abdalluh',
+          name: 'Boda',
+          email: 'Boda',
           phone: '01000000000',
           university: 'AH CLUB University',
           major: 'Computer Science',
-          password: '123',
+          password: 'Boda',
           role: 'admin'
         };
         parsed.users.push(admin);
         dbUpdated = true;
       } else {
-        if (admin.name !== 'Abdalluh haytham' || admin.email !== 'Abdalluh' || admin.password !== '123') {
-          admin.name = 'Abdalluh haytham';
-          admin.email = 'Abdalluh';
-          admin.password = '123';
+        if (admin.name !== 'Boda' || admin.email !== 'Boda' || admin.password !== 'Boda') {
+          admin.name = 'Boda';
+          admin.email = 'Boda';
+          admin.password = 'Boda';
           dbUpdated = true;
         }
       }
@@ -208,21 +208,21 @@ async function readDb() {
       if (!admin) {
         admin = {
           id: 'admin-id-123',
-          name: 'Abdalluh haytham',
-          email: 'Abdalluh',
+          name: 'Boda',
+          email: 'Boda',
           phone: '01000000000',
           university: 'AH CLUB University',
           major: 'Computer Science',
-          password: '123',
+          password: 'Boda',
           role: 'admin'
         };
         parsed.users.push(admin);
         dbUpdated = true;
       } else {
-        if (admin.name !== 'Abdalluh haytham' || admin.email !== 'Abdalluh' || admin.password !== '123') {
-          admin.name = 'Abdalluh haytham';
-          admin.email = 'Abdalluh';
-          admin.password = '123';
+        if (admin.name !== 'Boda' || admin.email !== 'Boda' || admin.password !== 'Boda') {
+          admin.name = 'Boda';
+          admin.email = 'Boda';
+          admin.password = 'Boda';
           dbUpdated = true;
         }
       }

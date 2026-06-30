@@ -818,6 +818,36 @@ app.put('/api/students/:id/privileges', verifyAdmin, async (req, res) => {
   }
 });
 
+app.delete('/api/students/:id', verifyAdmin, async (req, res) => {
+  const { id } = req.params;
+  if (id === 'admin-id-123') {
+    return res.status(400).json({ error: 'لا يمكن حذف حساب المسؤول الرئيسي' });
+  }
+
+  try {
+    const data = await db.readDb();
+    
+    // البحث عن الطالب
+    const userIndex = data.users.findIndex(u => u.id === id);
+    if (userIndex === -1) {
+      return res.status(404).json({ error: 'الطالب غير موجود' });
+    }
+
+    // حذف الطالب
+    data.users.splice(userIndex, 1);
+
+    // تنظيف طلبات الطالب المرتبطة به
+    if (data.requests) {
+      data.requests = data.requests.filter(r => r.studentId !== id);
+    }
+
+    await db.writeDb(data);
+    res.json({ message: 'تم حذف الطالب وجميع طلباته المرتبطة بنجاح' });
+  } catch (err) {
+    res.status(500).json({ error: 'فشل حذف الطالب من قاعدة البيانات' });
+  }
+});
+
 app.put('/api/students/:id/profile', verifyStudent, upload.single('avatar'), async (req, res) => {
   const { id } = req.params;
   const { name, phone, university, major, password } = req.body;
