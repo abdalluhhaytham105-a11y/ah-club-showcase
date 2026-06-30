@@ -268,24 +268,8 @@
         <!-- ==================================================== -->
         <div id="admin-students-panel" class="portal-panel hidden">
           <h3 style="margin-bottom: 1.5rem; font-weight: 700;">قاعدة بيانات الطلاب المسجلين بالمنصة</h3>
-          <div class="table-responsive">
-            <table class="custom-table">
-              <thead>
-                <tr>
-                  <th>اسم الطالب</th>
-                  <th>البريد الإلكتروني</th>
-                  <th>الهاتف/الواتساب</th>
-                  <th>الجامعة والتخصص</th>
-                  <th>الخصومات والعروض</th>
-                  <th>إجمالي الطلبات</th>
-                  <th>إجمالي المدفوعات</th>
-                  <th style="text-align: center; width: 200px;">الإجراءات</th>
-                </tr>
-              </thead>
-              <tbody id="admin-students-table-body">
-                <!-- ديناميكي -->
-              </tbody>
-            </table>
+          <div id="admin-students-cards-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.5rem;">
+            <!-- سيتم تعبئتها ديناميكياً ببطاقات الطلاب -->
           </div>
         </div>
 

@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const adminArchiveListTable = document.getElementById('admin-archive-list-table');
 
   // عناصر قاعدة بيانات الطلاب
-  const adminStudentsTableBody = document.getElementById('admin-students-table-body');
+  const adminStudentsCardsContainer = document.getElementById('admin-students-cards-container');
 
   let activeOrderId = null;
   let allRequests = [];
@@ -1032,41 +1032,100 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderStudentsTable(students) {
-    adminStudentsTableBody.innerHTML = '';
+    adminStudentsCardsContainer.innerHTML = '';
     if (students.length === 0) {
-      adminStudentsTableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-secondary); padding: 1.5rem;">لا يوجد طلاب مسجلين بالمنصة حالياً.</td></tr>`;
+      adminStudentsCardsContainer.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 3rem; background: rgba(255,255,255,0.01); border: 1px dashed var(--border-light); border-radius: 12px;">لا يوجد طلاب مسجلين بالمنصة حالياً.</div>`;
       return;
     }
 
     students.forEach(s => {
-      const tr = document.createElement('tr');
+      const card = document.createElement('div');
+      card.className = 'student-card';
+      card.style.cssText = `
+        background: radial-gradient(circle at top right, rgba(0, 240, 255, 0.03), rgba(255, 255, 255, 0.01));
+        border: 1px solid var(--border-light);
+        border-radius: 16px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      `;
       
-      const discountLabel = s.discountPercent > 0 ? `<span style="color: #ff5555; font-weight:700; background: rgba(255, 85, 85, 0.1); border: 1px solid rgba(255, 85, 85, 0.25); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.8rem;">%${s.discountPercent} خصم</span>` : '<span style="color: var(--text-muted); font-size: 0.85rem;">لا يوجد خصم</span>';
-      const offerLabel = s.specialOffer ? `<div style="font-size:0.75rem; color: var(--accent-gold); max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 0.2rem;" title="${s.specialOffer}"><i class="fa-solid fa-gift"></i> ${s.specialOffer}</div>` : '';
+      const discountLabel = s.discountPercent > 0 
+        ? `<span style="color: #ff5555; font-weight:700; background: rgba(255, 85, 85, 0.1); border: 1px solid rgba(255, 85, 85, 0.25); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.75rem;">%${s.discountPercent} خصم</span>` 
+        : '<span style="color: var(--text-muted); font-size: 0.8rem;">لا يوجد خصم</span>';
+      
+      const offerLabel = s.specialOffer 
+        ? `<div style="font-size:0.75rem; color: var(--accent-gold); margin-top: 0.2rem;" title="${s.specialOffer}"><i class="fa-solid fa-gift"></i> ${s.specialOffer}</div>` 
+        : '';
 
-      tr.innerHTML = `
-        <td style="font-weight: 700;">${s.name}</td>
-        <td style="font-family: 'Orbitron', sans-serif;">${s.email}</td>
-        <td style="font-family: 'Orbitron', sans-serif; direction: ltr; text-align: right;">${s.phone}</td>
-        <td>${s.university} - ${s.major}</td>
-        <td>
-          <div style="display: flex; flex-direction: column;">
-            ${discountLabel}
-            ${offerLabel}
+      const phoneLink = s.phone.startsWith('0') ? '2' + s.phone : s.phone;
+
+      card.innerHTML = `
+        <!-- خلفية متوهجة خفيفة -->
+        <div style="position: absolute; top: -50px; right: -50px; width: 100px; height: 100px; background: rgba(0, 240, 255, 0.1); filter: blur(40px); border-radius: 50%; pointer-events: none;"></div>
+        
+        <!-- Header: Name & First Letter Avatar -->
+        <div style="display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.8rem;">
+          <div style="width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary-cyan), var(--secondary-magenta)); color: #fff; font-weight: 800; font-size: 1.1rem; font-family: 'Orbitron', sans-serif; box-shadow: 0 0 10px rgba(0, 240, 255, 0.15); flex-shrink: 0;">
+            ${s.name ? s.name[0].toUpperCase() : '?'}
           </div>
-        </td>
-        <td style="font-family: 'Orbitron', sans-serif; text-align: center; font-weight:700;">${s.ordersCount}</td>
-        <td style="font-family: 'Orbitron', sans-serif; color: var(--primary-cyan); font-weight: 700;">${s.totalSpent} EGP</td>
-        <td style="text-align: center; vertical-align: middle; display: flex; gap: 0.3rem; justify-content: center;">
-          <button class="btn btn-outline btn-xs btn-admin-student-privileges" data-id="${s.id}" style="color: var(--accent-gold); border-color: rgba(255, 215, 0, 0.25); display: inline-flex; justify-content: center; align-items: center; gap: 0.2rem;">
+          <div style="display: flex; flex-direction: column; overflow: hidden; min-width: 0;">
+            <h4 style="margin: 0; font-weight: 800; font-size: 1rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${s.name}</h4>
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-family: 'Orbitron', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${s.email}</span>
+          </div>
+        </div>
+
+        <!-- Info Fields -->
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.8rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--text-muted);"><i class="fa-solid fa-phone"></i> الهاتف/الواتساب:</span>
+            <a href="https://wa.me/${phoneLink}" target="_blank" style="color: #25d366; font-family: 'Orbitron', sans-serif; text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem;">
+              ${s.phone} <i class="fa-brands fa-whatsapp"></i>
+            </a>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; text-align: left;">
+            <span style="color: var(--text-muted);"><i class="fa-solid fa-university"></i> الكلية/التخصص:</span>
+            <span style="font-weight: 700; color: #fff; text-align: right; max-width: 160px; line-height: 1.2;">${s.university} - ${s.major}</span>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--text-muted);"><i class="fa-solid fa-tags"></i> الخصومات والعروض:</span>
+            <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
+              ${discountLabel}
+              ${offerLabel}
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; background: rgba(255,255,255,0.01); padding: 0.6rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.02); text-align: center;">
+          <div>
+            <div style="font-size: 0.7rem; color: var(--text-muted);">إجمالي الطلبات</div>
+            <div style="font-size: 1rem; font-weight: 800; font-family: 'Orbitron', sans-serif; color: var(--primary-cyan); margin-top: 0.2rem;">${s.ordersCount}</div>
+          </div>
+          <div style="border-right: 1px solid rgba(255,255,255,0.05);">
+            <div style="font-size: 0.7rem; color: var(--text-muted);">إجمالي المدفوعات</div>
+            <div style="font-size: 1.05rem; font-weight: 800; font-family: 'Orbitron', sans-serif; color: var(--accent-gold); margin-top: 0.2rem;">${s.totalSpent} EGP</div>
+          </div>
+        </div>
+
+        <!-- Actions Panel -->
+        <div style="display: flex; gap: 0.5rem; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.8rem;">
+          <button class="btn btn-outline btn-xs btn-admin-student-privileges" data-id="${s.id}" style="flex: 1; color: var(--accent-gold); border-color: rgba(255, 215, 0, 0.25); display: inline-flex; justify-content: center; align-items: center; gap: 0.3rem; font-size: 0.75rem; padding: 0.4rem 0;">
             <i class="fa-solid fa-gift"></i> الامتيازات
           </button>
-          <button class="btn btn-outline btn-xs btn-admin-delete-student" data-id="${s.id}" style="color: var(--secondary-magenta); border-color: rgba(255, 0, 127, 0.25); display: inline-flex; justify-content: center; align-items: center; gap: 0.2rem;">
+          <button class="btn btn-outline btn-xs btn-admin-delete-student" data-id="${s.id}" style="flex: 1; color: var(--secondary-magenta); border-color: rgba(255, 0, 127, 0.25); display: inline-flex; justify-content: center; align-items: center; gap: 0.3rem; font-size: 0.75rem; padding: 0.4rem 0;">
             <i class="fa-solid fa-trash"></i> حذف
           </button>
-        </td>
+        </div>
       `;
-      adminStudentsTableBody.appendChild(tr);
+      adminStudentsCardsContainer.appendChild(card);
     });
 
     // ربط مستمعات تعديل الامتيازات
