@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const portalDashboardPanel = document.getElementById('portal-dashboard-panel');
   const portalRequestsPanel = document.getElementById('portal-requests-panel');
   const portalNewRequestPanel = document.getElementById('portal-new-request-panel');
-  const studentRequestsTableBody = document.getElementById('student-requests-table-body');
+  const studentRequestsCardsContainer = document.getElementById('student-requests-cards-container');
   const newRequestForm = document.getElementById('new-request-form');
 
   // مودال تتبع الطلب والدفع
@@ -769,29 +769,89 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   function renderStudentRequests(requests) {
-    studentRequestsTableBody.innerHTML = '';
+    studentRequestsCardsContainer.innerHTML = '';
     if (requests.length === 0) {
-      studentRequestsTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 2rem;">لا توجد طلبات جارية لك حالياً. اضغط على "طلب مشروع جديد" للبدء.</td></tr>`;
+      studentRequestsCardsContainer.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 3rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-light); border-radius: 16px;">لا توجد طلبات جارية لك حالياً. اضغط على "طلب مشروع جديد" للبدء.</div>`;
       return;
     }
 
     requests.forEach(r => {
-      const tr = document.createElement('tr');
+      const card = document.createElement('div');
+      card.className = 'admin-card';
+      card.style.flexDirection = 'column';
+      card.style.alignItems = 'stretch';
+      card.style.padding = '1.5rem';
+      card.style.background = 'var(--bg-card)';
+      card.style.border = '1px solid var(--border-light)';
+      card.style.borderRadius = '16px';
+      card.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.2)';
+      card.style.transition = 'all 0.3s ease';
+
       const formattedDate = new Date(r.createdAt).toLocaleDateString('ar-EG');
       const priceText = r.price > 0 ? `${r.price} EGP` : 'يحدد لاحقاً';
-      
-      tr.innerHTML = `
-        <td style="font-weight: 600;">${r.title}</td>
-        <td>${formattedDate}</td>
-        <td style="font-family: 'Orbitron', sans-serif;">${priceText}</td>
-        <td><span class="badge ${getBadgeClass(r.status)}">${getStatusLabel(r.status)}</span></td>
-        <td>
-          <button class="btn btn-outline btn-xs btn-track-order" data-id="${r.id}">
-            تتبع واستلام <i class="fa-solid fa-arrows-spin"></i>
-          </button>
-        </td>
+
+      // نسبة إنجاز تقديرية للتصميم الفاخر
+      let progressPercent = 0;
+      if (r.status === 'pending') progressPercent = 10;
+      else if (r.status === 'accepted') progressPercent = 30;
+      else if (r.status === 'in_progress') progressPercent = 50;
+      else if (r.status === 'ready_payment') progressPercent = 70;
+      else if (r.status === 'ready_payment_verify') progressPercent = 80;
+      else if (r.status === 'paid') progressPercent = 90;
+      else if (r.status === 'completed') progressPercent = 100;
+      else if (r.status === 'cancelled') progressPercent = 0;
+
+      card.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; gap: 0.5rem; direction: rtl; text-align: right;">
+          <h4 style="margin: 0; font-weight: 800; font-size: 1.05rem; color: #fff; line-height: 1.4;">${r.title}</h4>
+          <span class="badge ${getBadgeClass(r.status)}" style="font-size: 0.72rem; padding: 0.3rem 0.6rem; border-radius: 6px; white-space: nowrap;">${getStatusLabel(r.status)}</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.2rem; direction: rtl; text-align: right;">
+          <div style="display: flex; justify-content: space-between;">
+            <span><i class="fa-regular fa-calendar-days" style="color: var(--primary-cyan); margin-left: 0.4rem;"></i> تاريخ الطلب:</span>
+            <span style="color: #fff; font-weight: 600;">${formattedDate}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span><i class="fa-solid fa-coins" style="color: var(--accent-gold); margin-left: 0.4rem;"></i> التكلفة المتفق عليها:</span>
+            <span style="color: var(--accent-gold); font-weight: 700; font-family: 'Orbitron';">${priceText}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span><i class="fa-solid fa-graduation-cap" style="color: var(--primary-cyan); margin-left: 0.4rem;"></i> الكلية والجامعة:</span>
+            <span style="color: #fff; font-weight: 600;">${r.college || 'غير محدد'}</span>
+          </div>
+        </div>
+
+        ${r.status !== 'cancelled' ? `
+        <div style="margin-bottom: 1.2rem; direction: rtl;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.4rem;">
+            <span>نسبة إنجاز المشروع:</span>
+            <span style="font-weight: bold; color: var(--primary-cyan); font-family: 'Orbitron';">${progressPercent}%</span>
+          </div>
+          <div style="width: 100%; height: 6px; background: rgba(255, 255, 255, 0.05); border-radius: 3px; overflow: hidden;">
+            <div style="width: ${progressPercent}%; height: 100%; background: linear-gradient(90deg, var(--primary-cyan), var(--secondary-magenta)); border-radius: 3px; transition: width 0.3s ease;"></div>
+          </div>
+        </div>
+        ` : ''}
+
+        <button class="btn btn-outline btn-track-order" data-id="${r.id}" style="width: 100%; justify-content: center; font-size: 0.8rem; padding: 0.5rem 0; border-radius: 8px; font-weight: 700;">
+          تتبع الطلب والدفع <i class="fa-solid fa-arrows-spin"></i>
+        </button>
       `;
-      studentRequestsTableBody.appendChild(tr);
+
+      // تأثير الحوم الجذاب
+      card.addEventListener('mouseenter', () => {
+        card.style.transform = 'translateY(-4px)';
+        card.style.borderColor = 'var(--primary-cyan)';
+        card.style.boxShadow = '0 12px 40px rgba(0, 240, 255, 0.15)';
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'none';
+        card.style.borderColor = 'var(--border-light)';
+        card.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.2)';
+      });
+
+      studentRequestsCardsContainer.appendChild(card);
     });
 
     document.querySelectorAll('.btn-track-order').forEach(btn => {

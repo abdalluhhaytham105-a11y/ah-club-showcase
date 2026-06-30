@@ -253,22 +253,9 @@
 
           <!-- لوحة الطلبات الجارية -->
           <div id="portal-requests-panel" class="portal-panel hidden">
-            <h3 style="margin-bottom: 1.5rem; font-weight: 700;">طلباتك ومشاريعك الجارية</h3>
-            <div class="table-responsive">
-              <table class="custom-table">
-                <thead>
-                  <tr>
-                    <th>عنوان الطلب</th>
-                    <th>التاريخ</th>
-                    <th>التكلفة</th>
-                    <th>حالة الطلب</th>
-                    <th>الإجراءات</th>
-                  </tr>
-                </thead>
-                <tbody id="student-requests-table-body">
-                  <!-- سيتم تعبئتها ديناميكياً -->
-                </tbody>
-              </table>
+            <h3 style="margin-bottom: 1.5rem; font-weight: 700;">طلباتك ومشاريعك الجارية 📁</h3>
+            <div id="student-requests-cards-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+              <!-- سيتم تعبئتها ديناميكياً ببطاقات الطلبات المنظمة -->
             </div>
           </div>
 
