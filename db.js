@@ -4,6 +4,9 @@ const path = require('path');
 const DB_PATH = path.join(__dirname, 'database.json');
 
 const initialDb = {
+  config: {
+    googleClientId: '1052674937286-90sgv2k8q6660n3h4f2vbh32smd2h2j5.apps.googleusercontent.com'
+  },
   categories: [
     { id: 'cs', label: 'حاسبات وبرمجيات' },
     { id: 'engineering', label: 'هندسة وميكاترونكس' },
@@ -108,6 +111,12 @@ async function readDb() {
       // تأكيد وجود حساب الأدمن وتهيئة كافة القوائم دائماً
       let dbUpdated = false;
 
+      if (!parsed.config) {
+        parsed.config = {
+          googleClientId: '1052674937286-90sgv2k8q6660n3h4f2vbh32smd2h2j5.apps.googleusercontent.com'
+        };
+        dbUpdated = true;
+      }
       if (!parsed.users) {
         parsed.users = [];
         dbUpdated = true;
@@ -179,6 +188,12 @@ async function readDb() {
       
       let dbUpdated = false;
 
+      if (!parsed.config) {
+        parsed.config = {
+          googleClientId: '1052674937286-90sgv2k8q6660n3h4f2vbh32smd2h2j5.apps.googleusercontent.com'
+        };
+        dbUpdated = true;
+      }
       if (!parsed.users) {
         parsed.users = [];
         dbUpdated = true;

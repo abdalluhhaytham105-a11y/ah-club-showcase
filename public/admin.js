@@ -163,6 +163,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // رسم وتحديث المخططات البيانية
       renderDashboardCharts(allRequests);
 
+      // تحميل إعدادات جوجل الحالية
+      loadGoogleConfig();
+
       // ملء جدول أحدث الطلبات
       adminLatestOrdersTable.innerHTML = '';
       const latestOrders = allRequests.slice(-5).reverse(); // آخر 5 طلبات
@@ -1868,6 +1871,50 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ----------------------------------------------------
+  // إدارة إعدادات جوجل لالدخول الموحد
+  // ----------------------------------------------------
+  const adminGoogleConfigForm = document.getElementById('admin-google-config-form');
+  const adminGoogleClientIdInput = document.getElementById('admin-google-client-id');
+
+  async function loadGoogleConfig() {
+    try {
+      const res = await fetch('/api/config');
+      const config = await res.json();
+      if (adminGoogleClientIdInput && config.googleClientId) {
+        adminGoogleClientIdInput.value = config.googleClientId;
+      }
+    } catch (err) {
+      console.error('Error fetching Google config:', err);
+    }
+  }
+
+  if (adminGoogleConfigForm) {
+    adminGoogleConfigForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const googleClientId = adminGoogleClientIdInput.value.trim();
+      
+      try {
+        const response = await fetch('/api/admin/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ googleClientId })
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+          window.showNotificationToast('تم النجاح', 'تم حفظ وتحديث الـ Google Client ID بنجاح!', 'success');
+        } else {
+          window.showNotificationToast('خطأ', data.error || 'حدث خطأ أثناء حفظ الإعدادات.', 'error');
+        }
+      } catch (err) {
+        console.error(err);
+        window.showNotificationToast('خطأ في الاتصال', 'خطأ في الاتصال بالخادم.', 'error');
+      }
+    });
+  }
+
+  // ----------------------------------------------------
   // تشغيل الإحصائيات لأول مرة عند تحميل الملف
+  //   loadOverviewStats();
   loadOverviewStats();
 });

@@ -156,10 +156,30 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-app.get('/api/config', (req, res) => {
-  res.json({
-    googleClientId: process.env.GOOGLE_CLIENT_ID || '1052674937286-90sgv2k8q6660n3h4f2vbh32smd2h2j5.apps.googleusercontent.com'
-  });
+app.get('/api/config', async (req, res) => {
+  try {
+    const data = await db.readDb();
+    const googleClientId = (data.config && data.config.googleClientId) || process.env.GOOGLE_CLIENT_ID || '1052674937286-90sgv2k8q6660n3h4f2vbh32smd2h2j5.apps.googleusercontent.com';
+    res.json({ googleClientId });
+  } catch (err) {
+    res.json({ googleClientId: '1052674937286-90sgv2k8q6660n3h4f2vbh32smd2h2j5.apps.googleusercontent.com' });
+  }
+});
+
+app.post('/api/admin/config', verifyAdmin, async (req, res) => {
+  const { googleClientId } = req.body;
+  if (!googleClientId) {
+    return res.status(400).json({ error: 'Google Client ID مطلوب' });
+  }
+  try {
+    const data = await db.readDb();
+    if (!data.config) data.config = {};
+    data.config.googleClientId = googleClientId.trim();
+    await db.writeDb(data);
+    res.json({ message: 'تم حفظ وتحديث الإعدادات بنجاح!' });
+  } catch (err) {
+    res.status(500).json({ error: 'فشل حفظ الإعدادات بقاعدة البيانات' });
+  }
 });
 
 app.post('/api/auth/google', async (req, res) => {

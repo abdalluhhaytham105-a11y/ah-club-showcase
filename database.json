@@ -1,4 +1,7 @@
 {
+  "config": {
+    "googleClientId": "1052674937286-90sgv2k8q6660n3h4f2vbh32smd2h2j5.apps.googleusercontent.com"
+  },
   "users": [
     {
       "id": "admin-id-123",
