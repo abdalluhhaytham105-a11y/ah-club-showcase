@@ -156,13 +156,37 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+app.get('/api/config', (req, res) => {
+  res.json({
+    googleClientId: process.env.GOOGLE_CLIENT_ID || '1052674937286-90sgv2k8q6660n3h4f2vbh32smd2h2j5.apps.googleusercontent.com'
+  });
+});
+
 app.post('/api/auth/google', async (req, res) => {
-  const { email, name, avatar } = req.body;
-  if (!email || !name) {
-    return res.status(400).json({ error: 'البريد الإلكتروني والاسم مطلوبان' });
+  const { idToken } = req.body;
+  if (!idToken) {
+    return res.status(400).json({ error: 'ID Token مطلوب' });
   }
 
   try {
+    // التحقق من التوكن عبر خوادم جوجل الرسمية لضمان الأمان الكامل والواقعي
+    const verifyUrl = `https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`;
+    const verifyResponse = await fetch(verifyUrl);
+    if (!verifyResponse.ok) {
+      return res.status(400).json({ error: 'توكن Google غير صالح أو منتهي الصلاحية' });
+    }
+
+    const payload = await verifyResponse.json();
+    
+    // التأكد من الحقول الأساسية المرسلة من جوجل
+    const email = payload.email;
+    const name = payload.name;
+    const avatar = payload.picture;
+
+    if (!email || !name) {
+      return res.status(400).json({ error: 'لم نتمكن من الحصول على البريد أو الاسم من حساب Google' });
+    }
+
     const data = await db.readDb();
     
     // التحقق من وجود المستخدم
@@ -195,7 +219,7 @@ app.post('/api/auth/google', async (req, res) => {
     res.json(userWithoutPassword);
   } catch (err) {
     console.error('Google auth error:', err);
-    res.status(500).json({ error: 'حدث خطأ أثناء الدخول بواسطة Google' });
+    res.status(500).json({ error: 'حدث خطأ أثناء التحقق من حساب Google' });
   }
 });
 

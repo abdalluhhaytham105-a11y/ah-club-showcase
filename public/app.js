@@ -2175,81 +2175,47 @@ document.addEventListener('DOMContentLoaded', () => {
   loadAnnouncements();
 
   // ----------------------------------------------------
-  // نظام التسجيل بنقرة واحدة بواسطة Google
+  // نظام التسجيل بنقرة واحدة الآمن والواقعي بواسطة Google
   // ----------------------------------------------------
-  const btnGoogleAuth = document.getElementById('btn-google-auth');
-  const googleChooserModal = document.getElementById('google-chooser-modal');
-  const googleChooserClose = document.getElementById('google-chooser-close');
-  const googleCustomAccountTrigger = document.getElementById('google-custom-account-trigger');
-  const googleCustomAccountForm = document.getElementById('google-custom-account-form');
-  const googleAccountsList = document.getElementById('google-accounts-list');
-  const btnGoogleCustomSubmit = document.getElementById('btn-google-custom-submit');
-  const googleCustomName = document.getElementById('google-custom-name');
-  const googleCustomEmail = document.getElementById('google-custom-email');
-
-  if (btnGoogleAuth) {
-    btnGoogleAuth.addEventListener('click', () => {
-      // إغلاق مودال التحقق وفتح مودال اختيار حساب جوجل
-      authModal.classList.remove('active');
-      googleChooserModal.classList.add('active');
-      // إعادة تصفية فورم الحساب المخصص
-      if (googleCustomAccountForm) googleCustomAccountForm.classList.add('hidden');
-      if (googleAccountsList) googleAccountsList.classList.remove('hidden');
-    });
-  }
-
-  if (googleChooserClose) {
-    googleChooserClose.addEventListener('click', () => {
-      googleChooserModal.classList.remove('active');
-      authModal.classList.add('active');
-    });
-  }
-
-  if (googleCustomAccountTrigger) {
-    googleCustomAccountTrigger.addEventListener('click', () => {
-      googleAccountsList.classList.add('hidden');
-      googleCustomAccountForm.classList.remove('hidden');
-    });
-  }
-
-  // ربط النقر على الحسابات المقترحة
-  document.querySelectorAll('.google-account-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const email = item.getAttribute('data-email');
-      const name = item.getAttribute('data-name');
-      const avatar = item.getAttribute('data-avatar');
-      submitGoogleAuth(email, name, avatar);
-    });
-  });
-
-  if (btnGoogleCustomSubmit) {
-    btnGoogleCustomSubmit.addEventListener('click', () => {
-      const email = googleCustomEmail.value.trim();
-      const name = googleCustomName.value.trim();
-      if (!email || !name) {
-        alert('الرجاء كتابة الاسم والبريد الإلكتروني');
-        return;
-      }
-      const avatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(name)}`;
-      submitGoogleAuth(email, name, avatar);
-    });
-  }
-
-  async function submitGoogleAuth(email, name, avatar) {
+  async function initGoogleSignIn() {
     try {
-      // إغلاق المودال مؤقتاً
-      googleChooserModal.classList.remove('active');
+      const res = await fetch('/api/config');
+      const config = await res.json();
       
-      const response = await fetch('/api/auth/google', {
+      if (typeof google !== 'undefined') {
+        google.accounts.id.initialize({
+          client_id: config.googleClientId,
+          callback: handleCredentialResponse
+        });
+        const container = document.getElementById("google-signin-btn-container");
+        if (container) {
+          google.accounts.id.renderButton(
+            container,
+            { theme: "dark", size: "large", width: 380, text: "continue_with", shape: "rectangular" }
+          );
+        }
+      }
+    } catch (err) {
+      console.error('Error initializing Google Sign-In:', err);
+    }
+  }
+
+  function handleCredentialResponse(response) {
+    const idToken = response.credential;
+    submitGoogleAuth(idToken);
+  }
+
+  async function submitGoogleAuth(idToken) {
+    try {
+      const res = await fetch('/api/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name, avatar })
+        body: JSON.stringify({ idToken })
       });
-      const data = await response.json();
+      const data = await res.json();
       
-      if (!response.ok) {
-        alert(data.error || 'فشل الاتصال بحساب Google');
-        authModal.classList.add('active');
+      if (!res.ok) {
+        window.showNotificationToast('فشل الدخول', data.error || 'فشل التحقق من حساب Google.', 'error');
         return;
       }
 
@@ -2260,23 +2226,24 @@ document.addEventListener('DOMContentLoaded', () => {
       // تحديث الواجهة
       updateAuthUI();
       
+      // إغلاق المودال
+      authModal.classList.remove('active');
+      
       // التوجيه التلقائي للصفحة الرئيسية
       showSection('landing');
       
       // إشعار نجاح
-      if (window.showNotificationToast) {
-        window.showNotificationToast('تم الدخول بنجاح', `مرحباً بك يا ${currentUser.name}! تم تسجيل الدخول بجوجل بنقرة واحدة.`, 'success');
-      } else {
-        alert(`تم تسجيل الدخول بنجاح! مرحباً يا ${currentUser.name}`);
-      }
+      window.showNotificationToast('تم الدخول بنجاح', `مرحباً بك يا ${currentUser.name}! تم تسجيل الدخول بجوجل بنجاح وآمان.`, 'success');
       
       // بدء الاقتراع للطلبات
       startPolling();
       
     } catch (err) {
       console.error(err);
-      alert('خطأ في الاتصال بالخادم');
-      authModal.classList.add('active');
+      window.showNotificationToast('خطأ في الاتصال', 'خطأ في الاتصال بالخادم أثناء التحقق.', 'error');
     }
   }
+
+  // تهيئة تسجيل الدخول بجوجل
+  setTimeout(initGoogleSignIn, 1000);
 });
