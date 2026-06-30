@@ -183,15 +183,15 @@ app.post('/api/admin/config', verifyAdmin, async (req, res) => {
 });
 
 app.post('/api/auth/google', async (req, res) => {
-  const { idToken } = req.body;
-  if (!idToken) {
-    return res.status(400).json({ error: 'ID Token مطلوب' });
+  const { accessToken } = req.body;
+  if (!accessToken) {
+    return res.status(400).json({ error: 'Access Token مطلوب' });
   }
 
   try {
-    // التحقق من التوكن عبر خوادم جوجل الرسمية لضمان الأمان الكامل والواقعي
-    const verifyUrl = `https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`;
-    const verifyResponse = await fetch(verifyUrl);
+    // جلب معلومات المستخدم بأمان مباشرة من جوجل
+    const googleUserUrl = `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`;
+    const verifyResponse = await fetch(googleUserUrl);
     if (!verifyResponse.ok) {
       return res.status(400).json({ error: 'توكن Google غير صالح أو منتهي الصلاحية' });
     }
@@ -240,6 +240,36 @@ app.post('/api/auth/google', async (req, res) => {
   } catch (err) {
     console.error('Google auth error:', err);
     res.status(500).json({ error: 'حدث خطأ أثناء التحقق من حساب Google' });
+  }
+});
+
+app.put('/api/auth/google/phone', async (req, res) => {
+  const { userId, phone } = req.body;
+  if (!userId || !phone) {
+    return res.status(400).json({ error: 'معرف المستخدم ورقم الهاتف مطلوبان' });
+  }
+
+  // تحقق من صحة رقم الهاتف المصري (11 رقم يبدأ بـ 01)
+  const phoneRegex = /^01[0125][0-9]{8}$/;
+  if (!phoneRegex.test(phone)) {
+    return res.status(400).json({ error: 'رقم الهاتف غير صالح، يجب أن يكون 11 رقماً ويبدأ بـ 01' });
+  }
+
+  try {
+    const data = await db.readDb();
+    const userIndex = data.users.findIndex(u => u.id === userId);
+    if (userIndex === -1) {
+      return res.status(404).json({ error: 'المستخدم غير موجود' });
+    }
+
+    data.users[userIndex].phone = phone.trim();
+    await db.writeDb(data);
+
+    const { password: _, ...userWithoutPassword } = data.users[userIndex];
+    res.json(userWithoutPassword);
+  } catch (err) {
+    console.error('Update phone error:', err);
+    res.status(500).json({ error: 'فشل تحديث رقم الهاتف' });
   }
 });
 

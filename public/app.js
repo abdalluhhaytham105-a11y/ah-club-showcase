@@ -85,6 +85,41 @@ document.addEventListener('DOMContentLoaded', () => {
   let activeTrackedOrderId = null;
 
   // ----------------------------------------------------
+  // تفعيل المؤثرات الحركية الفاخرة للأزرار أثناء العمليات
+  // ----------------------------------------------------
+  function setButtonLoading(button, isLoading) {
+    if (!button) return;
+    if (isLoading) {
+      button.disabled = true;
+      button.dataset.originalHtml = button.innerHTML;
+      button.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري التحميل...';
+      button.style.opacity = '0.7';
+    } else {
+      button.innerHTML = button.dataset.originalHtml || button.innerHTML;
+      button.disabled = false;
+      button.style.opacity = '1';
+    }
+  }
+
+  function setButtonSuccess(button, successText = 'تمت العملية بنجاح! ✓') {
+    if (!button) return;
+    const original = button.dataset.originalHtml || button.innerHTML;
+    button.innerHTML = `<i class="fa-solid fa-check-double"></i> ${successText}`;
+    button.style.background = 'rgba(16, 185, 129, 0.2)';
+    button.style.borderColor = '#10b981';
+    button.style.color = '#10b981';
+    button.style.boxShadow = '0 0 15px rgba(16, 185, 129, 0.4)';
+    setTimeout(() => {
+      button.innerHTML = original;
+      button.style.background = '';
+      button.style.borderColor = '';
+      button.style.color = '';
+      button.style.boxShadow = '';
+      button.disabled = false;
+    }, 2500);
+  }
+
+  // ----------------------------------------------------
   // تهيئة وتنسيق الدخول
   // ----------------------------------------------------
   function updateAuthUI() {
@@ -258,6 +293,8 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
+    const submitBtn = loginForm.querySelector('button[type="submit"]');
+    setButtonLoading(submitBtn, true);
 
     try {
       const response = await fetch('/api/auth/login', {
@@ -268,18 +305,24 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.error || 'حدث خطأ أثناء الدخول');
+        window.showNotificationToast('فشل الدخول', data.error || 'بريد إلكتروني أو كلمة مرور غير صحيحة.', 'error');
+        setButtonLoading(submitBtn, false);
         return;
       }
 
-      currentUser = data;
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-      updateAuthUI();
-      closeAuthModal();
-      showSection('landing');
+      setButtonSuccess(submitBtn, 'تم الدخول بنجاح! ✓');
+      setTimeout(() => {
+        currentUser = data;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        updateAuthUI();
+        closeAuthModal();
+        showSection('landing');
+        window.showNotificationToast('مرحباً بك', `أهلاً بك مجدداً يا ${currentUser.name}! 🎉`, 'success');
+      }, 800);
     } catch (err) {
       console.error(err);
-      alert('خطأ في الاتصال بالخادم');
+      window.showNotificationToast('خطأ في الاتصال', 'خطأ في الاتصال بالخادم.', 'error');
+      setButtonLoading(submitBtn, false);
     }
   });
 
@@ -292,6 +335,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const university = document.getElementById('reg-university').value;
     const major = document.getElementById('reg-major').value;
     const password = document.getElementById('reg-password').value;
+    const submitBtn = registerForm.querySelector('button[type="submit"]');
+    setButtonLoading(submitBtn, true);
 
     try {
       const response = await fetch('/api/auth/register', {
@@ -302,18 +347,24 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.error || 'حدث خطأ أثناء التسجيل');
+        window.showNotificationToast('فشل التسجيل', data.error || 'حدث خطأ أثناء التسجيل.', 'error');
+        setButtonLoading(submitBtn, false);
         return;
       }
 
-      currentUser = data;
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-      updateAuthUI();
-      closeAuthModal();
-      showSection('landing');
+      setButtonSuccess(submitBtn, 'تم التسجيل بنجاح! ✓');
+      setTimeout(() => {
+        currentUser = data;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        updateAuthUI();
+        closeAuthModal();
+        showSection('landing');
+        window.showNotificationToast('أهلاً بك', `تم إنشاء الحساب والدخول بنجاح يا ${currentUser.name}! 🎉`, 'success');
+      }, 800);
     } catch (err) {
       console.error(err);
-      alert('خطأ في الاتصال بالخادم');
+      window.showNotificationToast('خطأ في الاتصال', 'خطأ في الاتصال بالخادم.', 'error');
+      setButtonLoading(submitBtn, false);
     }
   });
 
@@ -829,6 +880,9 @@ document.addEventListener('DOMContentLoaded', () => {
       formData.append('attachment', fileInput.files[0]);
     }
 
+    const submitBtn = newRequestForm.querySelector('button[type="submit"]');
+    setButtonLoading(submitBtn, true);
+
     try {
       const response = await fetch('/api/requests', {
         method: 'POST',
@@ -837,29 +891,35 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.error || 'حدث خطأ أثناء إرسال الطلب');
+        window.showNotificationToast('فشل التقديم', data.error || 'حدث خطأ أثناء إرسال الطلب.', 'error');
+        setButtonLoading(submitBtn, false);
         return;
       }
 
-      const notifyWhatsApp = confirm('تم تقديم طلب مشروعك الجديد بنجاح! 🎉\n\nهل ترغب في تأكيد الطلب فوراً مع إدارة المنصة عبر الواتساب لتسريع المراجعة والتسعير؟');
-      newRequestForm.reset();
+      setButtonSuccess(submitBtn, 'تم الإرسال بنجاح! ✓');
       
-      // إخفاء حقل الشرائح وتصفية المدخلات الافتراضية
-      if (reqSlideCountGroup) reqSlideCountGroup.style.display = 'none';
-      if (reqFileLabel) reqFileLabel.innerHTML = 'تحميل ملف المادة العلمية أو الداتا الخاصة بك (PDF, Word, Zip) (مطلوب) 📸';
-      
-      showPortalPanel('requests');
-      fetchStudentRequests();
+      setTimeout(() => {
+        const notifyWhatsApp = confirm('تم تقديم طلب مشروعك الجديد بنجاح! 🎉\n\nهل ترغب في تأكيد الطلب فوراً مع إدارة المنصة عبر الواتساب لتسريع المراجعة والتسعير؟');
+        newRequestForm.reset();
+        
+        // إخفاء حقل الشرائح وتصفية المدخلات الافتراضية
+        if (reqSlideCountGroup) reqSlideCountGroup.style.display = 'none';
+        if (reqFileLabel) reqFileLabel.innerHTML = 'تحميل ملف المادة العلمية أو الداتا الخاصة بك (PDF, Word, Zip) (مطلوب) 📸';
+        
+        showPortalPanel('requests');
+        fetchStudentRequests();
 
-      if (notifyWhatsApp) {
-        const orderId = data.id || '';
-        const whatsappMsg = `مرحباً إدارة المنصة، لقد قدمت طلب مشروع جديد على الموقع:\n\n- عنوان المشروع: ${data.title}\n- الكلية: ${data.college}\n- الجامعة: ${data.university}\n- صيغة التسليم: ${data.deliveryFormat === 'word' ? 'Word' : data.deliveryFormat === 'ppt' ? 'PowerPoint' : 'Poster'}\n- كود الطلب: ${orderId}\n\nيرجى مراجعته وتحديد السعر. شكراً لكم!`;
-        const whatsappUrl = `https://wa.me/201014054673?text=${encodeURIComponent(whatsappMsg)}`;
-        window.open(whatsappUrl, '_blank');
-      }
+        if (notifyWhatsApp) {
+          const orderId = data.id || '';
+          const whatsappMsg = `مرحباً إدارة المنصة، لقد قدمت طلب مشروع جديد على الموقع:\n\n- عنوان المشروع: ${data.title}\n- الكلية: ${data.college}\n- الجامعة: ${data.university}\n- صيغة التسليم: ${data.deliveryFormat === 'word' ? 'Word' : data.deliveryFormat === 'ppt' ? 'PowerPoint' : 'Poster'}\n- كود الطلب: ${orderId}\n\nيرجى مراجعته وتحديد السعر. شكراً لكم!`;
+          const whatsappUrl = `https://wa.me/201014054673?text=${encodeURIComponent(whatsappMsg)}`;
+          window.open(whatsappUrl, '_blank');
+        }
+      }, 500);
     } catch (err) {
       console.error(err);
-      alert('خطأ في الاتصال بالخادم');
+      window.showNotificationToast('خطأ في الاتصال', 'خطأ في الاتصال بالخادم.', 'error');
+      setButtonLoading(submitBtn, false);
     }
   });
 
@@ -2175,24 +2235,56 @@ document.addEventListener('DOMContentLoaded', () => {
   loadAnnouncements();
 
   // ----------------------------------------------------
-  // نظام التسجيل بنقرة واحدة الآمن والواقعي بواسطة Google
+  // نظام التسجيل بنقرة واحدة المطور والآمن بواسطة Google مع التحقق من الهاتف
   // ----------------------------------------------------
+  let googleTokenClient = null;
+  let pendingGoogleUser = null;
+  const btnCustomGoogle = document.getElementById('btn-custom-google');
+  const googlePhoneModal = document.getElementById('google-phone-modal');
+  const googlePhoneForm = document.getElementById('google-phone-form');
+  const googlePhoneInput = document.getElementById('google-phone-input');
+
+  // أسلوب تصميم نيوني رائع للزر عند الحوم
+  if (btnCustomGoogle) {
+    btnCustomGoogle.addEventListener('mouseenter', () => {
+      btnCustomGoogle.style.background = 'rgba(0, 240, 255, 0.15)';
+      btnCustomGoogle.style.boxShadow = '0 0 20px rgba(0, 240, 255, 0.45)';
+      btnCustomGoogle.style.transform = 'translateY(-2px)';
+    });
+    btnCustomGoogle.addEventListener('mouseleave', () => {
+      btnCustomGoogle.style.background = 'rgba(0, 240, 255, 0.05)';
+      btnCustomGoogle.style.boxShadow = '0 0 10px rgba(0, 240, 255, 0.15)';
+      btnCustomGoogle.style.transform = 'none';
+    });
+  }
+
   async function initGoogleSignIn() {
     try {
       const res = await fetch('/api/config');
       const config = await res.json();
       
-      if (typeof google !== 'undefined') {
-        google.accounts.id.initialize({
+      if (typeof google !== 'undefined' && config.googleClientId) {
+        googleTokenClient = google.accounts.oauth2.initTokenClient({
           client_id: config.googleClientId,
-          callback: handleCredentialResponse
+          scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+          callback: async (tokenResponse) => {
+            if (tokenResponse && tokenResponse.access_token) {
+              await submitGoogleAuth(tokenResponse.access_token);
+            } else {
+              setButtonLoading(btnCustomGoogle, false);
+            }
+          },
+          error_callback: () => {
+            setButtonLoading(btnCustomGoogle, false);
+            window.showNotificationToast('خطأ في جوجل', 'حدث خطأ أثناء الاتصال بخدمة جوجل.', 'error');
+          }
         });
-        const container = document.getElementById("google-signin-btn-container");
-        if (container) {
-          google.accounts.id.renderButton(
-            container,
-            { theme: "dark", size: "large", width: 380, text: "continue_with", shape: "rectangular" }
-          );
+
+        if (btnCustomGoogle) {
+          btnCustomGoogle.addEventListener('click', () => {
+            setButtonLoading(btnCustomGoogle, true);
+            googleTokenClient.requestAccessToken();
+          });
         }
       }
     } catch (err) {
@@ -2200,48 +2292,97 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function handleCredentialResponse(response) {
-    const idToken = response.credential;
-    submitGoogleAuth(idToken);
-  }
-
-  async function submitGoogleAuth(idToken) {
+  async function submitGoogleAuth(accessToken) {
     try {
       const res = await fetch('/api/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken })
+        body: JSON.stringify({ accessToken })
       });
       const data = await res.json();
       
       if (!res.ok) {
         window.showNotificationToast('فشل الدخول', data.error || 'فشل التحقق من حساب Google.', 'error');
+        setButtonLoading(btnCustomGoogle, false);
         return;
       }
 
-      // حفظ جلسة المستخدم
-      currentUser = data;
-      localStorage.setItem('user', JSON.stringify(currentUser));
-      
-      // تحديث الواجهة
-      updateAuthUI();
-      
-      // إغلاق المودال
-      authModal.classList.remove('active');
-      
-      // التوجيه التلقائي للصفحة الرئيسية
-      showSection('landing');
-      
-      // إشعار نجاح
-      window.showNotificationToast('تم الدخول بنجاح', `مرحباً بك يا ${currentUser.name}! تم تسجيل الدخول بجوجل بنجاح وآمان.`, 'success');
-      
-      // بدء الاقتراع للطلبات
-      startPolling();
-      
+      setButtonLoading(btnCustomGoogle, false);
+
+      // إذا كان رقم الهاتف هو الرقم الافتراضي، يتم فرض إدخال رقم هاتف واتس اب حقيقي
+      if (data.phone === '01000000000' || !data.phone) {
+        pendingGoogleUser = data;
+        authModal.classList.remove('active');
+        googlePhoneModal.classList.add('active');
+        if (googlePhoneInput) googlePhoneInput.focus();
+        return;
+      }
+
+      // الدخول المباشر
+      completeGoogleLogin(data);
     } catch (err) {
       console.error(err);
       window.showNotificationToast('خطأ في الاتصال', 'خطأ في الاتصال بالخادم أثناء التحقق.', 'error');
+      setButtonLoading(btnCustomGoogle, false);
     }
+  }
+
+  function completeGoogleLogin(userData) {
+    currentUser = userData;
+    localStorage.setItem('user', JSON.stringify(currentUser));
+    
+    // تحديث الواجهة والملفات
+    updateAuthUI();
+    authModal.classList.remove('active');
+    googlePhoneModal.classList.remove('active');
+    
+    showSection('landing');
+    window.showNotificationToast('تم الدخول بنجاح', `مرحباً بك يا ${currentUser.name}! تم تسجيل الدخول بنجاح وآمان. 🎉`, 'success');
+    startPolling();
+  }
+
+  // ربط نموذج إدخال الهاتف الإجباري للواتساب
+  if (googlePhoneForm) {
+    googlePhoneForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const phoneVal = googlePhoneInput.value.trim();
+      const phoneRegex = /^01[0125][0-9]{8}$/;
+      
+      if (!phoneRegex.test(phoneVal)) {
+        window.showNotificationToast('رقم غير صالح', 'الرجاء إدخال رقم هاتف مصري صحيح مكون من 11 رقماً ويبدأ بـ 01', 'error');
+        return;
+      }
+
+      const submitBtn = googlePhoneForm.querySelector('button[type="submit"]');
+      setButtonLoading(submitBtn, true);
+
+      try {
+        const response = await fetch('/api/auth/google/phone', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: pendingGoogleUser ? pendingGoogleUser.id : currentUser.id,
+            phone: phoneVal
+          })
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          window.showNotificationToast('خطأ في التحديث', data.error || 'فشل تحديث رقم الهاتف.', 'error');
+          setButtonLoading(submitBtn, false);
+          return;
+        }
+
+        setButtonSuccess(submitBtn, 'تم التحديث بنجاح! ✓');
+        setTimeout(() => {
+          completeGoogleLogin(data);
+        }, 800);
+      } catch (err) {
+        console.error(err);
+        window.showNotificationToast('خطأ في الاتصال', 'فشل الاتصال بالخادم لتحديث الهاتف.', 'error');
+        setButtonLoading(submitBtn, false);
+      }
+    });
   }
 
   // تهيئة تسجيل الدخول بجوجل
