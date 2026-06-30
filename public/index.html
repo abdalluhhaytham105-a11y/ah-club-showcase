@@ -505,7 +505,80 @@
           <button type="submit" class="btn btn-secondary" style="width: 100%; justify-content: center;">إنشاء الحساب</button>
         </form>
 
+        <!-- فاصل "أو" -->
+        <div id="google-auth-separator" style="display: flex; align-items: center; text-align: center; margin: 1.2rem 0; color: var(--text-muted); font-size: 0.8rem;">
+          <div style="flex: 1; border-bottom: 1px solid var(--border-light);"></div>
+          <span style="padding: 0 10px;">أو</span>
+          <div style="flex: 1; border-bottom: 1px solid var(--border-light);"></div>
+        </div>
+
+        <!-- زر جوجل الموحد -->
+        <button type="button" id="btn-google-auth" class="btn" style="width: 100%; justify-content: center; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-light); color: #fff; font-family: 'Cairo'; font-size: 0.85rem; font-weight: 700; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 0; border-radius: 8px; cursor: pointer;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" style="width: 18px; height: 18px;">
+          <span id="google-auth-text">متابعة باستخدام Google</span>
+        </button>
+
       </div>
+    </div>
+  </div>
+
+  <!-- مودال اختيار حساب جوجل (Google Account Chooser Simulation) -->
+  <div class="modal-overlay" id="google-chooser-modal" style="z-index: 1100;">
+    <div class="modal-container" style="max-width: 380px; padding: 1.5rem; text-align: center; border-radius: 16px;">
+      <div style="margin-bottom: 1.2rem;">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google Logo Logo" style="width: 75px; margin-bottom: 0.5rem;">
+        <h4 style="margin: 0; font-weight: 700; color: #fff; font-size: 1rem;">اختر حساباً للمتابعة إلى AH CLUB</h4>
+      </div>
+      
+      <!-- قائمة الحسابات المقترحة -->
+      <div id="google-accounts-list" style="display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1.5rem; text-align: right; direction: rtl;">
+        <!-- حساب الأدمن بودا -->
+        <div class="google-account-item" data-email="Boda" data-name="Boda" data-avatar="https://api.dicebear.com/7.x/bottts/svg?seed=Boda" style="display: flex; align-items: center; gap: 0.8rem; padding: 0.6rem 1rem; border: 1px solid var(--border-light); border-radius: 10px; cursor: pointer; transition: all 0.2s ease; background: rgba(255,255,255,0.01);">
+          <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Boda" style="width: 32px; height: 32px; border-radius: 50%; background: var(--border-light);" alt="Avatar">
+          <div style="display: flex; flex-direction: column; overflow: hidden; min-width: 0;">
+            <strong style="font-size: 0.85rem; color: #fff;">Boda (حساب المطور)</strong>
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-family: 'Orbitron';">boda@gmail.com</span>
+          </div>
+        </div>
+
+        <!-- حساب طالب افتراضي 1 -->
+        <div class="google-account-item" data-email="ahmed.zaki@gmail.com" data-name="أحمد زكي" data-avatar="https://api.dicebear.com/7.x/adventurer/svg?seed=Ahmed" style="display: flex; align-items: center; gap: 0.8rem; padding: 0.6rem 1rem; border: 1px solid var(--border-light); border-radius: 10px; cursor: pointer; transition: all 0.2s ease; background: rgba(255,255,255,0.01);">
+          <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=Ahmed" style="width: 32px; height: 32px; border-radius: 50%; background: var(--border-light);" alt="Avatar">
+          <div style="display: flex; flex-direction: column; overflow: hidden; min-width: 0;">
+            <strong style="font-size: 0.85rem; color: #fff;">أحمد زكي</strong>
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-family: 'Orbitron';">ahmed.zaki@gmail.com</span>
+          </div>
+        </div>
+
+        <!-- حساب طالب افتراضي 2 -->
+        <div class="google-account-item" data-email="faisal.ahmed@gmail.com" data-name="فيصل أحمد" data-avatar="https://api.dicebear.com/7.x/adventurer/svg?seed=Faisal" style="display: flex; align-items: center; gap: 0.8rem; padding: 0.6rem 1rem; border: 1px solid var(--border-light); border-radius: 10px; cursor: pointer; transition: all 0.2s ease; background: rgba(255,255,255,0.01);">
+          <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=Faisal" style="width: 32px; height: 32px; border-radius: 50%; background: var(--border-light);" alt="Avatar">
+          <div style="display: flex; flex-direction: column; overflow: hidden; min-width: 0;">
+            <strong style="font-size: 0.85rem; color: #fff;">فيصل أحمد</strong>
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-family: 'Orbitron';">faisal.ahmed@gmail.com</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- خيار كتابة بريد مخصص -->
+      <div id="google-custom-account-trigger" style="color: var(--primary-cyan); font-size: 0.8rem; cursor: pointer; margin-bottom: 1.5rem; text-decoration: underline; font-weight: 700;">
+        <i class="fa-solid fa-user-plus"></i> استخدام حساب Google آخر
+      </div>
+
+      <!-- نموذج كتابة البريد المخصص -->
+      <div id="google-custom-account-form" class="hidden" style="margin-bottom: 1.5rem; text-align: right;">
+        <div class="form-group" style="margin-bottom: 0.8rem;">
+          <label style="font-size: 0.75rem; color: var(--text-muted); font-weight:700;">الاسم بالكامل</label>
+          <input type="text" id="google-custom-name" class="form-control" placeholder="أدخل اسمك" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+        </div>
+        <div class="form-group" style="margin-bottom: 0.8rem;">
+          <label style="font-size: 0.75rem; color: var(--text-muted); font-weight:700;">البريد الإلكتروني لجوجل</label>
+          <input type="email" id="google-custom-email" class="form-control" placeholder="yourname@gmail.com" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+        </div>
+        <button type="button" id="btn-google-custom-submit" class="btn btn-primary" style="width: 100%; justify-content: center; font-size: 0.8rem; padding: 0.4rem 0;">متابعة</button>
+      </div>
+
+      <button class="btn btn-outline" id="google-chooser-close" style="width: 100%; justify-content: center; font-size: 0.8rem; padding: 0.4rem 0;">إلغاء</button>
     </div>
   </div>
 

@@ -156,6 +156,49 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+app.post('/api/auth/google', async (req, res) => {
+  const { email, name, avatar } = req.body;
+  if (!email || !name) {
+    return res.status(400).json({ error: 'البريد الإلكتروني والاسم مطلوبان' });
+  }
+
+  try {
+    const data = await db.readDb();
+    
+    // التحقق من وجود المستخدم
+    let user = data.users.find(u => u.email === email);
+    if (!user) {
+      // إنشاء حساب جديد للمسجل بواسطة جوجل
+      user = {
+        id: 'user-' + Date.now(),
+        name,
+        email,
+        phone: '01000000000', // قيم افتراضية للتسجيل السريع
+        university: 'غير محدد',
+        major: 'غير محدد',
+        password: 'GoogleUser' + Math.floor(Math.random() * 100000), // كلمة مرور عشوائية للسلامة العامة
+        avatar: avatar || '',
+        role: 'student'
+      };
+      data.users.push(user);
+      await db.writeDb(data);
+    } else {
+      // تحديث صورة البروفايل لو لم تكن موجودة
+      if (avatar && !user.avatar) {
+        user.avatar = avatar;
+        await db.writeDb(data);
+      }
+    }
+
+    // إرسال بيانات المستخدم بدون الباسورد
+    const { password: _, ...userWithoutPassword } = user;
+    res.json(userWithoutPassword);
+  } catch (err) {
+    console.error('Google auth error:', err);
+    res.status(500).json({ error: 'حدث خطأ أثناء الدخول بواسطة Google' });
+  }
+});
+
 // ----------------------------------------------------
 // 2. إدارة مشاريع الأرشيف المعروضة للكل
 // ----------------------------------------------------
